@@ -9,7 +9,7 @@ except ImportError:
     notification = None
 
 from PyQt6.QtCore import QRectF, QSize, Qt, QTimer
-from PyQt6.QtGui import QColor, QFont, QPainter, QPen, QPixmap
+from PyQt6.QtGui import QBrush, QColor, QFont, QPainter, QPen
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -167,7 +167,8 @@ class CircularProgressTimer(QWidget):
 
         pen_width = 8
 
-        # 1. Hintergrund-Kreis
+        # 1. Dunkle Scheibe + Ring-Hintergrund für perfekte Lesbarkeit
+        painter.setBrush(QBrush(QColor(18, 20, 28, 220)))  # Abdunkelung direkt hinter dem Timer
         bg_pen = QPen(QColor("#1a1c24"), pen_width)
         bg_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         painter.setPen(bg_pen)
@@ -239,49 +240,19 @@ class ExpeditionCard(QFrame):
         self.style_card(active=True)
 
     def setup_ui(self, char_name, location):
+        self.setObjectName("expedition_card_widget")
+
         card_layout = QVBoxLayout(self)
         card_layout.setContentsMargins(15, 12, 15, 12)
 
         # Header
         header_layout = QHBoxLayout()
 
-        self.lbl_avatar = QLabel()
-        self.lbl_avatar.setFixedSize(40, 40)
-        self.lbl_avatar.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        # Bildpfad basierend auf dem Charakternamen zusammensetzen (z. B. "hu_tao.png")
-        img_slug = char_name.lower().replace(" ", "_") + ".png"
-        img_path = os.path.join(ASSETS_DIR, img_slug)
-
-        if os.path.exists(img_path):
-            pixmap = QPixmap(img_path).scaled(
-                40, 40,
-                Qt.AspectRatioMode.KeepAspectRatioByExpanding,
-                Qt.TransformationMode.SmoothTransformation
-            )
-            self.lbl_avatar.setPixmap(pixmap)
-            self.lbl_avatar.setStyleSheet("""
-                border-radius: 20px;
-                background-color: #3b3f54;
-            """)
-        else:
-            # Fallback falls Grafik fehlt
-            self.lbl_avatar.setText(char_name[0])
-            self.lbl_avatar.setStyleSheet(f"""
-                background-color: #3b3f54;
-                color: {CORE_COLOR_CYAN};
-                font-size: 18px;
-                font-weight: bold;
-                border-radius: 20px;
-            """)
-
-        header_layout.addWidget(self.lbl_avatar)
-
         text_v_layout = QVBoxLayout()
         lbl_name = QLabel(char_name)
-        lbl_name.setStyleSheet("font-weight: bold; font-size: 13px; color: white;")
+        lbl_name.setStyleSheet("font-weight: bold; font-size: 14px; color: white;")
         self.lbl_loc = QLabel(location)
-        self.lbl_loc.setStyleSheet("color: #aaaaaa; font-size: 11px;")
+        self.lbl_loc.setStyleSheet("color: #dddddd; font-size: 11px;")
         text_v_layout.addWidget(lbl_name)
         text_v_layout.addWidget(self.lbl_loc)
         header_layout.addLayout(text_v_layout)
@@ -295,7 +266,7 @@ class ExpeditionCard(QFrame):
         btn_delete.setStyleSheet("""
             QPushButton {
                 background: transparent;
-                color: #777;
+                color: #aaa;
                 border: none;
                 font-weight: bold;
                 font-size: 12px;
@@ -330,14 +301,36 @@ class ExpeditionCard(QFrame):
 
     def style_card(self, active=False):
         color = CORE_COLOR_CYAN if active else CORE_COLOR_AMBER
+
+        # Bildpfad zusammensetzen
+        img_slug = self.char_name.lower().replace(" ", "_") + ".png"
+        img_path = os.path.join(ASSETS_DIR, img_slug).replace("\\", "/")
+
+        if os.path.exists(img_path):
+            bg_style = f"""
+                background-image: url("{img_path}");
+                background-repeat: no-repeat;
+                background-position: center;
+                /* Verstärkte Abdunkelung für besseren Gesamtkontrast */
+                background-color: qradialgradient(
+                    cx:0.5, cy:0.5, radius: 0.8,
+                    fx:0.5, fy:0.5,
+                    stop:0 rgba(18, 20, 28, 200),
+                    stop:0.6 rgba(20, 22, 30, 230),
+                    stop:1 rgba(26, 28, 36, 255)
+                );
+            """
+        else:
+            bg_style = f"background-color: {CARD_BG_COLOR};"
+
         self.setStyleSheet(f"""
-            ExpeditionCard {{
-                background-color: {CARD_BG_COLOR};
+            QFrame#expedition_card_widget {{
+                {bg_style}
                 border-radius: 12px;
                 border: 1px solid #333847;
             }}
             QPushButton {{
-                background-color: #2e323f;
+                background-color: rgba(46, 50, 63, 220);
                 border: 1px solid {color};
                 color: {color};
                 border-radius: 6px;
