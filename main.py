@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import time
+from datetime import datetime, timedelta
 
 try:
     from plyer import notification
@@ -18,11 +19,10 @@ from PyQt6.QtWidgets import (
     QGraphicsDropShadowEffect,
     QGridLayout,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
-    QLineEdit,
     QMainWindow,
     QPushButton,
-    QScrollArea,
     QVBoxLayout,
     QWidget,
 )
@@ -37,115 +37,51 @@ CORE_COLOR_AMBER = "#ffaa00"
 BG_COLOR_DARK = "#1a1c24"
 CARD_BG_COLOR = "#252833"
 
-# Vollständige Charakterliste mit Erkundungs-Zeitbonus (True = 25% schneller)
 CHARACTERS = {
-    "Albedo": False,
-    "Alhaitham": False,
-    "Aloy": False,
-    "Amber": False,
-    "Arataki Itto": False,
-    "Arlecchino": False,
-    "Barbara": False,
-    "Beidou": False,
-    "Bennett": True,
-    "Candace": False,
-    "Charlotte": False,
-    "Chasca": False,
-    "Chevreuse": False,
-    "Chiori": False,
-    "Chongyun": True,
-    "Citlali": False,
-    "Clorinde": False,
-    "Collei": False,
-    "Cyno": False,
-    "Dehya": False,
-    "Diluc": False,
-    "Diona": False,
-    "Dori": False,
-    "Emilie": False,
-    "Eula": False,
-    "Faruzan": False,
-    "Fischl": True,
-    "Freminet": False,
-    "Furina": False,
-    "Gaming": False,
-    "Ganyu": False,
-    "Gorou": False,
-    "Hu Tao": False,
-    "Iansan": False,
-    "Jean": False,
-    "Kachina": False,
-    "Kaedehara Kazuha": False,
-    "Kaeya": False,
-    "Kamisato Ayaka": False,
-    "Kamisato Ayato": False,
-    "Kaveh": False,
-    "Keqing": True,
-    "Kinich": False,
-    "Kirara": False,
-    "Klee": False,
-    "Kujou Sara": False,
-    "Kuki Shinobu": False,
-    "Lan Yan": False,
-    "Lanyan": False,
-    "Layla": False,
-    "Lisa": False,
-    "Lynette": False,
-    "Lyney": False,
-    "Mavuika": False,
-    "Mika": False,
-    "Mona": False,
-    "Mualani": False,
-    "Nahida": False,
-    "Navia": False,
-    "Neuvillette": False,
-    "Nilou": False,
-    "Ningguang": False,
-    "Noelle": False,
-    "Ororon": False,
-    "Qiqi": False,
-    "Raiden Shogun": False,
-    "Razor": False,
-    "Rosaria": False,
-    "Sangonomiya Kokomi": False,
-    "Sayu": False,
-    "Sethos": False,
-    "Shenhe": True,
-    "Shikanoin Heizou": False,
-    "Sigewinne": False,
-    "Sucrose": False,
-    "Thoma": False,
-    "Tighnari": False,
-    "Traveller": False,
-    "Venti": False,
-    "Wanderer": False,
-    "Wriothesley": False,
-    "Xiangling": False,
-    "Xianyun": False,
-    "Xiao": False,
-    "Xilonen": False,
-    "Xingqiu": False,
-    "Xinyan": False,
-    "Yae Miko": False,
-    "Yanfei": False,
-    "Yao Yao": False,
-    "Yelan": False,
-    "Yoimiya": False,
-    "Yun Jin": False,
-    "Zhongli": False,
+    "Albedo": False, "Alhaitham": False, "Aloy": False, "Amber": False,
+    "Arataki Itto": False, "Arlecchino": False, "Barbara": False, "Beidou": False,
+    "Bennett": True, "Candace": False, "Charlotte": False, "Chasca": False,
+    "Chevreuse": False, "Chiori": False, "Chongyun": True, "Citlali": False,
+    "Clorinde": False, "Collei": False, "Cyno": False, "Dehya": False,
+    "Diluc": False, "Diona": False, "Dori": False, "Emilie": False,
+    "Eula": False, "Faruzan": False, "Fischl": True, "Freminet": False,
+    "Furina": False, "Gaming": False, "Ganyu": False, "Gorou": False,
+    "Hu Tao": False, "Iansan": False, "Jean": False, "Kachina": False,
+    "Kaedehara Kazuha": False, "Kaeya": False, "Kamisato Ayaka": False,
+    "Kamisato Ayato": False, "Kaveh": False, "Keqing": True, "Kinich": False,
+    "Kirara": False, "Klee": False, "Kujou Sara": False, "Kuki Shinobu": False,
+    "Lan Yan": False, "Lanyan": False, "Layla": False, "Lisa": False,
+    "Lynette": False, "Lyney": False, "Mavuika": False, "Mika": False,
+    "Mona": False, "Mualani": False, "Nahida": False, "Navia": False,
+    "Neuvillette": False, "Nilou": False, "Ningguang": False, "Noelle": False,
+    "Ororon": False, "Qiqi": False, "Raiden Shogun": False, "Razor": False,
+    "Rosaria": False, "Sangonomiya Kokomi": False, "Sayu": False, "Sethos": False,
+    "Shenhe": True, "Shikanoin Heizou": False, "Sigewinne": False, "Sucrose": False,
+    "Thoma": False, "Tighnari": False, "Traveller": False, "Venti": False,
+    "Wanderer": False, "Wriothesley": False, "Xiangling": False, "Xianyun": False,
+    "Xiao": False, "Xilonen": False, "Xingqiu": False, "Xinyan": False,
+    "Yae Miko": False, "Yanfei": False, "Yao Yao": False, "Yelan": False,
+    "Yoimiya": False, "Yun Jin": False, "Zhongli": False,
 }
 
 REGIONS = ["Mondstadt", "Liyue", "Inazuma", "Sumeru", "Fontaine", "Natlan"]
+RESOURCES = [
+    "Mora",
+    "Erze (Eisen & Kristall)",
+    "Fleisch & Geflügel",
+    "Zutaten & Pflanzen",
+    "Fisch",
+]
 
 
 # =========================================================
-# Custom Widget: Der kreisförmige Ring-Timer (QPainter)
+# Custom Widget: Ring-Timer
 # =========================================================
 class CircularProgressTimer(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setMinimumSize(140, 140)
+        self.setMinimumSize(120, 120)
         self.total_seconds = 1
         self.remaining_seconds = 1
         self.is_complete = False
@@ -167,14 +103,12 @@ class CircularProgressTimer(QWidget):
 
         pen_width = 8
 
-        # 1. Dunkle Scheibe + Ring-Hintergrund für perfekte Lesbarkeit
-        painter.setBrush(QBrush(QColor(18, 20, 28, 220)))  # Abdunkelung direkt hinter dem Timer
+        painter.setBrush(QBrush(QColor(18, 20, 28, 220)))
         bg_pen = QPen(QColor("#1a1c24"), pen_width)
         bg_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         painter.setPen(bg_pen)
         painter.drawEllipse(rect)
 
-        # 2. Fortschritts-Bogen
         color = (
             QColor(CORE_COLOR_AMBER) if self.is_complete else QColor(CORE_COLOR_CYAN)
         )
@@ -189,9 +123,8 @@ class CircularProgressTimer(QWidget):
         elif self.is_complete:
             painter.drawArc(rect, 0, 360 * 16)
 
-        # 3. Zeit-Text in der Mitte
         painter.setPen(color)
-        font = QFont("Segoe UI", 13, QFont.Weight.Bold)
+        font = QFont("Segoe UI", 12, QFont.Weight.Bold)
         painter.setFont(font)
 
         if self.is_complete:
@@ -228,38 +161,19 @@ class ExpeditionCard(QFrame):
         self.on_delete_callback = on_delete
         self.notified = False
 
-        self.setup_ui(char_name, location)
-
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(15)
-        shadow.setXOffset(0)
-        shadow.setYOffset(4)
-        shadow.setColor(QColor(0, 0, 0, 100))
-        self.setGraphicsEffect(shadow)
-
-        self.style_card(active=True)
-
-    def setup_ui(self, char_name, location):
         self.setObjectName("expedition_card_widget")
 
         card_layout = QVBoxLayout(self)
         card_layout.setContentsMargins(15, 12, 15, 12)
+        card_layout.setSpacing(6)
 
-        # Header
+        # Header: Name oben links, Delete-Button rechts
         header_layout = QHBoxLayout()
-
-        text_v_layout = QVBoxLayout()
         lbl_name = QLabel(char_name)
         lbl_name.setStyleSheet("font-weight: bold; font-size: 14px; color: white;")
-        self.lbl_loc = QLabel(location)
-        self.lbl_loc.setStyleSheet("color: #dddddd; font-size: 11px;")
-        text_v_layout.addWidget(lbl_name)
-        text_v_layout.addWidget(self.lbl_loc)
-        header_layout.addLayout(text_v_layout)
-
+        header_layout.addWidget(lbl_name)
         header_layout.addStretch()
 
-        # Löschen Button ("✕")
         btn_delete = QPushButton("✕")
         btn_delete.setFixedSize(24, 24)
         btn_delete.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -282,17 +196,44 @@ class ExpeditionCard(QFrame):
 
         card_layout.addLayout(header_layout)
 
-        # Ring-Timer
+        # Ring-Timer in der Mitte
         self.ring_timer = CircularProgressTimer(self)
         card_layout.addWidget(
             self.ring_timer, alignment=Qt.AlignmentFlag.AlignCenter
         )
 
-        # Action-Button
+        card_layout.addStretch()
+
+        # Zielgebiet/Ressource als Badge über dem Button
+        self.lbl_loc = QLabel(f"📍 {location}")
+        self.lbl_loc.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lbl_loc.setStyleSheet("""
+            QLabel {
+                background-color: rgba(26, 28, 36, 220);
+                color: #38e3e3;
+                border: 1px solid #3d4254;
+                border-radius: 8px;
+                padding: 4px 10px;
+                font-size: 11px;
+                font-weight: bold;
+            }
+        """)
+        card_layout.addWidget(self.lbl_loc)
+
+        # Action-Button unten
         self.btn_action = QPushButton("Running")
         self.btn_action.setCursor(Qt.CursorShape.PointingHandCursor)
         card_layout.addWidget(self.btn_action)
 
+        # Schatten
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(12)
+        shadow.setXOffset(0)
+        shadow.setYOffset(4)
+        shadow.setColor(QColor(0, 0, 0, 90))
+        self.setGraphicsEffect(shadow)
+
+        self.style_card(active=True)
         self.update_time()
 
     def delete_click(self):
@@ -302,7 +243,6 @@ class ExpeditionCard(QFrame):
     def style_card(self, active=False):
         color = CORE_COLOR_CYAN if active else CORE_COLOR_AMBER
 
-        # Bildpfad zusammensetzen
         img_slug = self.char_name.lower().replace(" ", "_") + ".png"
         img_path = os.path.join(ASSETS_DIR, img_slug).replace("\\", "/")
 
@@ -310,8 +250,7 @@ class ExpeditionCard(QFrame):
             bg_style = f"""
                 background-image: url("{img_path}");
                 background-repeat: no-repeat;
-                background-position: center;
-                /* Verstärkte Abdunkelung für besseren Gesamtkontrast */
+                background-position: center center;
                 background-color: qradialgradient(
                     cx:0.5, cy:0.5, radius: 0.8,
                     fx:0.5, fy:0.5,
@@ -355,16 +294,205 @@ class ExpeditionCard(QFrame):
             self.style_card(active=False)
             if not self.notified:
                 self.notified = True
-                return True  # Löst Benachrichtigung aus
+                return True
         return False
 
     def to_dict(self):
+        clean_loc = self.lbl_loc.text().replace("📍 ", "")
         return {
             "char_name": self.char_name,
-            "location": self.lbl_loc.text(),
+            "location": clean_loc,
             "total_seconds": self.total_seconds,
             "end_timestamp": self.end_timestamp,
         }
+
+
+# =========================================================
+# Custom Widget: Operations HQ
+# =========================================================
+class OperationsHQCard(QFrame):
+
+    def __init__(self, parent_window=None):
+        super().__init__(parent_window)
+        self.parent_window = parent_window
+        self.current_resin = 120
+        self.max_resin = 160
+        self.last_resin_update = time.time()
+
+        self.setObjectName("operations_hq_card")
+        self.setStyleSheet(f"""
+            QFrame#operations_hq_card {{
+                background-color: {CARD_BG_COLOR};
+                border-radius: 12px;
+                border: 1px solid #333847;
+            }}
+            QLabel {{ color: #e6e6e6; }}
+            QPushButton {{
+                background-color: #2e323f;
+                border: 1px solid {CORE_COLOR_CYAN};
+                color: {CORE_COLOR_CYAN};
+                border-radius: 6px;
+                padding: 6px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {CORE_COLOR_CYAN};
+                color: {BG_COLOR_DARK};
+            }}
+        """)
+
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(12)
+        shadow.setXOffset(0)
+        shadow.setYOffset(4)
+        shadow.setColor(QColor(0, 0, 0, 90))
+        self.setGraphicsEffect(shadow)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(15, 12, 15, 12)
+        layout.setSpacing(6)
+
+        # Header
+        lbl_header = QLabel("OPERATIONS HQ")
+        lbl_header.setStyleSheet(
+            f"font-weight: bold; font-size: 13px; color: {CORE_COLOR_CYAN}; letter-spacing: 1px;"
+        )
+        layout.addWidget(lbl_header)
+
+        # Box 1: Next Ready
+        box_next = QFrame()
+        box_next.setStyleSheet("background-color: #1a1c24; border-radius: 6px;")
+        v_next = QVBoxLayout(box_next)
+        v_next.setSpacing(2)
+        v_next.setContentsMargins(10, 6, 10, 6)
+
+        lbl_next_title = QLabel("NÄCHSTE ANKUNFT")
+        lbl_next_title.setStyleSheet("font-size: 9px; color: #888; font-weight: bold;")
+        self.lbl_next_val = QLabel("Keine aktiven Expeditions")
+        self.lbl_next_val.setStyleSheet(f"font-size: 11px; font-weight: bold; color: {CORE_COLOR_AMBER};")
+
+        v_next.addWidget(lbl_next_title)
+        v_next.addWidget(self.lbl_next_val)
+        layout.addWidget(box_next)
+
+        # Box 2: Server Reset
+        box_reset = QFrame()
+        box_reset.setStyleSheet("background-color: #1a1c24; border-radius: 6px;")
+        v_reset = QVBoxLayout(box_reset)
+        v_reset.setSpacing(2)
+        v_reset.setContentsMargins(10, 6, 10, 6)
+
+        lbl_reset_title = QLabel("DAILY RESET (04:00 Uhr)")
+        lbl_reset_title.setStyleSheet("font-size: 9px; color: #888; font-weight: bold;")
+        self.lbl_reset_val = QLabel("00h 00m")
+        self.lbl_reset_val.setStyleSheet("font-size: 11px; font-weight: bold; color: white;")
+
+        v_reset.addWidget(lbl_reset_title)
+        v_reset.addWidget(self.lbl_reset_val)
+        layout.addWidget(box_reset)
+
+        # Box 3: Resin Tracker
+        box_resin = QFrame()
+        box_resin.setStyleSheet("background-color: #1a1c24; border-radius: 6px;")
+        v_resin = QVBoxLayout(box_resin)
+        v_resin.setSpacing(2)
+        v_resin.setContentsMargins(10, 6, 10, 6)
+
+        h_resin_hdr = QHBoxLayout()
+        lbl_resin_title = QLabel("RESIN COUNTER")
+        lbl_resin_title.setStyleSheet("font-size: 9px; color: #888; font-weight: bold;")
+        btn_edit_resin = QPushButton("⚙")
+        btn_edit_resin.setFixedSize(16, 16)
+        btn_edit_resin.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_edit_resin.setStyleSheet("""
+            QPushButton {
+                background: transparent; border: none; color: #aaa; font-size: 10px; padding: 0;
+            }
+            QPushButton:hover { color: #38e3e3; }
+        """)
+        btn_edit_resin.clicked.connect(self.edit_resin)
+        h_resin_hdr.addWidget(lbl_resin_title)
+        h_resin_hdr.addStretch()
+        h_resin_hdr.addWidget(btn_edit_resin)
+
+        self.lbl_resin_val = QLabel("120 / 160 (Voll in 05h 20m)")
+        self.lbl_resin_val.setStyleSheet("font-size: 10px; font-weight: bold; color: white;")
+
+        v_resin.addLayout(h_resin_hdr)
+        v_resin.addWidget(self.lbl_resin_val)
+        layout.addWidget(box_resin)
+
+        layout.addStretch()
+
+        # Claim All Button
+        self.btn_claim_all = QPushButton("Claim All Ready")
+        self.btn_claim_all.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_claim_all.clicked.connect(self.claim_all)
+        layout.addWidget(self.btn_claim_all)
+
+        self.update_info()
+
+    def edit_resin(self):
+        val, ok = QInputDialog.getInt(
+            self, "Resin anpassen", "Aktuelles Harz (0-160):", self.current_resin, 0, 160
+        )
+        if ok:
+            self.current_resin = val
+            self.last_resin_update = time.time()
+            self.update_info()
+
+    def claim_all(self):
+        if not self.parent_window:
+            return
+        ready_cards = [card for card in self.parent_window.active_cards if card.get_remaining_seconds() <= 0]
+        for card in ready_cards:
+            self.parent_window.remove_card(card)
+
+    def update_info(self):
+        now = time.time()
+        elapsed = int(now - self.last_resin_update)
+        gained = elapsed // 480
+        if gained > 0 and self.current_resin < self.max_resin:
+            self.current_resin = min(self.max_resin, self.current_resin + gained)
+            self.last_resin_update += gained * 480
+
+        if self.current_resin >= self.max_resin:
+            self.lbl_resin_val.setText("160 / 160 (VOLL!)")
+            self.lbl_resin_val.setStyleSheet(f"font-size: 10px; font-weight: bold; color: {CORE_COLOR_AMBER};")
+        else:
+            needed_resin = self.max_resin - self.current_resin
+            seconds_left = (needed_resin * 480) - (int(now - self.last_resin_update) % 480)
+            h = seconds_left // 3600
+            m = (seconds_left % 3600) // 60
+            self.lbl_resin_val.setText(f"{self.current_resin} / 160 (Voll in {h:02d}h {m:02d}m)")
+            self.lbl_resin_val.setStyleSheet("font-size: 10px; font-weight: bold; color: white;")
+
+        dt_now = datetime.now()
+        dt_reset = dt_now.replace(hour=4, minute=0, second=0, microsecond=0)
+        if dt_now >= dt_reset:
+            dt_reset += timedelta(days=1)
+        time_to_reset = dt_reset - dt_now
+        res_h = int(time_to_reset.total_seconds() // 3600)
+        res_m = int((time_to_reset.total_seconds() % 3600) // 60)
+        self.lbl_reset_val.setText(f"In {res_h:02d}h {res_m:02d}m")
+
+        if self.parent_window and self.parent_window.active_cards:
+            active = self.parent_window.active_cards
+            ready_cards = [c for c in active if c.get_remaining_seconds() <= 0]
+            if ready_cards:
+                self.lbl_next_val.setText(f"{len(ready_cards)} Bereit zum Abholen!")
+                self.lbl_next_val.setStyleSheet(f"font-size: 11px; font-weight: bold; color: {CORE_COLOR_AMBER};")
+            else:
+                next_card = min(active, key=lambda c: c.get_remaining_seconds())
+                rem = next_card.get_remaining_seconds()
+                h = rem // 3600
+                m = (rem % 3600) // 60
+                s = rem % 60
+                self.lbl_next_val.setText(f"{next_card.char_name} in {h:02d}:{m:02d}:{s:02d}")
+                self.lbl_next_val.setStyleSheet(f"font-size: 11px; font-weight: bold; color: {CORE_COLOR_CYAN};")
+        else:
+            self.lbl_next_val.setText("Keine Expeditions aktiv")
+            self.lbl_next_val.setStyleSheet("font-size: 11px; font-weight: bold; color: #888;")
 
 
 # =========================================================
@@ -385,7 +513,7 @@ class InlineAddDialog(QFrame):
                 border-radius: 12px;
             }}
             QLabel {{ color: #e6e6e6; font-weight: bold; font-size: 12px; }}
-            QComboBox, QLineEdit {{
+            QComboBox {{
                 background-color: #1a1c24;
                 color: white;
                 border: 1px solid #3d4254;
@@ -393,7 +521,7 @@ class InlineAddDialog(QFrame):
                 padding: 5px 8px;
                 font-size: 12px;
             }}
-            QComboBox:focus, QLineEdit:focus {{ border: 1px solid {CORE_COLOR_CYAN}; }}
+            QComboBox:focus {{ border: 1px solid {CORE_COLOR_CYAN}; }}
             QPushButton {{
                 background-color: #2e323f;
                 color: white;
@@ -438,9 +566,11 @@ class InlineAddDialog(QFrame):
         self.combo_region.addItems(REGIONS)
         form_layout.addRow("Zielgebiet:", self.combo_region)
 
-        self.input_detail = QLineEdit()
-        self.input_detail.setPlaceholderText("Erz, Mora...")
-        form_layout.addRow("Ressource:", self.input_detail)
+        # Dropdown für Ressourcen (editiervorwertig für Freitext!)
+        self.combo_resource = QComboBox()
+        self.combo_resource.setEditable(True)
+        self.combo_resource.addItems(RESOURCES)
+        form_layout.addRow("Ressource:", self.combo_resource)
 
         self.combo_duration = QComboBox()
         self.combo_duration.addItems([
@@ -472,7 +602,6 @@ class InlineAddDialog(QFrame):
 
         layout.addLayout(btn_layout)
 
-        # Initialen Bonus-Status für den ersten Charakter in der Liste prüfen
         self.on_char_changed(self.combo_char.currentText())
 
     def on_char_changed(self, char_name):
@@ -486,7 +615,7 @@ class InlineAddDialog(QFrame):
         duration_text = self.combo_duration.currentText()
         hours = int(duration_text.split()[0])
         region = self.combo_region.currentText()
-        detail = self.input_detail.text().strip()
+        detail = self.combo_resource.currentText().strip()
         location = f"{region} ({detail})" if detail else region
 
         if self.on_submit_callback:
@@ -505,7 +634,6 @@ class GenshinTrackerWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Genshin Impact Expedition Tracker")
-        self.resize(1000, 700)
 
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {BG_COLOR_DARK}; }}
@@ -516,7 +644,7 @@ class GenshinTrackerWindow(QMainWindow):
         self.setCentralWidget(self.central_widget)
 
         self.main_layout = QVBoxLayout(self.central_widget)
-        self.main_layout.setContentsMargins(20, 20, 20, 20)
+        self.main_layout.setContentsMargins(16, 16, 16, 16)
 
         header_layout = QHBoxLayout()
         lbl_title = QLabel("Active Expeditions")
@@ -525,49 +653,76 @@ class GenshinTrackerWindow(QMainWindow):
         header_layout.addStretch()
         self.main_layout.addLayout(header_layout)
 
-        btn_start_new = QPushButton("+ Start New Expedition")
-        btn_start_new.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_start_new.setStyleSheet(f"""
-            QPushButton {{
-                background-color: #252833;
-                border: 2px dashed #444;
-                border-radius: 8px;
-                padding: 15px;
-                font-size: 14px;
-                font-weight: bold;
-                color: #888;
-            }}
-            QPushButton:hover {{
-                border-color: {CORE_COLOR_CYAN};
-                color: {CORE_COLOR_CYAN};
-                background-color: #2a2e3a;
-            }}
-        """)
-        btn_start_new.clicked.connect(self.open_add_dialog)
-        self.main_layout.addWidget(btn_start_new)
-        self.main_layout.addSpacing(20)
-
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setStyleSheet("background: transparent; border: none;")
+        self.btn_start_new = QPushButton()
+        self.btn_start_new.clicked.connect(self.open_add_dialog)
+        self.main_layout.addWidget(self.btn_start_new)
+        self.main_layout.addSpacing(10)
 
         self.grid_widget = QWidget()
         self.cards_grid = QGridLayout(self.grid_widget)
-        self.cards_grid.setSpacing(20)
+        self.cards_grid.setContentsMargins(0, 0, 0, 0)
+        self.cards_grid.setSpacing(12)
 
-        scroll.setWidget(self.grid_widget)
-        self.main_layout.addWidget(scroll)
+        for col in range(3):
+            self.cards_grid.setColumnStretch(col, 1)
+        for row in range(2):
+            self.cards_grid.setRowStretch(row, 1)
+
+        self.main_layout.addWidget(self.grid_widget, stretch=1)
 
         self.active_cards = []
         self.overlay_dialog = None
 
-        # Timer
+        self.hq_card = OperationsHQCard(parent_window=self)
+
         self.update_timer = QTimer(self)
         self.update_timer.timeout.connect(self.on_timer_tick)
         self.update_timer.start(1000)
 
-        # Lade gespeicherte Erkundungen aus expeditions.json
         self.load_expeditions()
+        self.update_add_button_state()
+
+        self.resize(980, 680)
+
+    def update_add_button_state(self):
+        count = len(self.active_cards)
+        max_limit = 5
+
+        if count >= max_limit:
+            self.btn_start_new.setEnabled(False)
+            self.btn_start_new.setText(f"Limit Reached ({count}/{max_limit} Expeditions)")
+            self.btn_start_new.setCursor(Qt.CursorShape.ForbiddenCursor)
+            self.btn_start_new.setStyleSheet("""
+                QPushButton {
+                    background-color: #1e2029;
+                    border: 2px dashed #333745;
+                    border-radius: 8px;
+                    padding: 10px;
+                    font-size: 13px;
+                    font-weight: bold;
+                    color: #555866;
+                }
+            """)
+        else:
+            self.btn_start_new.setEnabled(True)
+            self.btn_start_new.setText(f"+ Start New Expedition ({count}/{max_limit})")
+            self.btn_start_new.setCursor(Qt.CursorShape.PointingHandCursor)
+            self.btn_start_new.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: #252833;
+                    border: 2px dashed #444;
+                    border-radius: 8px;
+                    padding: 10px;
+                    font-size: 13px;
+                    font-weight: bold;
+                    color: #888;
+                }}
+                QPushButton:hover {{
+                    border-color: {CORE_COLOR_CYAN};
+                    color: {CORE_COLOR_CYAN};
+                    background-color: #2a2e3a;
+                }}
+            """)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -623,10 +778,23 @@ class GenshinTrackerWindow(QMainWindow):
             self.save_expeditions()
 
     def regrid_cards(self):
+        for i in reversed(range(self.cards_grid.count())):
+            widget = self.cards_grid.itemAt(i).widget()
+            if widget:
+                widget.setParent(None)
+
         for i, card in enumerate(self.active_cards):
             row = i // 3
             col = i % 3
             self.cards_grid.addWidget(card, row, col)
+
+        hq_index = len(self.active_cards)
+        hq_row = hq_index // 3
+        hq_col = hq_index % 3
+        self.cards_grid.addWidget(self.hq_card, hq_row, hq_col)
+
+        self.update_add_button_state()
+        self.hq_card.update_info()
 
     def on_timer_tick(self):
         for card in self.active_cards:
@@ -638,8 +806,8 @@ class GenshinTrackerWindow(QMainWindow):
                     app_name="GenshinTimer",
                     timeout=5,
                 )
+        self.hq_card.update_info()
 
-    # --- JSON Speicher- & Ladelogik ---
     def save_expeditions(self):
         data = [card.to_dict() for card in self.active_cards]
         try:
@@ -650,6 +818,7 @@ class GenshinTrackerWindow(QMainWindow):
 
     def load_expeditions(self):
         if not os.path.exists(SAVE_FILE):
+            self.regrid_cards()
             return
         try:
             with open(SAVE_FILE, "r", encoding="utf-8") as f:
