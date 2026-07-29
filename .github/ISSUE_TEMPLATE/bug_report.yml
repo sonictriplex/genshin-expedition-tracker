@@ -1,0 +1,41 @@
+name: Bug Report
+description: Melde einen Fehler oder ein Problem im Tracker.
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Plattform / Version
+      description: Auf welchem System tritt der Fehler auf?
+      options:
+        - Desktop (PyQt6 / Python)
+        - Android (Jetpack Compose)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Fehlerbeschreibung
+      description: Was passiert genau?
+      placeholder: "Der Timer bleibt bei 00:00 stehen und benachrichtigt nicht..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Schritte zum Reproduzieren
+      description: Wie kann man den Fehler nachstellen?
+      placeholder: |
+        1. App starten
+        2. Auf '+ Start New Expedition' klicken
+        3. Bennett auswählen...
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Konsolen-Output / Fehlermeldung (falls vorhanden)
+      description: Füge hier Terminal-Logs oder Tracebacks ein.
+      render: shell

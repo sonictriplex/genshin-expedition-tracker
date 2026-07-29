@@ -1,0 +1,19 @@
+name: Feature Request
+description: Schlage eine neue Funktion oder Idee vor.
+title: "[FEATURE]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Beschreibung der Idee
+      description: Welche neue Funktion wünschst du dir und warum?
+      placeholder: "Ein Widget für den Android-Homescreen..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativen oder Zusatzinfos
+      description: Hast du bereits Alternativen oder Workarounds ausprobiert?
