@@ -81,6 +81,7 @@ python main.py
 
 
 Screenshot:
+
 ![Screenshot Linux App](./assets/GenshinTrackerLinux.png)
 
 ### Android
@@ -94,6 +95,7 @@ Screenshot:
 
 
 Screenshot:
+
 <img src="./assets/GenshinTrackerAndroid.jpg" alt="Screenshot Android App" width="400">
 
 ## Project Structure
