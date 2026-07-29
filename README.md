@@ -79,6 +79,8 @@ python main.py
 5. Click **„Claim Reward“** or **„Claim All Ready“** in the Operations HQ to collect the reward.
 6. Data is automatically saved and restored on next launch.
 
+![Screenshot Linux App](./assets/GenshinTrackerLinux.png)
+
 ### Android
 1. Tap **„+ Start New Expedition“** to open the add dialog.
 2. Choose a character, region, resource, and duration (4/8/12/16/20 hours).
@@ -87,6 +89,8 @@ python main.py
 5. Tap **„Claim Reward“** to remove the expedition.
 6. Use the **Operations HQ** card to see the next arrival, daily reset, and resin counter.
 7. Tap the gear icon next to **RESIN COUNTER** to manually adjust resin.
+
+![Screenshot Linux App](./assets/GenshinTrackerAndroid.png)
 
 ## Project Structure
 
