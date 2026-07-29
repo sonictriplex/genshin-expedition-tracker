@@ -1,9 +1,13 @@
 package com.mediamatrix.genshintracker
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,12 +29,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.mediamatrix.genshintracker.ui.theme.GenshinExpeditionTrackerTheme
 import kotlinx.coroutines.delay
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Calendar
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 // --- Farbschema ---
 val CoreCyan = Color(0xFF38E3E3)
@@ -40,8 +49,23 @@ val CardBg = Color(0xFF252833)
 val BoxDark = Color(0xFF12141C)
 
 class MainActivity : ComponentActivity() {
+
+    // Launcher zur Abfrage der Benachrichtigungs-Berechtigung (Android 13+)
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        // Berechtigung erteilt/abgelehnt
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 1. Notification-Channel für Benachrichtigungen anlegen
+        NotificationHelper.createNotificationChannel(this)
+
+        // 2. Rechte abfragen (Android 13+)
+        checkAndRequestNotificationPermission()
+
         setContent {
             GenshinExpeditionTrackerTheme {
                 Surface(
@@ -50,6 +74,18 @@ class MainActivity : ComponentActivity() {
                 ) {
                     MainScreen()
                 }
+            }
+        }
+    }
+
+    private fun checkAndRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
     }
@@ -188,6 +224,15 @@ fun MainScreen() {
                     endTimestampEpochSec = now + totalSec
                 )
                 activeExpeditions = activeExpeditions + newExp
+
+                // WorkManager Benachrichtigung für diesen Timer einplanen
+                scheduleExpeditionNotification(
+                    context = context,
+                    charName = charName,
+                    location = location,
+                    durationInHours = hours.toLong()
+                )
+
                 showAddDialog = false
             }
         )
@@ -643,6 +688,28 @@ fun AdjustResinDialog(currentResin: Int, maxResin: Int, onDismiss: () -> Unit, o
         },
         containerColor = CardBg
     )
+}
+
+// =========================================================
+// Helper: WorkManager Task einplanen
+// =========================================================
+fun scheduleExpeditionNotification(
+    context: Context,
+    charName: String,
+    location: String,
+    durationInHours: Long
+) {
+    val inputData = workDataOf(
+        "char_name" to charName,
+        "location" to location
+    )
+
+    val workRequest = OneTimeWorkRequestBuilder<ExpeditionWorker>()
+        .setInitialDelay(durationInHours, TimeUnit.HOURS)
+        .setInputData(inputData)
+        .build()
+
+    WorkManager.getInstance(context).enqueue(workRequest)
 }
 
 // =========================================================
