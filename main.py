@@ -10,7 +10,7 @@ except ImportError:
     notification = None
 
 from PyQt6.QtCore import QRectF, QSize, Qt, QTimer
-from PyQt6.QtGui import QBrush, QColor, QFont, QPainter, QPen
+from PyQt6.QtGui import QBrush, QColor, QFont, QIcon, QPainter, QPen
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -634,6 +634,10 @@ class GenshinTrackerWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Genshin Impact Expedition Tracker")
 
+        icon_path = os.path.join(ASSETS_DIR, "traveller.png")
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
+
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {BG_COLOR_DARK}; }}
             QWidget {{ color: #e6e6e6; font-family: 'Segoe UI', sans-serif; }}
@@ -681,7 +685,7 @@ class GenshinTrackerWindow(QMainWindow):
         self.load_expeditions()
         self.update_add_button_state()
 
-        self.resize(980, 680)
+        self.resize(1500, 975)
 
     def update_add_button_state(self):
         count = len(self.active_cards)
