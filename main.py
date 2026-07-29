@@ -67,10 +67,10 @@ CHARACTERS = {
 REGIONS = ["Mondstadt", "Liyue", "Inazuma", "Sumeru", "Fontaine", "Natlan"]
 RESOURCES = [
     "Mora",
-    "Erze (Eisen & Kristall)",
-    "Fleisch & Geflügel",
-    "Zutaten & Pflanzen",
-    "Fisch",
+    "Ores (Iron & Crystal)",
+    "Meat & Fowl",
+    "Ingredients & Plants",
+    "Fish",
 ]
 
 
@@ -128,7 +128,7 @@ class CircularProgressTimer(QWidget):
         painter.setFont(font)
 
         if self.is_complete:
-            time_str = "FERTIG!"
+            time_str = "READY!"
         else:
             h = max(0, self.remaining_seconds) // 3600
             m = (max(0, self.remaining_seconds) % 3600) // 60
@@ -167,7 +167,6 @@ class ExpeditionCard(QFrame):
         card_layout.setContentsMargins(15, 12, 15, 12)
         card_layout.setSpacing(6)
 
-        # Header: Name oben links, Delete-Button rechts
         header_layout = QHBoxLayout()
         lbl_name = QLabel(char_name)
         lbl_name.setStyleSheet("font-weight: bold; font-size: 14px; color: white;")
@@ -196,7 +195,6 @@ class ExpeditionCard(QFrame):
 
         card_layout.addLayout(header_layout)
 
-        # Ring-Timer in der Mitte
         self.ring_timer = CircularProgressTimer(self)
         card_layout.addWidget(
             self.ring_timer, alignment=Qt.AlignmentFlag.AlignCenter
@@ -204,7 +202,6 @@ class ExpeditionCard(QFrame):
 
         card_layout.addStretch()
 
-        # Zielgebiet/Ressource als Badge über dem Button
         self.lbl_loc = QLabel(f"📍 {location}")
         self.lbl_loc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lbl_loc.setStyleSheet("""
@@ -220,12 +217,10 @@ class ExpeditionCard(QFrame):
         """)
         card_layout.addWidget(self.lbl_loc)
 
-        # Action-Button unten
         self.btn_action = QPushButton("Running")
         self.btn_action.setCursor(Qt.CursorShape.PointingHandCursor)
         card_layout.addWidget(self.btn_action)
 
-        # Schatten
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setBlurRadius(12)
         shadow.setXOffset(0)
@@ -316,7 +311,7 @@ class OperationsHQCard(QFrame):
         super().__init__(parent_window)
         self.parent_window = parent_window
         self.current_resin = 120
-        self.max_resin = 160
+        self.max_resin = 200
         self.last_resin_update = time.time()
 
         self.setObjectName("operations_hq_card")
@@ -352,7 +347,6 @@ class OperationsHQCard(QFrame):
         layout.setContentsMargins(15, 12, 15, 12)
         layout.setSpacing(6)
 
-        # Header
         lbl_header = QLabel("OPERATIONS HQ")
         lbl_header.setStyleSheet(
             f"font-weight: bold; font-size: 13px; color: {CORE_COLOR_CYAN}; letter-spacing: 1px;"
@@ -366,9 +360,9 @@ class OperationsHQCard(QFrame):
         v_next.setSpacing(2)
         v_next.setContentsMargins(10, 6, 10, 6)
 
-        lbl_next_title = QLabel("NÄCHSTE ANKUNFT")
+        lbl_next_title = QLabel("NEXT ARRIVAL")
         lbl_next_title.setStyleSheet("font-size: 9px; color: #888; font-weight: bold;")
-        self.lbl_next_val = QLabel("Keine aktiven Expeditions")
+        self.lbl_next_val = QLabel("No active expeditions")
         self.lbl_next_val.setStyleSheet(f"font-size: 11px; font-weight: bold; color: {CORE_COLOR_AMBER};")
 
         v_next.addWidget(lbl_next_title)
@@ -382,7 +376,7 @@ class OperationsHQCard(QFrame):
         v_reset.setSpacing(2)
         v_reset.setContentsMargins(10, 6, 10, 6)
 
-        lbl_reset_title = QLabel("DAILY RESET (04:00 Uhr)")
+        lbl_reset_title = QLabel("DAILY RESET (04:00)")
         lbl_reset_title.setStyleSheet("font-size: 9px; color: #888; font-weight: bold;")
         self.lbl_reset_val = QLabel("00h 00m")
         self.lbl_reset_val.setStyleSheet("font-size: 11px; font-weight: bold; color: white;")
@@ -415,7 +409,7 @@ class OperationsHQCard(QFrame):
         h_resin_hdr.addStretch()
         h_resin_hdr.addWidget(btn_edit_resin)
 
-        self.lbl_resin_val = QLabel("120 / 160 (Voll in 05h 20m)")
+        self.lbl_resin_val = QLabel("120 / 200")
         self.lbl_resin_val.setStyleSheet("font-size: 10px; font-weight: bold; color: white;")
 
         v_resin.addLayout(h_resin_hdr)
@@ -424,7 +418,6 @@ class OperationsHQCard(QFrame):
 
         layout.addStretch()
 
-        # Claim All Button
         self.btn_claim_all = QPushButton("Claim All Ready")
         self.btn_claim_all.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_claim_all.clicked.connect(self.claim_all)
@@ -434,7 +427,7 @@ class OperationsHQCard(QFrame):
 
     def edit_resin(self):
         val, ok = QInputDialog.getInt(
-            self, "Resin anpassen", "Aktuelles Harz (0-160):", self.current_resin, 0, 160
+            self, "Adjust Resin", f"Current Resin (0-{self.max_resin}):", self.current_resin, 0, self.max_resin
         )
         if ok:
             self.current_resin = val
@@ -457,14 +450,14 @@ class OperationsHQCard(QFrame):
             self.last_resin_update += gained * 480
 
         if self.current_resin >= self.max_resin:
-            self.lbl_resin_val.setText("160 / 160 (VOLL!)")
+            self.lbl_resin_val.setText(f"{self.max_resin} / {self.max_resin} (FULL!)")
             self.lbl_resin_val.setStyleSheet(f"font-size: 10px; font-weight: bold; color: {CORE_COLOR_AMBER};")
         else:
             needed_resin = self.max_resin - self.current_resin
             seconds_left = (needed_resin * 480) - (int(now - self.last_resin_update) % 480)
             h = seconds_left // 3600
             m = (seconds_left % 3600) // 60
-            self.lbl_resin_val.setText(f"{self.current_resin} / 160 (Voll in {h:02d}h {m:02d}m)")
+            self.lbl_resin_val.setText(f"{self.current_resin} / {self.max_resin} (Full in {h:02d}h {m:02d}m)")
             self.lbl_resin_val.setStyleSheet("font-size: 10px; font-weight: bold; color: white;")
 
         dt_now = datetime.now()
@@ -480,7 +473,7 @@ class OperationsHQCard(QFrame):
             active = self.parent_window.active_cards
             ready_cards = [c for c in active if c.get_remaining_seconds() <= 0]
             if ready_cards:
-                self.lbl_next_val.setText(f"{len(ready_cards)} Bereit zum Abholen!")
+                self.lbl_next_val.setText(f"{len(ready_cards)} Ready to claim!")
                 self.lbl_next_val.setStyleSheet(f"font-size: 11px; font-weight: bold; color: {CORE_COLOR_AMBER};")
             else:
                 next_card = min(active, key=lambda c: c.get_remaining_seconds())
@@ -491,7 +484,7 @@ class OperationsHQCard(QFrame):
                 self.lbl_next_val.setText(f"{next_card.char_name} in {h:02d}:{m:02d}:{s:02d}")
                 self.lbl_next_val.setStyleSheet(f"font-size: 11px; font-weight: bold; color: {CORE_COLOR_CYAN};")
         else:
-            self.lbl_next_val.setText("Keine Expeditions aktiv")
+            self.lbl_next_val.setText("No active expeditions")
             self.lbl_next_val.setStyleSheet("font-size: 11px; font-weight: bold; color: #888;")
 
 
@@ -548,7 +541,7 @@ class InlineAddDialog(QFrame):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 15, 20, 15)
 
-        lbl_title = QLabel("Neue Erkundung")
+        lbl_title = QLabel("New Expedition")
         lbl_title.setStyleSheet(
             f"font-size: 14px; color: {CORE_COLOR_CYAN}; margin-bottom: 5px;"
         )
@@ -560,27 +553,26 @@ class InlineAddDialog(QFrame):
         self.combo_char = QComboBox()
         self.combo_char.addItems(sorted(CHARACTERS.keys()))
         self.combo_char.currentTextChanged.connect(self.on_char_changed)
-        form_layout.addRow("Charakter:", self.combo_char)
+        form_layout.addRow("Character:", self.combo_char)
 
         self.combo_region = QComboBox()
         self.combo_region.addItems(REGIONS)
-        form_layout.addRow("Zielgebiet:", self.combo_region)
+        form_layout.addRow("Region:", self.combo_region)
 
-        # Dropdown für Ressourcen (editiervorwertig für Freitext!)
         self.combo_resource = QComboBox()
         self.combo_resource.setEditable(True)
         self.combo_resource.addItems(RESOURCES)
-        form_layout.addRow("Ressource:", self.combo_resource)
+        form_layout.addRow("Resource:", self.combo_resource)
 
         self.combo_duration = QComboBox()
         self.combo_duration.addItems([
-            "4 Stunden",
-            "8 Stunden",
-            "12 Stunden",
-            "16 Stunden (Bonus)",
-            "20 Stunden (Standard)",
+            "4 Hours",
+            "8 Hours",
+            "12 Hours",
+            "16 Hours (Bonus)",
+            "20 Hours (Standard)",
         ])
-        form_layout.addRow("Dauer:", self.combo_duration)
+        form_layout.addRow("Duration:", self.combo_duration)
 
         layout.addLayout(form_layout)
         layout.addStretch()
@@ -588,11 +580,11 @@ class InlineAddDialog(QFrame):
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
 
-        btn_cancel = QPushButton("Abbrechen")
+        btn_cancel = QPushButton("Cancel")
         btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_cancel.clicked.connect(self.cancel_click)
 
-        btn_start = QPushButton("Starten")
+        btn_start = QPushButton("Start")
         btn_start.setProperty("primary", "true")
         btn_start.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_start.clicked.connect(self.submit_click)
@@ -802,7 +794,7 @@ class GenshinTrackerWindow(QMainWindow):
             if just_finished and notification:
                 notification.notify(
                     title="Genshin Impact Tracker",
-                    message=f"Die Erkundung von {card.char_name} ist abgeschlossen!",
+                    message=f"The expedition of {card.char_name} has finished!",
                     app_name="GenshinTimer",
                     timeout=5,
                 )
@@ -814,7 +806,7 @@ class GenshinTrackerWindow(QMainWindow):
             with open(SAVE_FILE, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
         except Exception as e:
-            print(f"Fehler beim Speichern: {e}")
+            print(f"Error saving: {e}")
 
     def load_expeditions(self):
         if not os.path.exists(SAVE_FILE):
@@ -831,7 +823,7 @@ class GenshinTrackerWindow(QMainWindow):
                         end_timestamp=item["end_timestamp"],
                     )
         except Exception as e:
-            print(f"Fehler beim Laden: {e}")
+            print(f"Error loading: {e}")
 
 
 if __name__ == "__main__":
