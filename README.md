@@ -1,62 +1,62 @@
 # Genshin Impact Expedition Tracker
 
-Ein PyQt6-basierter Desktop-Tracker für Erkundungen in Genshin Impact.
+A PyQt6-based desktop tracker for expeditions in Genshin Impact.
 
 ## Features
-- **Live Ring-Timer:** Kreisförmige Fortschrittsanzeigen für aktive Erkundungen.
-- **Charakter-Boni:** Erkennt automatisch Figuren mit 25% Zeitersparnis (z. B. Bennett, Chongyun, Fischl, Keqing, Shenhe).
-- **Desktop Notifications:** Benachrichtigt dich via `plyer`, wenn eine Expedition abgeschlossen ist.
-- **Operations HQ:** Zeigt die nächste anstehende Expedition, den täglichen Server-Reset (04:00) und einen Harz-Zähler an.
-- **Claim All Ready:** Sammle alle abgeschlossenen Expeditionen auf einmal ein.
-- **Persistenz:** Expeditionsdaten werden automatisch in `expeditions.json` gespeichert und beim nächsten Start wiederhergestellt.
-- **Charakter-Icons:** Hintergrundbilder der Charaktere werden aus dem Ordner `assets/characters/` geladen (optional).
+- **Live Ring Timer:** Circular progress indicators for active expeditions.
+- **Character Bonuses:** Automatically detects characters with 25% time reduction (e.g., Bennett, Chongyun, Fischl, Keqing, Shenhe).
+- **Desktop Notifications:** Notifies you via `plyer` when an expedition is completed.
+- **Operations HQ:** Shows the next upcoming expedition, daily server reset (04:00), and a resin counter.
+- **Claim All Ready:** Collect all completed expeditions at once.
+- **Persistence:** Expedition data is automatically saved to `expeditions.json` and restored on next launch.
+- **Character Icons:** Background images of characters are loaded from the `assets/characters/` folder (optional).
 
-## Installation & Start
+## Installation & Startup
 
-### Voraussetzungen
-- Python 3.8 oder höher
-- pip (Python-Paketmanager)
+### Prerequisites
+- Python 3.8 or higher
+- pip (Python package manager)
 
-### Abhängigkeiten installieren
+### Install Dependencies
 ```bash
 pip install PyQt6 plyer
 ```
 
-### Repository klonen
+### Clone Repository
 ```bash
 git clone https://github.com/sonictriplex/genshin-expedition-tracker.git
 cd genshin-expedition-tracker
 ```
 
-### Charakter-Icons herunterladen (optional)
-Führe das beiliegende Skript aus, um die 93 Charakter-Icons von Fandom herunterzuladen:
+### Download Character Icons (optional)
+Run the included script to download the 93 character icons from Fandom:
 ```bash
 python download_genshin_icons.py
 ```
 
-### Programm starten
+### Start the Program
 ```bash
 python main.py
 ```
 
-## Nutzung
-1. Klicke auf **„+ Start New Expedition“**, um eine neue Expedition zu erstellen.
-2. Wähle einen Charakter, eine Region, eine Ressource und eine Dauer aus.
-3. Der Ring-Timer zeigt den verbleibenden Countdown an.
-4. Sobald eine Expedition abgeschlossen ist, erscheint eine Desktop-Benachrichtigung (falls `plyer` installiert ist).
-5. Klicke auf **„Claim Reward“** oder auf **„Claim All Ready“** im Operations HQ, um die Belohnung einzusammeln.
-6. Die Daten werden automatisch gespeichert und beim nächsten Start wiederhergestellt.
+## Usage
+1. Click **„+ Start New Expedition“** to create a new expedition.
+2. Select a character, region, resource, and duration.
+3. The ring timer shows the remaining countdown.
+4. Once an expedition is completed, a desktop notification appears (if `plyer` is installed).
+5. Click **„Claim Reward“** or **„Claim All Ready“** in the Operations HQ to collect the reward.
+6. Data is automatically saved and restored on next launch.
 
-## Projektstruktur
+## Project Structure
 ```
 genshin-expedition-tracker/
 ├── assets/
-│   └── characters/          # Charakter-Icons (optional)
-├── main.py                  # Hauptprogramm
-├── download_genshin_icons.py # Skript zum Herunterladen der Icons
-├── expeditions.json         # Automatisch erstellte Speicherdatei
-└── README.md                # Diese Datei
+│   └── characters/          # Character icons (optional)
+├── main.py                  # Main program
+├── download_genshin_icons.py # Script to download icons
+├── expeditions.json         # Auto‑created save file
+└── README.md                # This file
 ```
 
-## Lizenz
-Dieses Projekt ist unter der MIT-Lizenz lizenziert.
+## License
+This project is licensed under the MIT License.
