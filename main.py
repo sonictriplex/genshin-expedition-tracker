@@ -219,6 +219,7 @@ class ExpeditionCard(QFrame):
 
         self.btn_action = QPushButton("Running")
         self.btn_action.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_action.clicked.connect(self.on_action_click)  # Nur ausführen, wenn "Claim Reward"
         card_layout.addWidget(self.btn_action)
 
         shadow = QGraphicsDropShadowEffect(self)
@@ -230,6 +231,11 @@ class ExpeditionCard(QFrame):
 
         self.style_card(active=True)
         self.update_time()
+
+    def on_action_click(self):
+        # Nur auflösen, wenn die Expedition beendet ist ("Claim Reward")
+        if self.get_remaining_seconds() <= 0:
+            self.delete_click()
 
     def delete_click(self):
         if self.on_delete_callback:
@@ -290,6 +296,8 @@ class ExpeditionCard(QFrame):
             if not self.notified:
                 self.notified = True
                 return True
+        else:
+            self.btn_action.setText("Running")
         return False
 
     def to_dict(self):
