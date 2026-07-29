@@ -568,7 +568,6 @@ class InlineAddDialog(QFrame):
         form_layout.addRow("Region:", self.combo_region)
 
         self.combo_resource = QComboBox()
-        self.combo_resource.setEditable(True)
         self.combo_resource.addItems(RESOURCES)
         form_layout.addRow("Resource:", self.combo_resource)
 
