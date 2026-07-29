@@ -2,6 +2,7 @@ package com.mediamatrix.genshintracker
 
 import android.Manifest
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -59,6 +60,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // --- Ausrichtung sperren: Portrait auf Smartphones, flexibel auf Tablets ---
+        val isTablet = resources.configuration.smallestScreenWidthDp >= 600
+        if (!isTablet) {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
 
         // 1. Notification-Channel für Benachrichtigungen anlegen
         NotificationHelper.createNotificationChannel(this)
