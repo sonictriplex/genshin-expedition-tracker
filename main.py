@@ -685,6 +685,7 @@ class GenshinTrackerWindow(QMainWindow):
         self.load_expeditions()
         self.update_add_button_state()
 
+        self.setMinimumSize(1500, 975)
         self.resize(1500, 975)
 
     def update_add_button_state(self):
