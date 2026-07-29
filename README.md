@@ -80,7 +80,7 @@ python main.py
 6. Data is automatically saved and restored on next launch.
 
 
-Screenshot:
+#### Screenshot:
 
 ![Screenshot Linux App](./assets/GenshinTrackerLinux.png)
 
@@ -94,7 +94,7 @@ Screenshot:
 7. Tap the gear icon next to **RESIN COUNTER** to manually adjust resin.
 
 
-Screenshot:
+#### Screenshot:
 
 <img src="./assets/GenshinTrackerAndroid.jpg" alt="Screenshot Android App" width="400">
 
