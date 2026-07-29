@@ -90,7 +90,7 @@ python main.py
 6. Use the **Operations HQ** card to see the next arrival, daily reset, and resin counter.
 7. Tap the gear icon next to **RESIN COUNTER** to manually adjust resin.
 
-![Screenshot Android App](./assets/GenshinTrackerAndroid.jpg)
+<img src="./assets/GenshinTrackerAndroid.jpg" alt="Screenshot Android App" width="400">
 
 ## Project Structure
 
