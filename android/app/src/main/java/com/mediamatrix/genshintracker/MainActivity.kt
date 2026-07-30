@@ -49,28 +49,47 @@ val BgDark = Color(0xFF1A1C24)
 val CardBg = Color(0xFF252833)
 val BoxDark = Color(0xFF12141C)
 
+// --- Bonus-Zuordnung: Charakter zu Heimatregion (-25% Zeitersparnis) ---
+val TIME_REDUCTION_BONUS = mapOf(
+    "Bennett" to "Mondstadt",
+    "Fischl" to "Mondstadt",
+    "Chongyun" to "Liyue",
+    "Keqing" to "Liyue",
+    "Shenhe" to "Liyue",
+    "Yelan" to "Liyue",
+    "Kujou Sara" to "Inazuma"
+)
+
+// --- Expeditionsdauern ---
+val DURATIONS_STANDARD = listOf(
+    "4 Hours" to 4,
+    "8 Hours" to 8,
+    "12 Hours" to 12,
+    "20 Hours (Standard)" to 20
+)
+
+val DURATIONS_BONUS = listOf(
+    "3 Hours (Bonus 4h)" to 3,
+    "6 Hours (Bonus 8h)" to 6,
+    "9 Hours (Bonus 12h)" to 9,
+    "15 Hours (Bonus 20h)" to 15
+)
+
 class MainActivity : ComponentActivity() {
 
-    // Launcher zur Abfrage der Benachrichtigungs-Berechtigung (Android 13+)
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        // Berechtigung erteilt/abgelehnt
-    }
+    ) { _ -> }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // --- Ausrichtung sperren: Portrait auf Smartphones, flexibel auf Tablets ---
         val isTablet = resources.configuration.smallestScreenWidthDp >= 600
         if (!isTablet) {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
-        // 1. Notification-Channel für Benachrichtigungen anlegen
         NotificationHelper.createNotificationChannel(this)
-
-        // 2. Rechte abfragen (Android 13+)
         checkAndRequestNotificationPermission()
 
         setContent {
@@ -102,7 +121,6 @@ class MainActivity : ComponentActivity() {
 fun MainScreen() {
     val context = LocalContext.current
 
-    // Zustand beim Start aus SharedPreferences laden
     var activeExpeditions by remember { mutableStateOf(loadExpeditions(context)) }
     var currentResin by remember { mutableIntStateOf(loadResin(context)) }
     var lastResinUpdate by remember { mutableLongStateOf(loadLastResinUpdate(context)) }
@@ -111,17 +129,14 @@ fun MainScreen() {
     var showResinDialog by remember { mutableStateOf(false) }
     val maxResin = 200
 
-    // Automatisch Speichern, sobald sich Expeditionen ändern
     LaunchedEffect(activeExpeditions) {
         saveExpeditions(context, activeExpeditions)
     }
 
-    // Automatisch Speichern, sobald sich Harz ändert
     LaunchedEffect(currentResin, lastResinUpdate) {
         saveResinData(context, currentResin, lastResinUpdate)
     }
 
-    // 1-Sekunden Ticker für Timer-Updates & Harz-Regeneration
     LaunchedEffect(Unit) {
         while (true) {
             delay(1000)
@@ -141,7 +156,6 @@ fun MainScreen() {
             .statusBarsPadding()
             .padding(16.dp)
     ) {
-        // --- Header Text ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -157,7 +171,6 @@ fun MainScreen() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // --- Start New Expedition Button ---
         val limitReached = activeExpeditions.size >= 5
         Button(
             onClick = { if (!limitReached) showAddDialog = true },
@@ -185,7 +198,6 @@ fun MainScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- Grid Layout (Kacheln) ---
         LazyVerticalGrid(
             columns = GridCells.Fixed(1),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -217,7 +229,6 @@ fun MainScreen() {
         }
     }
 
-    // --- Overlay Dialog: Neue Expedition ---
     if (showAddDialog) {
         AddExpeditionDialog(
             onDismiss = { showAddDialog = false },
@@ -232,12 +243,11 @@ fun MainScreen() {
                 )
                 activeExpeditions = activeExpeditions + newExp
 
-                // WorkManager Benachrichtigung für diesen Timer einplanen
                 scheduleExpeditionNotification(
                     context = context,
                     charName = charName,
                     location = location,
-                    durationInHours = hours.toLong()
+                    delaySeconds = totalSec
                 )
 
                 showAddDialog = false
@@ -245,7 +255,6 @@ fun MainScreen() {
         )
     }
 
-    // --- Overlay Dialog: Resin anpassen ---
     if (showResinDialog) {
         AdjustResinDialog(
             currentResin = currentResin,
@@ -393,13 +402,12 @@ fun OperationsHQCard(
 }
 
 // =========================================================
-// UI Komponente: Expeditions-Karte (GEFIXT)
+// UI Komponente: Expeditions-Karte
 // =========================================================
 @Composable
 fun ExpeditionCard(expedition: Expedition, onDelete: (Expedition) -> Unit) {
     var currentTime by remember { mutableLongStateOf(System.currentTimeMillis() / 1000) }
 
-    // Sekündlicher Ticker
     LaunchedEffect(Unit) {
         while (true) {
             delay(1000)
@@ -407,7 +415,6 @@ fun ExpeditionCard(expedition: Expedition, onDelete: (Expedition) -> Unit) {
         }
     }
 
-    // FIX: Restzeit direkt über 'currentTime' berechnen, damit Compose neu rendert!
     val rem = (expedition.endTimestampEpochSec - currentTime).coerceAtLeast(0)
     val isComplete = rem <= 0
     val activeColor = if (isComplete) CoreAmber else CoreCyan
@@ -501,7 +508,7 @@ fun ExpeditionCard(expedition: Expedition, onDelete: (Expedition) -> Unit) {
 }
 
 // =========================================================
-// Dialog: Neue Expedition hinzufügen
+// Dialog: Neue Expedition hinzufügen (mit dynamischer Bonuslogik)
 // =========================================================
 @Composable
 fun AddExpeditionDialog(onDismiss: () -> Unit, onSubmit: (String, String, Int) -> Unit) {
@@ -510,26 +517,25 @@ fun AddExpeditionDialog(onDismiss: () -> Unit, onSubmit: (String, String, Int) -
     var selectedRegion by remember { mutableStateOf(REGIONS.first()) }
     var selectedResource by remember { mutableStateOf(RESOURCES.first()) }
 
-    val durationOptions = listOf(
-        "4 Hours" to 4,
-        "8 Hours" to 8,
-        "12 Hours" to 12,
-        "16 Hours (Bonus)" to 16,
-        "20 Hours (Standard)" to 20
-    )
+    // Prüfen, ob der Charakter in seiner Heimatregion eingesetzt wird
+    val hasBonus = TIME_REDUCTION_BONUS[selectedChar] == selectedRegion
+    val durationOptions = if (hasBonus) DURATIONS_BONUS else DURATIONS_STANDARD
 
-    var selectedDuration by remember { mutableStateOf(durationOptions.last()) }
+    var selectedIndex by remember { mutableIntStateOf(3) } // Standardmäßig auf das letzte Element (20h bzw. 15h)
+
+    // Falls sich der Status ändert, sicherstellen dass der Index im Bereich liegt
+    LaunchedEffect(hasBonus) {
+        if (selectedIndex >= durationOptions.size) {
+            selectedIndex = durationOptions.size - 1
+        }
+    }
+
+    val selectedDuration = durationOptions[selectedIndex.coerceIn(durationOptions.indices)]
 
     var charExpanded by remember { mutableStateOf(false) }
     var regionExpanded by remember { mutableStateOf(false) }
     var resourceExpanded by remember { mutableStateOf(false) }
     var durationExpanded by remember { mutableStateOf(false) }
-
-    LaunchedEffect(selectedChar) {
-        val info = CHARACTERS[selectedChar]
-        val targetHours = if (info?.hasBonus == true) 16 else 20
-        selectedDuration = durationOptions.firstOrNull { it.second == targetHours } ?: durationOptions.last()
-    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -614,17 +620,21 @@ fun AddExpeditionDialog(onDismiss: () -> Unit, onSubmit: (String, String, Int) -
                         onClick = { durationExpanded = true },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(selectedDuration.first, color = CoreAmber, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = selectedDuration.first,
+                            color = if (hasBonus) CoreAmber else CoreCyan,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                     DropdownMenu(
                         expanded = durationExpanded,
                         onDismissRequest = { durationExpanded = false }
                     ) {
-                        durationOptions.forEach { option ->
+                        durationOptions.forEachIndexed { index, option ->
                             DropdownMenuItem(
                                 text = { Text(option.first) },
                                 onClick = {
-                                    selectedDuration = option
+                                    selectedIndex = index
                                     durationExpanded = false
                                 }
                             )
@@ -649,7 +659,7 @@ fun AddExpeditionDialog(onDismiss: () -> Unit, onSubmit: (String, String, Int) -
 }
 
 // =========================================================
-// Dialog: Harz bearbeiten (mit lesbarer Schrift)
+// Dialog: Harz bearbeiten
 // =========================================================
 @Composable
 fun AdjustResinDialog(currentResin: Int, maxResin: Int, onDismiss: () -> Unit, onConfirm: (Int) -> Unit) {
@@ -704,7 +714,7 @@ fun scheduleExpeditionNotification(
     context: Context,
     charName: String,
     location: String,
-    durationInHours: Long
+    delaySeconds: Long
 ) {
     val inputData = workDataOf(
         "char_name" to charName,
@@ -712,7 +722,7 @@ fun scheduleExpeditionNotification(
     )
 
     val workRequest = OneTimeWorkRequestBuilder<ExpeditionWorker>()
-        .setInitialDelay(durationInHours, TimeUnit.HOURS)
+        .setInitialDelay(delaySeconds, TimeUnit.SECONDS)
         .setInputData(inputData)
         .build()
 
