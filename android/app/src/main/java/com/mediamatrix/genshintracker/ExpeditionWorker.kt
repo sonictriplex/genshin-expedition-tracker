@@ -15,8 +15,8 @@ class ExpeditionWorker(
 
         NotificationHelper.showNotification(
             context = context,
-            title = "Expedition beendet! 🎉",
-            message = "$charName ist von der Expedition ($location) zurückgekehrt.",
+            title = "Expedition complete! 🎉",
+            message = "$charName has returned from the expedition ($location).",
             notificationId = System.currentTimeMillis().toInt()
         )
 
