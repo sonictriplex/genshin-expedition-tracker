@@ -37,18 +37,19 @@ CORE_COLOR_AMBER = "#ffaa00"
 BG_COLOR_DARK = "#1a1c24"
 CARD_BG_COLOR = "#252833"
 
+# Charaktere
 CHARACTERS = {
     "Albedo": False, "Alhaitham": False, "Aloy": False, "Amber": False,
     "Arataki Itto": False, "Arlecchino": False, "Barbara": False, "Beidou": False,
-    "Bennett": True, "Candace": False, "Charlotte": False, "Chasca": False,
-    "Chevreuse": False, "Chiori": False, "Chongyun": True, "Citlali": False,
+    "Bennett": False, "Candace": False, "Charlotte": False, "Chasca": False,
+    "Chevreuse": False, "Chiori": False, "Chongyun": False, "Citlali": False,
     "Clorinde": False, "Collei": False, "Cyno": False, "Dehya": False,
     "Diluc": False, "Diona": False, "Dori": False, "Emilie": False,
-    "Eula": False, "Faruzan": False, "Fischl": True, "Freminet": False,
+    "Eula": False, "Faruzan": False, "Fischl": False, "Freminet": False,
     "Furina": False, "Gaming": False, "Ganyu": False, "Gorou": False,
     "Hu Tao": False, "Iansan": False, "Jean": False, "Kachina": False,
     "Kaedehara Kazuha": False, "Kaeya": False, "Kamisato Ayaka": False,
-    "Kamisato Ayato": False, "Kaveh": False, "Keqing": True, "Kinich": False,
+    "Kamisato Ayato": False, "Kaveh": False, "Keqing": False, "Kinich": False,
     "Kirara": False, "Klee": False, "Kujou Sara": False, "Kuki Shinobu": False,
     "Lan Yan": False, "Lanyan": False, "Layla": False, "Lisa": False,
     "Lynette": False, "Lyney": False, "Mavuika": False, "Mika": False,
@@ -56,12 +57,21 @@ CHARACTERS = {
     "Neuvillette": False, "Nilou": False, "Ningguang": False, "Noelle": False,
     "Ororon": False, "Qiqi": False, "Raiden Shogun": False, "Razor": False,
     "Rosaria": False, "Sangonomiya Kokomi": False, "Sayu": False, "Sethos": False,
-    "Shenhe": True, "Shikanoin Heizou": False, "Sigewinne": False, "Sucrose": False,
+    "Shenhe": False, "Shikanoin Heizou": False, "Sigewinne": False, "Sucrose": False,
     "Thoma": False, "Tighnari": False, "Traveller": False, "Venti": False,
     "Wanderer": False, "Wriothesley": False, "Xiangling": False, "Xianyun": False,
     "Xiao": False, "Xilonen": False, "Xingqiu": False, "Xinyan": False,
     "Yae Miko": False, "Yanfei": False, "Yao Yao": False, "Yelan": False,
     "Yoimiya": False, "Yun Jin": False, "Zhongli": False,
+}
+
+# Charaktere mit 25% Zeitersparnis und ihre Heimatregion
+TIME_REDUCTION_BONUS = {
+    "Bennett": "Mondstadt",
+    "Fischl": "Mondstadt",
+    "Chongyun": "Liyue",
+    "Keqing": "Liyue",
+    "Kujou Sara": "Inazuma",
 }
 
 REGIONS = ["Mondstadt", "Liyue", "Inazuma", "Sumeru", "Fontaine", "Natlan"]
@@ -219,7 +229,7 @@ class ExpeditionCard(QFrame):
 
         self.btn_action = QPushButton("Running")
         self.btn_action.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_action.clicked.connect(self.on_action_click)  # Nur ausführen, wenn "Claim Reward"
+        self.btn_action.clicked.connect(self.on_action_click)
         card_layout.addWidget(self.btn_action)
 
         shadow = QGraphicsDropShadowEffect(self)
@@ -233,7 +243,6 @@ class ExpeditionCard(QFrame):
         self.update_time()
 
     def on_action_click(self):
-        # Nur auflösen, wenn die Expedition beendet ist ("Claim Reward")
         if self.get_remaining_seconds() <= 0:
             self.delete_click()
 
@@ -497,9 +506,25 @@ class OperationsHQCard(QFrame):
 
 
 # =========================================================
-# Inline Overlay-Dialog
+# Inline Overlay-Dialog (OPTION A IMPLEMENTIERUNG)
 # =========================================================
 class InlineAddDialog(QFrame):
+
+    # Standard-Zeiten ohne Bonus
+    DURATIONS_STANDARD = [
+        ("4 Hours", 4),
+        ("8 Hours", 8),
+        ("12 Hours", 12),
+        ("20 Hours (Standard)", 20),
+    ]
+
+    # Reduzierte Zeiten mit 25% Ersparnis für alle Stufen
+    DURATIONS_BONUS = [
+        ("3 Hours (Bonus 4h)", 3),
+        ("6 Hours (Bonus 8h)", 6),
+        ("9 Hours (Bonus 12h)", 9),
+        ("15 Hours (Bonus 20h)", 15),
+    ]
 
     def __init__(self, parent=None, on_submit=None, on_cancel=None):
         super().__init__(parent)
@@ -560,7 +585,6 @@ class InlineAddDialog(QFrame):
 
         self.combo_char = QComboBox()
         self.combo_char.addItems(sorted(CHARACTERS.keys()))
-        self.combo_char.currentTextChanged.connect(self.on_char_changed)
         form_layout.addRow("Character:", self.combo_char)
 
         self.combo_region = QComboBox()
@@ -572,14 +596,11 @@ class InlineAddDialog(QFrame):
         form_layout.addRow("Resource:", self.combo_resource)
 
         self.combo_duration = QComboBox()
-        self.combo_duration.addItems([
-            "4 Hours",
-            "8 Hours",
-            "12 Hours",
-            "16 Hours (Bonus)",
-            "20 Hours (Standard)",
-        ])
         form_layout.addRow("Duration:", self.combo_duration)
+
+        # Bei Änderungen an Charakter oder Region wird der Bonus-Status neu berechnet
+        self.combo_char.currentTextChanged.connect(self.update_bonus_state)
+        self.combo_region.currentTextChanged.connect(self.update_bonus_state)
 
         layout.addLayout(form_layout)
         layout.addStretch()
@@ -601,18 +622,40 @@ class InlineAddDialog(QFrame):
 
         layout.addLayout(btn_layout)
 
-        self.on_char_changed(self.combo_char.currentText())
+        # Erstmaliges Befüllen der Duration-ComboBox
+        self.update_bonus_state()
 
-    def on_char_changed(self, char_name):
-        has_bonus = CHARACTERS.get(char_name, False)
-        if has_bonus:
-            self.combo_duration.setCurrentIndex(3)
-        else:
-            self.combo_duration.setCurrentIndex(4)
+    def update_bonus_state(self):
+        selected_char = self.combo_char.currentText()
+        selected_region = self.combo_region.currentText()
+
+        # Aktuellen Index merken, um ihn nach dem Update beizubehalten
+        current_index = max(0, self.combo_duration.currentIndex())
+
+        # Prüfe ob Charakter für die ausgewählte Region den 25% Zeitbonus besitzt
+        bonus_region = TIME_REDUCTION_BONUS.get(selected_char)
+        has_bonus = (bonus_region is not None and bonus_region == selected_region)
+
+        # ComboBox-Signale während der Erneuerung blockieren
+        self.combo_duration.blockSignals(True)
+        self.combo_duration.clear()
+
+        options = self.DURATIONS_BONUS if has_bonus else self.DURATIONS_STANDARD
+        for label, hours in options:
+            self.combo_duration.addItem(label, userData=hours)
+
+        # Vorherigen Index wiederherstellen (oder letztes Element)
+        target_index = current_index if current_index < len(options) else len(options) - 1
+        self.combo_duration.setCurrentIndex(target_index)
+        self.combo_duration.blockSignals(False)
 
     def submit_click(self):
-        duration_text = self.combo_duration.currentText()
-        hours = int(duration_text.split()[0])
+        # Stunden direkt aus den userData des gewählten Items lesen
+        hours = self.combo_duration.currentData()
+        if hours is None:
+            # Fallback falls currentData einmal fehlschlägt
+            hours = int(self.combo_duration.currentText().split()[0])
+
         region = self.combo_region.currentText()
         detail = self.combo_resource.currentText().strip()
         location = f"{region} ({detail})" if detail else region
