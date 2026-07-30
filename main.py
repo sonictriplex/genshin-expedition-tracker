@@ -27,15 +27,62 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-# --- Pfade & Farben ---
+# --- Pfade & Standardfarben ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets", "characters")
 SAVE_FILE = os.path.join(BASE_DIR, "expeditions.json")
 
-CORE_COLOR_CYAN = "#38e3e3"
-CORE_COLOR_AMBER = "#ffaa00"
-BG_COLOR_DARK = "#1a1c24"
-CARD_BG_COLOR = "#252833"
+# Regionales Theme-System für Teyvat
+REGION_THEMES = {
+    "Mondstadt (Anemo)": {
+        "cyan": "#38e3e3",
+        "amber": "#ffaa00",
+        "bg_dark": "#1a1c24",
+        "card_bg": "#252833",
+    },
+    "Liyue (Geo)": {
+        "cyan": "#e6a000",
+        "amber": "#ffd266",
+        "bg_dark": "#221d14",
+        "card_bg": "#30291d",
+    },
+    "Inazuma (Electro)": {
+        "cyan": "#a855f7",
+        "amber": "#f0abfc",
+        "bg_dark": "#1a1325",
+        "card_bg": "#251b36",
+    },
+    "Sumeru (Dendro)": {
+        "cyan": "#22c55e",
+        "amber": "#facc15",
+        "bg_dark": "#122017",
+        "card_bg": "#1a2e21",
+    },
+    "Fontaine (Hydro)": {
+        "cyan": "#38bdf8",
+        "amber": "#f472b6",
+        "bg_dark": "#111c28",
+        "card_bg": "#182838",
+    },
+    "Natlan (Pyro)": {
+        "cyan": "#ef4444",
+        "amber": "#fbbf24",
+        "bg_dark": "#241313",
+        "card_bg": "#331c1c",
+    },
+    "Snezhnaya (Cryo)": {
+        "cyan": "#99f6e4",
+        "amber": "#a5f3fc",
+        "bg_dark": "#121d24",
+        "card_bg": "#1a2933",
+    },
+}
+
+# Aktuell aktive Farb-Variablen
+CORE_COLOR_CYAN = REGION_THEMES["Mondstadt (Anemo)"]["cyan"]
+CORE_COLOR_AMBER = REGION_THEMES["Mondstadt (Anemo)"]["amber"]
+BG_COLOR_DARK = REGION_THEMES["Mondstadt (Anemo)"]["bg_dark"]
+CARD_BG_COLOR = REGION_THEMES["Mondstadt (Anemo)"]["card_bg"]
 
 # Charaktere als einfache Liste
 CHARACTERS = [
@@ -206,16 +253,16 @@ class ExpeditionCard(QFrame):
 
         self.lbl_loc = QLabel(f"📍 {location}")
         self.lbl_loc.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lbl_loc.setStyleSheet("""
-            QLabel {
+        self.lbl_loc.setStyleSheet(f"""
+            QLabel {{
                 background-color: rgba(26, 28, 36, 220);
-                color: #38e3e3;
+                color: {CORE_COLOR_CYAN};
                 border: 1px solid #3d4254;
                 border-radius: 8px;
                 padding: 4px 10px;
                 font-size: 11px;
                 font-weight: bold;
-            }
+            }}
         """)
         card_layout.addWidget(self.lbl_loc)
 
@@ -284,6 +331,18 @@ class ExpeditionCard(QFrame):
             }}
         """)
 
+        self.lbl_loc.setStyleSheet(f"""
+            QLabel {{
+                background-color: rgba(26, 28, 36, 220);
+                color: {CORE_COLOR_CYAN};
+                border: 1px solid #3d4254;
+                border-radius: 8px;
+                padding: 4px 10px;
+                font-size: 11px;
+                font-weight: bold;
+            }}
+        """)
+
     def get_remaining_seconds(self):
         return int(self.end_timestamp - time.time())
 
@@ -327,26 +386,7 @@ class OperationsHQCard(QFrame):
         self.last_resin_update = time.time()
 
         self.setObjectName("operations_hq_card")
-        self.setStyleSheet(f"""
-            QFrame#operations_hq_card {{
-                background-color: {CARD_BG_COLOR};
-                border-radius: 12px;
-                border: 1px solid #333847;
-            }}
-            QLabel {{ color: #e6e6e6; }}
-            QPushButton {{
-                background-color: #2e323f;
-                border: 1px solid {CORE_COLOR_CYAN};
-                color: {CORE_COLOR_CYAN};
-                border-radius: 6px;
-                padding: 6px;
-                font-weight: bold;
-            }}
-            QPushButton:hover {{
-                background-color: {CORE_COLOR_CYAN};
-                color: {BG_COLOR_DARK};
-            }}
-        """)
+        self.apply_theme_style()
 
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setBlurRadius(12)
@@ -359,11 +399,11 @@ class OperationsHQCard(QFrame):
         layout.setContentsMargins(15, 12, 15, 12)
         layout.setSpacing(6)
 
-        lbl_header = QLabel("OPERATIONS HQ")
-        lbl_header.setStyleSheet(
+        self.lbl_header = QLabel("OPERATIONS HQ")
+        self.lbl_header.setStyleSheet(
             f"font-weight: bold; font-size: 13px; color: {CORE_COLOR_CYAN}; letter-spacing: 1px;"
         )
-        layout.addWidget(lbl_header)
+        layout.addWidget(self.lbl_header)
 
         # Box 1: Next Ready
         box_next = QFrame()
@@ -407,19 +447,19 @@ class OperationsHQCard(QFrame):
         h_resin_hdr = QHBoxLayout()
         lbl_resin_title = QLabel("RESIN COUNTER")
         lbl_resin_title.setStyleSheet("font-size: 9px; color: #888; font-weight: bold;")
-        btn_edit_resin = QPushButton("⚙")
-        btn_edit_resin.setFixedSize(16, 16)
-        btn_edit_resin.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_edit_resin.setStyleSheet("""
-            QPushButton {
+        self.btn_edit_resin = QPushButton("⚙")
+        self.btn_edit_resin.setFixedSize(16, 16)
+        self.btn_edit_resin.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_edit_resin.setStyleSheet(f"""
+            QPushButton {{
                 background: transparent; border: none; color: #aaa; font-size: 10px; padding: 0;
-            }
-            QPushButton:hover { color: #38e3e3; }
+            }}
+            QPushButton:hover {{ color: {CORE_COLOR_CYAN}; }}
         """)
-        btn_edit_resin.clicked.connect(self.edit_resin)
+        self.btn_edit_resin.clicked.connect(self.edit_resin)
         h_resin_hdr.addWidget(lbl_resin_title)
         h_resin_hdr.addStretch()
-        h_resin_hdr.addWidget(btn_edit_resin)
+        h_resin_hdr.addWidget(self.btn_edit_resin)
 
         self.lbl_resin_val = QLabel("120 / 200")
         self.lbl_resin_val.setStyleSheet("font-size: 10px; font-weight: bold; color: white;")
@@ -436,6 +476,39 @@ class OperationsHQCard(QFrame):
         layout.addWidget(self.btn_claim_all)
 
         self.update_info()
+
+    def apply_theme_style(self):
+        self.setStyleSheet(f"""
+            QFrame#operations_hq_card {{
+                background-color: {CARD_BG_COLOR};
+                border-radius: 12px;
+                border: 1px solid #333847;
+            }}
+            QLabel {{ color: #e6e6e6; }}
+            QPushButton {{
+                background-color: #2e323f;
+                border: 1px solid {CORE_COLOR_CYAN};
+                color: {CORE_COLOR_CYAN};
+                border-radius: 6px;
+                padding: 6px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {CORE_COLOR_CYAN};
+                color: {BG_COLOR_DARK};
+            }}
+        """)
+        if hasattr(self, "lbl_header"):
+            self.lbl_header.setStyleSheet(
+                f"font-weight: bold; font-size: 13px; color: {CORE_COLOR_CYAN}; letter-spacing: 1px;"
+            )
+        if hasattr(self, "btn_edit_resin"):
+            self.btn_edit_resin.setStyleSheet(f"""
+                QPushButton {{
+                    background: transparent; border: none; color: #aaa; font-size: 10px; padding: 0;
+                }}
+                QPushButton:hover {{ color: {CORE_COLOR_CYAN}; }}
+            """)
 
     def edit_resin(self):
         if self.parent_window:
@@ -551,7 +624,7 @@ class InlineAddDialog(QFrame):
                 color: #1a1c24;
                 border: none;
             }}
-            QPushButton[primary="true"]:hover {{ background-color: #5effff; }}
+            QPushButton[primary="true"]:hover {{ background-color: {CORE_COLOR_CYAN}; }}
         """)
 
         shadow = QGraphicsDropShadowEffect(self)
@@ -689,7 +762,7 @@ class InlineResinDialog(QFrame):
                 color: #1a1c24;
                 border: none;
             }}
-            QPushButton[primary="true"]:hover {{ background-color: #5effff; }}
+            QPushButton[primary="true"]:hover {{ background-color: {CORE_COLOR_CYAN}; }}
         """)
 
         shadow = QGraphicsDropShadowEffect(self)
@@ -750,14 +823,11 @@ class GenshinTrackerWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Genshin Impact Expedition Tracker")
 
+        self.current_theme_name = "Mondstadt (Anemo)"
+
         icon_path = os.path.join(ASSETS_DIR, "traveller.png")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
-
-        self.setStyleSheet(f"""
-            QMainWindow {{ background-color: {BG_COLOR_DARK}; }}
-            QWidget {{ color: #e6e6e6; font-family: 'Segoe UI', sans-serif; }}
-        """)
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -765,18 +835,27 @@ class GenshinTrackerWindow(QMainWindow):
         self.main_layout = QVBoxLayout(self.central_widget)
         self.main_layout.setContentsMargins(16, 16, 16, 16)
 
+        # Header mit Title & Theme Chooser
         header_layout = QHBoxLayout()
         lbl_title = QLabel("Active Expeditions")
         lbl_title.setStyleSheet("font-size: 18px; font-weight: bold; color: white;")
         header_layout.addWidget(lbl_title)
         header_layout.addStretch()
-        self.main_layout.addLayout(header_layout)
 
-        self.btn_start_new = QPushButton()
-        self.btn_start_new.clicked.connect(self.open_add_dialog)
-        self.main_layout.addWidget(self.btn_start_new)
+        lbl_theme = QLabel("Theme:")
+        lbl_theme.setStyleSheet("font-size: 12px; font-weight: bold; color: #aaa;")
+        header_layout.addWidget(lbl_theme)
+
+        self.combo_theme = QComboBox()
+        self.combo_theme.addItems(list(REGION_THEMES.keys()))
+        self.combo_theme.setCurrentText(self.current_theme_name)
+        self.combo_theme.currentTextChanged.connect(self.apply_theme)
+        header_layout.addWidget(self.combo_theme)
+
+        self.main_layout.addLayout(header_layout)
         self.main_layout.addSpacing(10)
 
+        # Cards Grid (nimmt den Hauptplatz ein)
         self.grid_widget = QWidget()
         self.cards_grid = QGridLayout(self.grid_widget)
         self.cards_grid.setContentsMargins(0, 0, 0, 0)
@@ -788,6 +867,12 @@ class GenshinTrackerWindow(QMainWindow):
             self.cards_grid.setRowStretch(row, 1)
 
         self.main_layout.addWidget(self.grid_widget, stretch=1)
+        self.main_layout.addSpacing(10)
+
+        # Start Button (ganz unten platziert)
+        self.btn_start_new = QPushButton()
+        self.btn_start_new.clicked.connect(self.open_add_dialog)
+        self.main_layout.addWidget(self.btn_start_new)
 
         self.active_cards = []
         self.overlay_dialog = None
@@ -799,10 +884,47 @@ class GenshinTrackerWindow(QMainWindow):
         self.update_timer.start(1000)
 
         self.load_expeditions()
+        self.apply_theme(self.current_theme_name)
         self.update_add_button_state()
 
         self.setMinimumSize(1500, 975)
         self.resize(1500, 975)
+
+    def apply_theme(self, theme_name):
+        self.current_theme_name = theme_name
+        theme = REGION_THEMES.get(theme_name, REGION_THEMES["Mondstadt (Anemo)"])
+
+        global CORE_COLOR_CYAN, CORE_COLOR_AMBER, BG_COLOR_DARK, CARD_BG_COLOR
+        CORE_COLOR_CYAN = theme["cyan"]
+        CORE_COLOR_AMBER = theme["amber"]
+        BG_COLOR_DARK = theme["bg_dark"]
+        CARD_BG_COLOR = theme["card_bg"]
+
+        self.setStyleSheet(f"""
+            QMainWindow {{ background-color: {BG_COLOR_DARK}; }}
+            QWidget {{ color: #e6e6e6; font-family: 'Segoe UI', sans-serif; }}
+            QComboBox {{
+                background-color: #1a1c24;
+                color: white;
+                border: 1px solid {CORE_COLOR_CYAN};
+                border-radius: 5px;
+                padding: 4px 8px;
+                font-size: 12px;
+            }}
+        """)
+
+        # HQ Card auffrischen
+        if hasattr(self, "hq_card"):
+            self.hq_card.apply_theme_style()
+            self.hq_card.update_info()
+
+        # Karten auffrischen
+        for card in self.active_cards:
+            card.style_card(active=card.get_remaining_seconds() > 0)
+            card.ring_timer.update()
+
+        self.update_add_button_state()
+        self.save_expeditions()
 
     def update_add_button_state(self):
         count = len(self.active_cards)
@@ -829,7 +951,7 @@ class GenshinTrackerWindow(QMainWindow):
             self.btn_start_new.setCursor(Qt.CursorShape.PointingHandCursor)
             self.btn_start_new.setStyleSheet(f"""
                 QPushButton {{
-                    background-color: #252833;
+                    background-color: {CARD_BG_COLOR};
                     border: 2px dashed #444;
                     border-radius: 8px;
                     padding: 10px;
@@ -956,6 +1078,7 @@ class GenshinTrackerWindow(QMainWindow):
             "expeditions": [card.to_dict() for card in self.active_cards],
             "resin": self.hq_card.current_resin,
             "last_resin_update": self.hq_card.last_resin_update,
+            "theme": self.current_theme_name,
         }
         try:
             with open(SAVE_FILE, "w", encoding="utf-8") as f:
@@ -977,6 +1100,7 @@ class GenshinTrackerWindow(QMainWindow):
                     expeditions = data.get("expeditions", [])
                     self.hq_card.current_resin = data.get("resin", 120)
                     self.hq_card.last_resin_update = data.get("last_resin_update", time.time())
+                    self.current_theme_name = data.get("theme", "Mondstadt (Anemo)")
 
                 for item in expeditions:
                     self.create_card(
@@ -985,6 +1109,8 @@ class GenshinTrackerWindow(QMainWindow):
                         item["total_seconds"],
                         end_timestamp=item["end_timestamp"],
                     )
+                if hasattr(self, "combo_theme"):
+                    self.combo_theme.setCurrentText(self.current_theme_name)
         except Exception as e:
             print(f"Error loading: {e}")
 
