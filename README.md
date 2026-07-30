@@ -1,146 +1,144 @@
 # Genshin Impact Expedition Tracker
 
-A cross‑platform tracker for expeditions in Genshin Impact, available as a **PyQt6 desktop application** and as a **native Android app** built with Jetpack Compose.
+Ein plattformübergreifender Tracker für Expeditionen in Genshin Impact, verfügbar als **PyQt6 Desktop-Anwendung** und als **native Android-App** mit Jetpack Compose.
 
-## Features
+## Funktionen
 
 ### Desktop (PyQt6)
-- **Live Ring Timer:** Circular progress indicators for active expeditions.
-- **Character Bonuses:** Automatically detects characters with 25% time reduction (e.g., Bennett, Fischl, Chongyun, Keqing, Kujou Sara).
-- **Desktop Notifications:** Notifies you via `plyer` when an expedition is completed.
-- **Operations HQ:** Shows the next upcoming expedition, daily server reset (04:00), and a resin counter.
-- **Claim All Ready:** Collect all completed expeditions at once.
-- **Persistence:** Expedition data is automatically saved to `expeditions.json` and restored on next launch.
-- **Character Icons:** Background images of characters are loaded from the `assets/characters/` folder (optional).
+- **Live-Ring-Timer:** Kreisförmige Fortschrittsanzeigen für aktive Expeditionen.
+- **Charakter-Boni:** Erkennt automatisch Charaktere mit 25 % Zeitersparnis (z. B. Bennett, Fischl, Chongyun, Keqing, Kujou Sara).
+- **Desktop-Benachrichtigungen:** Benachrichtigt über `plyer`, wenn eine Expedition abgeschlossen ist.
+- **Operations HQ:** Zeigt die nächste anstehende Expedition, den täglichen Server-Reset (04:00) und einen Harz-Zähler.
+- **Alle einsammeln:** Sammle alle abgeschlossenen Expeditionen auf einmal ein.
+- **Persistenz:** Expeditionsdaten werden automatisch in `expeditions.json` gespeichert und beim nächsten Start wiederhergestellt.
+- **Charakter-Icons:** Hintergrundbilder der Charaktere werden aus dem Ordner `assets/characters/` geladen (optional).
 
 ### Android (Jetpack Compose)
-- **Native UI:** Modern Material 3 design with dark theme.
-- **Expedition Management:** Add, view, and delete expeditions with a clean card layout.
-- **Resin Counter:** Tracks current resin (regenerates 1 every 8 minutes) and shows time until full.
-- **Daily Reset Timer:** Displays time until the next server reset (04:00).
-- **Notifications:** Uses Android’s `WorkManager` to schedule a notification when an expedition finishes.
-- **Persistence:** Expedition and resin data are stored in `SharedPreferences` and restored on next launch.
-- **Character Images:** Dynamically loads character drawables from the app’s resources.
+- **Native UI:** Modernes Material 3 Design mit dunklem Theme.
+- **Expeditionsverwaltung:** Hinzufügen, Anzeigen und Löschen von Expeditionen mit einem übersichtlichen Kartenlayout.
+- **Harz-Zähler:** Zeigt das aktuelle Harz an (regeneriert 1 alle 8 Minuten) und die Zeit bis zur vollen Aufladung.
+- **Täglicher Reset-Timer:** Zeigt die Zeit bis zum nächsten Server-Reset (04:00) an.
+- **Benachrichtigungen:** Verwendet Android’s `WorkManager`, um eine Benachrichtigung zu planen, wenn eine Expedition endet.
+- **Persistenz:** Expeditions- und Harzdaten werden in `SharedPreferences` gespeichert und beim nächsten Start wiederhergestellt.
+- **Charakterbilder:** Lädt dynamisch Charakter-Drawables aus den App-Ressourcen.
 
-## Installation & Startup
+## Installation & Start
 
 ### Desktop (Python)
 
-#### Prerequisites
-- Python 3.8 or higher
-- pip (Python package manager)
+#### Voraussetzungen
+- Python 3.8 oder höher
+- pip (Python-Paketmanager)
 
-#### Install Dependencies
+#### Abhängigkeiten installieren
 ```bash
 pip install PyQt6 plyer
 ```
 
-#### Clone Repository
+#### Repository klonen
 ```bash
 git clone https://github.com/sonictriplex/genshin-expedition-tracker.git
 cd genshin-expedition-tracker
 ```
 
-#### Download Character Icons (optional)
-Run the included script to download the 93 character icons from Fandom:
+#### Charakter-Icons herunterladen (optional)
+Führe das enthaltene Skript aus, um die 93 Charakter-Icons von Fandom herunterzuladen:
 ```bash
 python download_genshin_icons.py
 ```
 
-#### Start the Program
+#### Programm starten
 ```bash
 python main.py
 ```
 
 ### Android
 
-#### Prerequisites
-- Android Studio (latest version recommended)
+#### Voraussetzungen
+- Android Studio (aktuelle Version empfohlen)
 - Android SDK 26+ (minSdk = 26)
-- Gradle 9.5 (included via wrapper)
+- Gradle 9.5 (im Wrapper enthalten)
 
-#### Build & Run
-1. Open the `android/` folder in Android Studio.
-2. Let Gradle sync and download dependencies.
-3. Connect a device or start an emulator (API 26+).
-4. Click **Run** (▶) or execute:
+#### Build & Ausführen
+1. Öffne den Ordner `android/` in Android Studio.
+2. Lass Gradle synchronisieren und die Abhängigkeiten herunterladen.
+3. Verbinde ein Gerät oder starte einen Emulator (API 26+).
+4. Klicke auf **Run** (▶) oder führe aus:
    ```bash
    cd android
    ./gradlew installDebug
    ```
 
-## Usage
+## Verwendung
 
 ### Desktop
-1. Click **„+ Start New Expedition“** to create a new expedition.
-2. Select a character, region, resource, and duration.
-3. The ring timer shows the remaining countdown.
-4. Once an expedition is completed, a desktop notification appears (if `plyer` is installed).
-5. Click **„Claim Reward“** or **„Claim All Ready“** in the Operations HQ to collect the reward.
-6. Data is automatically saved and restored on next launch.
-
+1. Klicke auf **„+ Start New Expedition“**, um eine neue Expedition zu erstellen.
+2. Wähle einen Charakter, eine Region, eine Ressource und eine Dauer aus.
+3. Der Ring-Timer zeigt den verbleibenden Countdown an.
+4. Sobald eine Expedition abgeschlossen ist, erscheint eine Desktop-Benachrichtigung (falls `plyer` installiert ist).
+5. Klicke auf **„Claim Reward“** oder **„Claim All Ready“** im Operations HQ, um die Belohnung einzusammeln.
+6. Die Daten werden automatisch gespeichert und beim nächsten Start wiederhergestellt.
 
 #### Screenshot:
 
 ![Screenshot Linux App](./assets/GenshinTrackerLinux.png)
 
 ### Android
-1. Tap **„+ Start New Expedition“** to open the add dialog.
-2. Choose a character, region, resource, and duration (4/8/12/16/20 hours).
-3. The card shows a live countdown and the character’s image.
-4. When the timer reaches zero, the card displays **„READY!“** and a notification is sent.
-5. Tap **„Claim Reward“** to remove the expedition.
-6. Use the **Operations HQ** card to see the next arrival, daily reset, and resin counter.
-7. Tap the gear icon next to **RESIN COUNTER** to manually adjust resin.
-
+1. Tippe auf **„+ Start New Expedition“**, um den Hinzufügen-Dialog zu öffnen.
+2. Wähle einen Charakter, eine Region, eine Ressource und eine Dauer (4/8/12/16/20 Stunden).
+3. Die Karte zeigt einen Live-Countdown und das Bild des Charakters.
+4. Wenn der Timer Null erreicht, zeigt die Karte **„READY!“** an und eine Benachrichtigung wird gesendet.
+5. Tippe auf **„Claim Reward“**, um die Expedition zu entfernen.
+6. Verwende die **Operations HQ**-Karte, um die nächste Ankunft, den täglichen Reset und den Harz-Zähler zu sehen.
+7. Tippe auf das Zahnrad-Symbol neben **RESIN COUNTER**, um das Harz manuell anzupassen.
 
 #### Screenshot:
 
 <img src="./assets/GenshinTrackerAndroid.jpg" alt="Screenshot Android App" width="400">
 
-## Project Structure
+## Projektstruktur
 
 ```
 genshin-expedition-tracker/
 ├── assets/
-│   └── characters/          # Character icons (optional, desktop)
-├── main.py                  # Desktop main program (PyQt6)
-├── download_genshin_icons.py # Script to download icons
-├── expeditions.json         # Auto‑created save file (desktop)
-├── android/                 # Android project root
+│   └── characters/          # Charakter-Icons (optional, Desktop)
+├── main.py                  # Desktop-Hauptprogramm (PyQt6)
+├── download_genshin_icons.py # Skript zum Herunterladen der Icons
+├── expeditions.json         # Automatisch erstellte Speicherdatei (Desktop)
+├── android/                 # Android-Projektwurzel
 │   ├── app/
 │   │   ├── src/
 │   │   │   ├── main/
 │   │   │   │   ├── java/com/mediamatrix/genshintracker/
-│   │   │   │   │   ├── MainActivity.kt          # Main activity with Compose UI
-│   │   │   │   │   ├── Expedition.kt            # Data model & character list
-│   │   │   │   │   ├── ExpeditionWorker.kt      # WorkManager worker for notifications
-│   │   │   │   │   ├── NotificationHelper.kt    # Notification channel & helper
-│   │   │   │   │   └── ui/theme/                # Material 3 theme files
+│   │   │   │   │   ├── MainActivity.kt          # Hauptaktivität mit Compose UI
+│   │   │   │   │   ├── Expedition.kt            # Datenmodell & Charakterliste
+│   │   │   │   │   ├── ExpeditionWorker.kt      # WorkManager-Worker für Benachrichtigungen
+│   │   │   │   │   ├── NotificationHelper.kt    # Benachrichtigungskanal & Helfer
+│   │   │   │   │   └── ui/theme/                # Material 3 Theme-Dateien
 │   │   │   │   ├── res/
-│   │   │   │   │   ├── drawable/                # Character images & launcher icons
-│   │   │   │   │   ├── mipmap-*/                # Launcher icons
+│   │   │   │   │   ├── drawable/                # Charakterbilder & Launcher-Icons
+│   │   │   │   │   ├── mipmap-*/                # Launcher-Icons
 │   │   │   │   │   ├── values/                  # strings.xml, colors.xml, themes.xml
-│   │   │   │   │   └── xml/                     # Backup & data extraction rules
+│   │   │   │   │   └── xml/                     # Backup- & Datenextraktionsregeln
 │   │   │   │   └── AndroidManifest.xml
-│   │   │   ├── androidTest/                     # Instrumented tests
-│   │   │   └── test/                            # Unit tests
+│   │   │   ├── androidTest/                     # Instrumentierte Tests
+│   │   │   └── test/                            # Unit-Tests
 │   │   └── build.gradle.kts
-│   ├── build.gradle.kts                         # Top‑level build file
+│   ├── build.gradle.kts                         # Top-Level-Build-Datei
 │   ├── settings.gradle.kts
 │   ├── gradle.properties
 │   ├── gradle/
-│   │   ├── libs.versions.toml                   # Version catalog
-│   │   └── wrapper/                             # Gradle wrapper
+│   │   ├── libs.versions.toml                   # Versionskatalog
+│   │   └── wrapper/                             # Gradle Wrapper
 │   └── gradlew / gradlew.bat
-└── README.md                # This file
+└── README.md                # Diese Datei
 ```
 
-## License & Disclaimer
+## Lizenz & Haftungsausschluss
 
-This project is licensed under the MIT License.
+Dieses Projekt ist unter der MIT-Lizenz lizenziert.
 
-* **Assets & IP:** All character icons, game art, and related materials are the property of **HoYoverse**. 
-* This project is an unofficial, non-commercial fan-made tool created under HoYoverse's Fan-Art Policy. It is not affiliated with, endorsed, or sponsored by HoYoverse.
+* **Assets & IP:** Alle Charakter-Icons, Spielgrafiken und zugehöriges Material sind Eigentum von **HoYoverse**.
+* Dieses Projekt ist ein inoffizielles, nicht-kommerzielles Fan-Tool, das unter der Fan-Art-Richtlinie von HoYoverse erstellt wurde. Es wird nicht von HoYoverse unterstützt, befürwortet oder gesponsert.
 
-* README.md optimized with Aider
+* README.md optimiert mit Aider
