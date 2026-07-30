@@ -1,7 +1,6 @@
 # Genshin Impact Expedition Tracker                                                                                                                 
                                                                                                                                                     
-A cross-platform tracker for expeditions in Genshin Impact, available as a **PyQt6 desktop application** and as a **native Android app** with       
-Jetpack Compose.                                                                                                                                    
+A cross-platform tracker for expeditions in Genshin Impact, available as a **PyQt6 desktop application** and as a **native Android app** with Jetpack Compose.                                                                                                                                    
                                                                                                                                                     
 ## Features                                                                                                                                         
                                                                                                                                                     
@@ -13,8 +12,7 @@ Jetpack Compose.
 - **Claim All:** Collect all completed expeditions at once.                                                                                         
 - **Persistence:** Expedition data is automatically saved in `expeditions.json` and restored on next launch.                                        
 - **Character Icons:** Background images of characters are loaded from the `assets/characters/` folder (optional).                                  
-- **Regional Themes:** Choose between seven Teyvat regions (Mondstadt, Liyue, Inazuma, Sumeru, Fontaine, Natlan, Snezhnaya) that customize the      
-entire color scheme of the app.                                                                                                                     
+- **Regional Themes:** Choose between seven Teyvat regions (Mondstadt, Liyue, Inazuma, Sumeru, Fontaine, Natlan, Snezhnaya) that customize the entire color scheme of the app.                                                                                                                     
                                                                                                                                                     
 ### Android (Jetpack Compose)                                                                                                                       
 - **Native UI:** Modern Material 3 design with dark theme.                                                                                          
@@ -24,8 +22,7 @@ entire color scheme of the app.
 - **Notifications:** Uses Android's `WorkManager` to schedule a notification when an expedition ends.                                               
 - **Persistence:** Expedition and resin data are stored in `SharedPreferences` and restored on next launch.                                         
 - **Character Images:** Dynamically loads character drawables from app resources.                                                                   
-- **Regional Themes:** Choose between seven Teyvat regions (Mondstadt, Liyue, Inazuma, Sumeru, Fontaine, Natlan, Snezhnaya) that customize the      
-entire color scheme of the app.                                                                                                                     
+- **Regional Themes:** Choose between seven Teyvat regions (Mondstadt, Liyue, Inazuma, Sumeru, Fontaine, Natlan, Snezhnaya) that customize the entire color scheme of the app.                                                                                                                     
                                                                                                                                                     
 ## Installation & Getting Started                                                                                                                   
                                                                                                                                                     
@@ -146,7 +143,5 @@ genshin-expedition-tracker/
 This project is licensed under the MIT License.                                                                                                     
                                                                                                                                                     
 * **Assets & IP:** All character icons, game graphics, and related material are property of **HoYoverse**.                                          
-* This project is an unofficial, non‑commercial fan tool created under HoYoverse's Fan‑Art Policy. It is not endorsed, supported, or sponsored by   
-HoYoverse.                                                                                                                                          
-                                                                                                                                                    
+* This project is an unofficial, non‑commercial fan tool created under HoYoverse's Fan‑Art Policy. It is not endorsed, supported, or sponsored by HoYoverse.                                                     *
 * README.md optimized with Aider
