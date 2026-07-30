@@ -143,5 +143,5 @@ genshin-expedition-tracker/
 This project is licensed under the MIT License.                                                                                                     
                                                                                                                                                     
 * **Assets & IP:** All character icons, game graphics, and related material are property of **HoYoverse**.                                          
-* This project is an unofficial, non‑commercial fan tool created under HoYoverse's Fan‑Art Policy. It is not endorsed, supported, or sponsored by HoYoverse.                                                     *
+* This project is an unofficial, non‑commercial fan tool created under HoYoverse's Fan‑Art Policy. It is not endorsed, supported, or sponsored by HoYoverse.
 * README.md optimized with Aider
