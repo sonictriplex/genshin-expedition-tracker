@@ -40,7 +40,7 @@ CARD_BG_COLOR = "#252833"
 # Charaktere als einfache Liste
 CHARACTERS = [
     "Albedo", "Alhaitham", "Aloy", "Amber", "Arataki Itto", "Arlecchino",
-    "Barbara", "Beidou", "Bennett", "Candace", "Charlotte", "Chasca",
+    "Baizhu", "Barbara", "Beidou", "Bennett", "Candace", "Charlotte", "Chasca",
     "Chevreuse", "Chiori", "Chongyun", "Citlali", "Clorinde", "Collei",
     "Cyno", "Dehya", "Diluc", "Diona", "Dori", "Emilie", "Eula", "Faruzan",
     "Fischl", "Freminet", "Furina", "Gaming", "Ganyu", "Gorou", "Hu Tao",
@@ -51,9 +51,9 @@ CHARACTERS = [
     "Navia", "Neuvillette", "Nilou", "Ningguang", "Noelle", "Ororon",
     "Qiqi", "Raiden Shogun", "Razor", "Rosaria", "Sangonomiya Kokomi",
     "Sayu", "Sethos", "Shenhe", "Shikanoin Heizou", "Sigewinne", "Sucrose",
-    "Thoma", "Tighnari", "Traveller", "Venti", "Wanderer", "Wriothesley",
+    "Tartaglia", "Thoma", "Tighnari", "Traveller", "Venti", "Wanderer", "Wriothesley",
     "Xiangling", "Xianyun", "Xiao", "Xilonen", "Xingqiu", "Xinyan",
-    "Yae Miko", "Yanfei", "Yao Yao", "Yelan", "Yoimiya", "Yun Jin", "Zhongli",
+    "Yae Miko", "Yanfei", "Yaoyao", "Yelan", "Yoimiya", "Yun Jin", "Zhongli",
 ]
 
 # Charaktere mit 25% Zeitersparnis und ihre Heimatregion
@@ -161,7 +161,7 @@ class ExpeditionCard(QFrame):
         )
         self.on_delete_callback = on_delete
         self.notified = False
-        self.is_active = True  # Optimierung: Status-Flag für Stylesheet-Rendering
+        self.is_active = True
 
         self.setObjectName("expedition_card_widget")
 
@@ -293,7 +293,6 @@ class ExpeditionCard(QFrame):
 
         if rem <= 0:
             self.btn_action.setText("Claim Reward")
-            # Optimierung: Style nur einmalig bei Fertigstellung anpassen
             if self.is_active:
                 self.is_active = False
                 self.style_card(active=False)
@@ -321,7 +320,9 @@ class ExpeditionCard(QFrame):
 class OperationsHQCard(QFrame):
 
     def __init__(self, parent_window=None):
-        super().__init__(parent_window)
+        # FIX: super().__init__() OHNE parent_window aufrufen,
+        # damit das Grid die volle Kontrolle über die Position übernimmt!
+        super().__init__()
         self.parent_window = parent_window
         self.current_resin = 120
         self.max_resin = 200
@@ -633,7 +634,6 @@ class InlineAddDialog(QFrame):
         for label, hours in options:
             self.combo_duration.addItem(label, userData=hours)
 
-        # UX-Optimierung: Standardmäßig auf die längste Option (20h / 15h) setzen
         self.combo_duration.setCurrentIndex(len(options) - 1)
         self.combo_duration.blockSignals(False)
 
@@ -777,9 +777,9 @@ class GenshinTrackerWindow(QMainWindow):
             on_submit=self.on_dialog_submit,
             on_cancel=self.close_overlay,
         )
-        self.position_overlay()
         self.overlay_dialog.show()
         self.overlay_dialog.raise_()
+        self.position_overlay()
 
     def on_dialog_submit(self, char, loc, hours):
         self.create_card(char, loc, hours * 3600)
@@ -843,7 +843,6 @@ class GenshinTrackerWindow(QMainWindow):
         self.hq_card.update_info()
 
     def save_expeditions(self):
-        # Speichert sowohl Expeditionen als auch den aktuellen Resin-Stand
         data = {
             "expeditions": [card.to_dict() for card in self.active_cards],
             "resin": self.hq_card.current_resin,
@@ -863,7 +862,6 @@ class GenshinTrackerWindow(QMainWindow):
             with open(SAVE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
-                # Abwärtskompatibilität: Falls das Savegame noch ein einfaches Array war
                 if isinstance(data, list):
                     expeditions = data
                 else:
