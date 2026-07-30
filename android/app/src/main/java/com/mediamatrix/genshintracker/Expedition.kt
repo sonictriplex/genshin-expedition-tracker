@@ -87,7 +87,7 @@ val CHARACTERS = mapOf(
     "Tartaglia" to CharacterInfo("Tartaglia"),
     "Thoma" to CharacterInfo("Thoma"),
     "Tighnari" to CharacterInfo("Tighnari"),
-    "Traveller" to CharacterInfo("Traveller"),
+    "Traveler" to CharacterInfo("Traveler"),
     "Venti" to CharacterInfo("Venti"),
     "Wanderer" to CharacterInfo("Wanderer"),
     "Wriothesley" to CharacterInfo("Wriothesley"),
