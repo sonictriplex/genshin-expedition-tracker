@@ -952,7 +952,7 @@ class GenshinTrackerWindow(QMainWindow):
             self.btn_start_new.setStyleSheet(f"""
                 QPushButton {{
                     background-color: {CARD_BG_COLOR};
-                    border: 2px dashed #444;
+                    border: 2px solid #444;
                     border-radius: 8px;
                     padding: 10px;
                     font-size: 13px;
