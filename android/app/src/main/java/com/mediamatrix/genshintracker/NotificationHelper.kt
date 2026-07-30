@@ -27,14 +27,13 @@ object NotificationHelper {
 
     fun showNotification(context: Context, title: String, message: String, notificationId: Int) {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.traveller) // Dein neues Icon!
+            .setSmallIcon(R.drawable.traveller)
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
 
         with(NotificationManagerCompat.from(context)) {
-            // Prüfung für Android 13+
             try {
                 notify(notificationId, builder.build())
             } catch (e: SecurityException) {
