@@ -12,6 +12,7 @@ Ein plattformübergreifender Tracker für Expeditionen in Genshin Impact, verfü
 - **Alle einsammeln:** Sammle alle abgeschlossenen Expeditionen auf einmal ein.
 - **Persistenz:** Expeditionsdaten werden automatisch in `expeditions.json` gespeichert und beim nächsten Start wiederhergestellt.
 - **Charakter-Icons:** Hintergrundbilder der Charaktere werden aus dem Ordner `assets/characters/` geladen (optional).
+- **Regionale Themes:** Wähle zwischen sieben Teyvat-Regionen (Mondstadt, Liyue, Inazuma, Sumeru, Fontaine, Natlan, Snezhnaya), die das gesamte Farbschema der App anpassen.
 
 ### Android (Jetpack Compose)
 - **Native UI:** Modernes Material 3 Design mit dunklem Theme.
@@ -21,6 +22,7 @@ Ein plattformübergreifender Tracker für Expeditionen in Genshin Impact, verfü
 - **Benachrichtigungen:** Verwendet Android’s `WorkManager`, um eine Benachrichtigung zu planen, wenn eine Expedition endet.
 - **Persistenz:** Expeditions- und Harzdaten werden in `SharedPreferences` gespeichert und beim nächsten Start wiederhergestellt.
 - **Charakterbilder:** Lädt dynamisch Charakter-Drawables aus den App-Ressourcen.
+- **Regionale Themes:** Wähle zwischen sieben Teyvat-Regionen (Mondstadt, Liyue, Inazuma, Sumeru, Fontaine, Natlan, Snezhnaya), die das gesamte Farbschema der App anpassen.
 
 ## Installation & Start
 
@@ -78,6 +80,7 @@ python main.py
 4. Sobald eine Expedition abgeschlossen ist, erscheint eine Desktop-Benachrichtigung (falls `plyer` installiert ist).
 5. Klicke auf **„Claim Reward“** oder **„Claim All Ready“** im Operations HQ, um die Belohnung einzusammeln.
 6. Die Daten werden automatisch gespeichert und beim nächsten Start wiederhergestellt.
+7. **Theme wechseln:** Wähle oben rechts im Dropdown-Menü eine Region aus, um das gesamte Farbschema der App anzupassen.
 
 #### Screenshot:
 
@@ -91,6 +94,7 @@ python main.py
 5. Tippe auf **„Claim Reward“**, um die Expedition zu entfernen.
 6. Verwende die **Operations HQ**-Karte, um die nächste Ankunft, den täglichen Reset und den Harz-Zähler zu sehen.
 7. Tippe auf das Zahnrad-Symbol neben **RESIN COUNTER**, um das Harz manuell anzupassen.
+8. **Theme wechseln:** Tippe oben rechts auf den Region-Namen, um das gesamte Farbschema der App anzupassen.
 
 #### Screenshot:
 
