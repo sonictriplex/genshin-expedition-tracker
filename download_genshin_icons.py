@@ -31,7 +31,7 @@ FANDOM_FILES = {
     "Gaming": "Character_Gaming_Thumb.png",
     "Hu Tao": "Character_Hu_Tao_Thumb.png",
     "Keqing": "Character_Keqing_Thumb.png",
-    "Lanyan": "Character_Lan_Yan_Thumb.png",
+    "Lan Yan": "Character_Lan_Yan_Thumb.png",
     "Ningguang": "Character_Ningguang_Thumb.png",
     "Qiqi": "Character_Qiqi_Thumb.png",
     "Shenhe": "Character_Shenhe_Thumb.png",
@@ -101,6 +101,8 @@ FANDOM_FILES = {
     "Mualani": "Character_Mualani_Thumb.png",
     "Ororon": "Character_Ororon_Thumb.png",
     "Xilonen": "Character_Xilonen_Thumb.png",
+    # --- Snezhnaya ---
+    "Tartaglia": "Character_Tartaglia_Thumb.png",
     # --- Sonstige ---
     "Aloy": "Character_Aloy_Thumb.png",
     "Traveller": "Character_Traveler_Thumb.png",
