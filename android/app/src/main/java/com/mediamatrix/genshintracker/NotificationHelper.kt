@@ -27,7 +27,7 @@ object NotificationHelper {
 
     fun showNotification(context: Context, title: String, message: String, notificationId: Int) {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.traveller)
+            .setSmallIcon(R.drawable.traveler)
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
