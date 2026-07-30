@@ -51,7 +51,7 @@ CHARACTERS = [
     "Navia", "Neuvillette", "Nilou", "Ningguang", "Noelle", "Ororon",
     "Qiqi", "Raiden Shogun", "Razor", "Rosaria", "Sangonomiya Kokomi",
     "Sayu", "Sethos", "Shenhe", "Shikanoin Heizou", "Sigewinne", "Sucrose",
-    "Tartaglia", "Thoma", "Tighnari", "Traveller", "Venti", "Wanderer", "Wriothesley",
+    "Tartaglia", "Thoma", "Tighnari", "Traveler", "Venti", "Wanderer", "Wriothesley",
     "Xiangling", "Xianyun", "Xiao", "Xilonen", "Xingqiu", "Xinyan",
     "Yae Miko", "Yanfei", "Yaoyao", "Yelan", "Yoimiya", "Yun Jin", "Zhongli",
 ]
