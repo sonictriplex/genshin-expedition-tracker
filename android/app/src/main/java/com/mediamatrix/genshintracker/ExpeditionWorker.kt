@@ -10,7 +10,7 @@ class ExpeditionWorker(
 ) : Worker(context, workerParams) {
 
     override fun doWork(): Result {
-        val charName = inputData.getString("char_name") ?: "Charakter"
+        val charName = inputData.getString("char_name") ?: "Character"
         val location = inputData.getString("location") ?: "Expedition"
 
         NotificationHelper.showNotification(
