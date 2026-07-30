@@ -937,7 +937,7 @@ class GenshinTrackerWindow(QMainWindow):
             self.btn_start_new.setStyleSheet("""
                 QPushButton {
                     background-color: #1e2029;
-                    border: 2px dashed #333745;
+                    border: 2px solid #333745;
                     border-radius: 8px;
                     padding: 10px;
                     font-size: 13px;
