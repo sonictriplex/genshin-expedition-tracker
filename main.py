@@ -19,10 +19,10 @@ from PyQt6.QtWidgets import (
     QGraphicsDropShadowEffect,
     QGridLayout,
     QHBoxLayout,
-    QInputDialog,
     QLabel,
     QMainWindow,
     QPushButton,
+    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
@@ -40,7 +40,7 @@ CARD_BG_COLOR = "#252833"
 # Charaktere als einfache Liste
 CHARACTERS = [
     "Albedo", "Alhaitham", "Aloy", "Amber", "Arataki Itto", "Arlecchino",
-    "Baizhu", "Barbara", "Beidou", "Bennett", "Candace", "Charlotte", "Chasca",
+    "Barbara", "Baizhu", "Beidou", "Bennett", "Candace", "Charlotte", "Chasca",
     "Chevreuse", "Chiori", "Chongyun", "Citlali", "Clorinde", "Collei",
     "Cyno", "Dehya", "Diluc", "Diona", "Dori", "Emilie", "Eula", "Faruzan",
     "Fischl", "Freminet", "Furina", "Gaming", "Ganyu", "Gorou", "Hu Tao",
@@ -51,7 +51,7 @@ CHARACTERS = [
     "Navia", "Neuvillette", "Nilou", "Ningguang", "Noelle", "Ororon",
     "Qiqi", "Raiden Shogun", "Razor", "Rosaria", "Sangonomiya Kokomi",
     "Sayu", "Sethos", "Shenhe", "Shikanoin Heizou", "Sigewinne", "Sucrose",
-    "Tartaglia", "Thoma", "Tighnari", "Traveler", "Venti", "Wanderer", "Wriothesley",
+    "Tartaglia", "Thoma", "Tighnari", "Traveller", "Venti", "Wanderer", "Wriothesley",
     "Xiangling", "Xianyun", "Xiao", "Xilonen", "Xingqiu", "Xinyan",
     "Yae Miko", "Yanfei", "Yaoyao", "Yelan", "Yoimiya", "Yun Jin", "Zhongli",
 ]
@@ -320,8 +320,6 @@ class ExpeditionCard(QFrame):
 class OperationsHQCard(QFrame):
 
     def __init__(self, parent_window=None):
-        # FIX: super().__init__() OHNE parent_window aufrufen,
-        # damit das Grid die volle Kontrolle über die Position übernimmt!
         super().__init__()
         self.parent_window = parent_window
         self.current_resin = 120
@@ -440,15 +438,8 @@ class OperationsHQCard(QFrame):
         self.update_info()
 
     def edit_resin(self):
-        val, ok = QInputDialog.getInt(
-            self, "Adjust Resin", f"Current Resin (0-{self.max_resin}):", self.current_resin, 0, self.max_resin
-        )
-        if ok:
-            self.current_resin = val
-            self.last_resin_update = time.time()
-            self.update_info()
-            if self.parent_window:
-                self.parent_window.save_expeditions()
+        if self.parent_window:
+            self.parent_window.open_resin_dialog()
 
     def claim_all(self):
         if not self.parent_window:
@@ -505,7 +496,7 @@ class OperationsHQCard(QFrame):
 
 
 # =========================================================
-# Inline Overlay-Dialog
+# Inline Overlay-Dialog: Expedition hinzufügen
 # =========================================================
 class InlineAddDialog(QFrame):
 
@@ -655,6 +646,102 @@ class InlineAddDialog(QFrame):
 
 
 # =========================================================
+# Inline Overlay-Dialog: Resin anpassen
+# =========================================================
+class InlineResinDialog(QFrame):
+
+    def __init__(self, current_resin=120, max_resin=200, on_submit=None, on_cancel=None, parent=None):
+        super().__init__(parent)
+        self.on_submit_callback = on_submit
+        self.on_cancel_callback = on_cancel
+        self.max_resin = max_resin
+
+        self.setFixedSize(320, 180)
+        self.setStyleSheet(f"""
+            InlineResinDialog {{
+                background-color: {CARD_BG_COLOR};
+                border: 2px solid {CORE_COLOR_CYAN};
+                border-radius: 12px;
+            }}
+            QLabel {{ color: #e6e6e6; font-weight: bold; font-size: 12px; }}
+            QSpinBox {{
+                background-color: #1a1c24;
+                color: white;
+                border: 1px solid #3d4254;
+                border-radius: 5px;
+                padding: 5px 8px;
+                font-size: 14px;
+                font-weight: bold;
+            }}
+            QSpinBox:focus {{ border: 1px solid {CORE_COLOR_CYAN}; }}
+            QPushButton {{
+                background-color: #2e323f;
+                color: white;
+                border: 1px solid #444;
+                border-radius: 5px;
+                padding: 6px 12px;
+                font-size: 12px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{ background-color: #3b3f54; }}
+            QPushButton[primary="true"] {{
+                background-color: {CORE_COLOR_CYAN};
+                color: #1a1c24;
+                border: none;
+            }}
+            QPushButton[primary="true"]:hover {{ background-color: #5effff; }}
+        """)
+
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(25)
+        shadow.setColor(QColor(0, 0, 0, 180))
+        self.setGraphicsEffect(shadow)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(20, 15, 20, 15)
+
+        lbl_title = QLabel("Adjust Original Resin")
+        lbl_title.setStyleSheet(f"font-size: 14px; color: {CORE_COLOR_CYAN}; margin-bottom: 5px;")
+        layout.addWidget(lbl_title)
+
+        form_layout = QFormLayout()
+        form_layout.setSpacing(8)
+
+        self.spin_resin = QSpinBox()
+        self.spin_resin.setRange(0, self.max_resin)
+        self.spin_resin.setValue(current_resin)
+        form_layout.addRow("Current Resin:", self.spin_resin)
+
+        layout.addLayout(form_layout)
+        layout.addStretch()
+
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+
+        btn_cancel = QPushButton("Cancel")
+        btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_cancel.clicked.connect(self.cancel_click)
+
+        btn_save = QPushButton("Save")
+        btn_save.setProperty("primary", "true")
+        btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_save.clicked.connect(self.submit_click)
+
+        btn_layout.addWidget(btn_cancel)
+        btn_layout.addWidget(btn_save)
+
+        layout.addLayout(btn_layout)
+
+    def submit_click(self):
+        if self.on_submit_callback:
+            self.on_submit_callback(self.spin_resin.value())
+
+    def cancel_click(self):
+        if self.on_cancel_callback:
+            self.on_cancel_callback()
+
+
+# =========================================================
 # Hauptfenster
 # =========================================================
 class GenshinTrackerWindow(QMainWindow):
@@ -762,11 +849,11 @@ class GenshinTrackerWindow(QMainWindow):
         self.position_overlay()
 
     def position_overlay(self):
-        if self.overlay_dialog and self.overlay_dialog.isVisible():
+        if self.overlay_dialog:
             cw = self.central_widget
             x = (cw.width() - self.overlay_dialog.width()) // 2
             y = (cw.height() - self.overlay_dialog.height()) // 2
-            self.overlay_dialog.move(x, y)
+            self.overlay_dialog.move(max(0, x), max(0, y))
 
     def open_add_dialog(self):
         if len(self.active_cards) >= 5 or self.overlay_dialog:
@@ -781,10 +868,32 @@ class GenshinTrackerWindow(QMainWindow):
         self.overlay_dialog.raise_()
         self.position_overlay()
 
+    def open_resin_dialog(self):
+        if self.overlay_dialog:
+            return
+
+        self.overlay_dialog = InlineResinDialog(
+            current_resin=self.hq_card.current_resin,
+            max_resin=self.hq_card.max_resin,
+            on_submit=self.on_resin_submit,
+            on_cancel=self.close_overlay,
+            parent=self.central_widget,
+        )
+        self.overlay_dialog.show()
+        self.overlay_dialog.raise_()
+        self.position_overlay()
+
     def on_dialog_submit(self, char, loc, hours):
         self.create_card(char, loc, hours * 3600)
         self.close_overlay()
         self.save_expeditions()
+
+    def on_resin_submit(self, new_resin_val):
+        self.hq_card.current_resin = new_resin_val
+        self.hq_card.last_resin_update = time.time()
+        self.hq_card.update_info()
+        self.save_expeditions()
+        self.close_overlay()
 
     def close_overlay(self):
         if self.overlay_dialog:
