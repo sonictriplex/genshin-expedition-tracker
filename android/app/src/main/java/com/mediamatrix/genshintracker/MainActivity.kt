@@ -222,6 +222,7 @@ fun MainScreen() {
                 ExpeditionCard(
                     expedition = expedition,
                     onDelete = { target ->
+                        WorkManager.getInstance(context).cancelAllWorkByTag(target.id)
                         activeExpeditions = activeExpeditions.filter { it.id != target.id }
                     }
                 )
@@ -245,6 +246,7 @@ fun MainScreen() {
 
                 scheduleExpeditionNotification(
                     context = context,
+                    expeditionId = newExp.id,
                     charName = charName,
                     location = location,
                     delaySeconds = totalSec
@@ -521,9 +523,8 @@ fun AddExpeditionDialog(onDismiss: () -> Unit, onSubmit: (String, String, Int) -
     val hasBonus = TIME_REDUCTION_BONUS[selectedChar] == selectedRegion
     val durationOptions = if (hasBonus) DURATIONS_BONUS else DURATIONS_STANDARD
 
-    var selectedIndex by remember { mutableIntStateOf(3) } // Standardmäßig auf das letzte Element (20h bzw. 15h)
+    var selectedIndex by remember { mutableIntStateOf(3) }
 
-    // Falls sich der Status ändert, sicherstellen dass der Index im Bereich liegt
     LaunchedEffect(hasBonus) {
         if (selectedIndex >= durationOptions.size) {
             selectedIndex = durationOptions.size - 1
@@ -708,10 +709,11 @@ fun AdjustResinDialog(currentResin: Int, maxResin: Int, onDismiss: () -> Unit, o
 }
 
 // =========================================================
-// Helper: WorkManager Task einplanen
+// Helper: WorkManager Task einplanen (mit Tag-Stornierung)
 // =========================================================
 fun scheduleExpeditionNotification(
     context: Context,
+    expeditionId: String,
     charName: String,
     location: String,
     delaySeconds: Long
@@ -724,6 +726,7 @@ fun scheduleExpeditionNotification(
     val workRequest = OneTimeWorkRequestBuilder<ExpeditionWorker>()
         .setInitialDelay(delaySeconds, TimeUnit.SECONDS)
         .setInputData(inputData)
+        .addTag(expeditionId)
         .build()
 
     WorkManager.getInstance(context).enqueue(workRequest)
