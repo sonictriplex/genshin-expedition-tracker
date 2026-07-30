@@ -37,33 +37,24 @@ CORE_COLOR_AMBER = "#ffaa00"
 BG_COLOR_DARK = "#1a1c24"
 CARD_BG_COLOR = "#252833"
 
-# Charaktere
-CHARACTERS = {
-    "Albedo": False, "Alhaitham": False, "Aloy": False, "Amber": False,
-    "Arataki Itto": False, "Arlecchino": False, "Barbara": False, "Beidou": False,
-    "Bennett": False, "Candace": False, "Charlotte": False, "Chasca": False,
-    "Chevreuse": False, "Chiori": False, "Chongyun": False, "Citlali": False,
-    "Clorinde": False, "Collei": False, "Cyno": False, "Dehya": False,
-    "Diluc": False, "Diona": False, "Dori": False, "Emilie": False,
-    "Eula": False, "Faruzan": False, "Fischl": False, "Freminet": False,
-    "Furina": False, "Gaming": False, "Ganyu": False, "Gorou": False,
-    "Hu Tao": False, "Iansan": False, "Jean": False, "Kachina": False,
-    "Kaedehara Kazuha": False, "Kaeya": False, "Kamisato Ayaka": False,
-    "Kamisato Ayato": False, "Kaveh": False, "Keqing": False, "Kinich": False,
-    "Kirara": False, "Klee": False, "Kujou Sara": False, "Kuki Shinobu": False,
-    "Lan Yan": False, "Lanyan": False, "Layla": False, "Lisa": False,
-    "Lynette": False, "Lyney": False, "Mavuika": False, "Mika": False,
-    "Mona": False, "Mualani": False, "Nahida": False, "Navia": False,
-    "Neuvillette": False, "Nilou": False, "Ningguang": False, "Noelle": False,
-    "Ororon": False, "Qiqi": False, "Raiden Shogun": False, "Razor": False,
-    "Rosaria": False, "Sangonomiya Kokomi": False, "Sayu": False, "Sethos": False,
-    "Shenhe": False, "Shikanoin Heizou": False, "Sigewinne": False, "Sucrose": False,
-    "Thoma": False, "Tighnari": False, "Traveller": False, "Venti": False,
-    "Wanderer": False, "Wriothesley": False, "Xiangling": False, "Xianyun": False,
-    "Xiao": False, "Xilonen": False, "Xingqiu": False, "Xinyan": False,
-    "Yae Miko": False, "Yanfei": False, "Yao Yao": False, "Yelan": False,
-    "Yoimiya": False, "Yun Jin": False, "Zhongli": False,
-}
+# Charaktere als einfache Liste
+CHARACTERS = [
+    "Albedo", "Alhaitham", "Aloy", "Amber", "Arataki Itto", "Arlecchino",
+    "Barbara", "Beidou", "Bennett", "Candace", "Charlotte", "Chasca",
+    "Chevreuse", "Chiori", "Chongyun", "Citlali", "Clorinde", "Collei",
+    "Cyno", "Dehya", "Diluc", "Diona", "Dori", "Emilie", "Eula", "Faruzan",
+    "Fischl", "Freminet", "Furina", "Gaming", "Ganyu", "Gorou", "Hu Tao",
+    "Iansan", "Jean", "Kachina", "Kaedehara Kazuha", "Kaeya", "Kamisato Ayaka",
+    "Kamisato Ayato", "Kaveh", "Keqing", "Kinich", "Kirara", "Klee",
+    "Kujou Sara", "Kuki Shinobu", "Lan Yan", "Layla", "Lisa",
+    "Lynette", "Lyney", "Mavuika", "Mika", "Mona", "Mualani", "Nahida",
+    "Navia", "Neuvillette", "Nilou", "Ningguang", "Noelle", "Ororon",
+    "Qiqi", "Raiden Shogun", "Razor", "Rosaria", "Sangonomiya Kokomi",
+    "Sayu", "Sethos", "Shenhe", "Shikanoin Heizou", "Sigewinne", "Sucrose",
+    "Thoma", "Tighnari", "Traveller", "Venti", "Wanderer", "Wriothesley",
+    "Xiangling", "Xianyun", "Xiao", "Xilonen", "Xingqiu", "Xinyan",
+    "Yae Miko", "Yanfei", "Yao Yao", "Yelan", "Yoimiya", "Yun Jin", "Zhongli",
+]
 
 # Charaktere mit 25% Zeitersparnis und ihre Heimatregion
 TIME_REDUCTION_BONUS = {
@@ -170,6 +161,7 @@ class ExpeditionCard(QFrame):
         )
         self.on_delete_callback = on_delete
         self.notified = False
+        self.is_active = True  # Optimierung: Status-Flag für Stylesheet-Rendering
 
         self.setObjectName("expedition_card_widget")
 
@@ -301,7 +293,11 @@ class ExpeditionCard(QFrame):
 
         if rem <= 0:
             self.btn_action.setText("Claim Reward")
-            self.style_card(active=False)
+            # Optimierung: Style nur einmalig bei Fertigstellung anpassen
+            if self.is_active:
+                self.is_active = False
+                self.style_card(active=False)
+
             if not self.notified:
                 self.notified = True
                 return True
@@ -450,6 +446,8 @@ class OperationsHQCard(QFrame):
             self.current_resin = val
             self.last_resin_update = time.time()
             self.update_info()
+            if self.parent_window:
+                self.parent_window.save_expeditions()
 
     def claim_all(self):
         if not self.parent_window:
@@ -506,11 +504,10 @@ class OperationsHQCard(QFrame):
 
 
 # =========================================================
-# Inline Overlay-Dialog (OPTION A IMPLEMENTIERUNG)
+# Inline Overlay-Dialog
 # =========================================================
 class InlineAddDialog(QFrame):
 
-    # Standard-Zeiten ohne Bonus
     DURATIONS_STANDARD = [
         ("4 Hours", 4),
         ("8 Hours", 8),
@@ -518,7 +515,6 @@ class InlineAddDialog(QFrame):
         ("20 Hours (Standard)", 20),
     ]
 
-    # Reduzierte Zeiten mit 25% Ersparnis für alle Stufen
     DURATIONS_BONUS = [
         ("3 Hours (Bonus 4h)", 3),
         ("6 Hours (Bonus 8h)", 6),
@@ -584,7 +580,7 @@ class InlineAddDialog(QFrame):
         form_layout.setSpacing(8)
 
         self.combo_char = QComboBox()
-        self.combo_char.addItems(sorted(CHARACTERS.keys()))
+        self.combo_char.addItems(sorted(CHARACTERS))
         form_layout.addRow("Character:", self.combo_char)
 
         self.combo_region = QComboBox()
@@ -598,7 +594,6 @@ class InlineAddDialog(QFrame):
         self.combo_duration = QComboBox()
         form_layout.addRow("Duration:", self.combo_duration)
 
-        # Bei Änderungen an Charakter oder Region wird der Bonus-Status neu berechnet
         self.combo_char.currentTextChanged.connect(self.update_bonus_state)
         self.combo_region.currentTextChanged.connect(self.update_bonus_state)
 
@@ -622,21 +617,15 @@ class InlineAddDialog(QFrame):
 
         layout.addLayout(btn_layout)
 
-        # Erstmaliges Befüllen der Duration-ComboBox
         self.update_bonus_state()
 
     def update_bonus_state(self):
         selected_char = self.combo_char.currentText()
         selected_region = self.combo_region.currentText()
 
-        # Aktuellen Index merken, um ihn nach dem Update beizubehalten
-        current_index = max(0, self.combo_duration.currentIndex())
-
-        # Prüfe ob Charakter für die ausgewählte Region den 25% Zeitbonus besitzt
         bonus_region = TIME_REDUCTION_BONUS.get(selected_char)
         has_bonus = (bonus_region is not None and bonus_region == selected_region)
 
-        # ComboBox-Signale während der Erneuerung blockieren
         self.combo_duration.blockSignals(True)
         self.combo_duration.clear()
 
@@ -644,16 +633,13 @@ class InlineAddDialog(QFrame):
         for label, hours in options:
             self.combo_duration.addItem(label, userData=hours)
 
-        # Vorherigen Index wiederherstellen (oder letztes Element)
-        target_index = current_index if current_index < len(options) else len(options) - 1
-        self.combo_duration.setCurrentIndex(target_index)
+        # UX-Optimierung: Standardmäßig auf die längste Option (20h / 15h) setzen
+        self.combo_duration.setCurrentIndex(len(options) - 1)
         self.combo_duration.blockSignals(False)
 
     def submit_click(self):
-        # Stunden direkt aus den userData des gewählten Items lesen
         hours = self.combo_duration.currentData()
         if hours is None:
-            # Fallback falls currentData einmal fehlschlägt
             hours = int(self.combo_duration.currentText().split()[0])
 
         region = self.combo_region.currentText()
@@ -773,13 +759,14 @@ class GenshinTrackerWindow(QMainWindow):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        if self.overlay_dialog and self.overlay_dialog.isVisible():
-            self.position_overlay()
+        self.position_overlay()
 
     def position_overlay(self):
-        x = (self.width() - self.overlay_dialog.width()) // 2
-        y = (self.height() - self.overlay_dialog.height()) // 2
-        self.overlay_dialog.move(x, y)
+        if self.overlay_dialog and self.overlay_dialog.isVisible():
+            cw = self.central_widget
+            x = (cw.width() - self.overlay_dialog.width()) // 2
+            y = (cw.height() - self.overlay_dialog.height()) // 2
+            self.overlay_dialog.move(x, y)
 
     def open_add_dialog(self):
         if len(self.active_cards) >= 5 or self.overlay_dialog:
@@ -856,7 +843,12 @@ class GenshinTrackerWindow(QMainWindow):
         self.hq_card.update_info()
 
     def save_expeditions(self):
-        data = [card.to_dict() for card in self.active_cards]
+        # Speichert sowohl Expeditionen als auch den aktuellen Resin-Stand
+        data = {
+            "expeditions": [card.to_dict() for card in self.active_cards],
+            "resin": self.hq_card.current_resin,
+            "last_resin_update": self.hq_card.last_resin_update,
+        }
         try:
             with open(SAVE_FILE, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
@@ -870,7 +862,16 @@ class GenshinTrackerWindow(QMainWindow):
         try:
             with open(SAVE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                for item in data:
+
+                # Abwärtskompatibilität: Falls das Savegame noch ein einfaches Array war
+                if isinstance(data, list):
+                    expeditions = data
+                else:
+                    expeditions = data.get("expeditions", [])
+                    self.hq_card.current_resin = data.get("resin", 120)
+                    self.hq_card.last_resin_update = data.get("last_resin_update", time.time())
+
+                for item in expeditions:
                     self.create_card(
                         item["char_name"],
                         item["location"],
