@@ -6,7 +6,7 @@ A cross‑platform tracker for expeditions in Genshin Impact, available as a **P
 
 ### Desktop (PyQt6)
 - **Live Ring Timer:** Circular progress indicators for active expeditions.
-- **Character Bonuses:** Automatically detects characters with 25% time reduction (e.g., Bennett, Chongyun, Fischl, Keqing, Shenhe).
+- **Character Bonuses:** Automatically detects characters with 25% time reduction (e.g., Bennett, Fischl, Chongyun, Keqing, Kujou Sara).
 - **Desktop Notifications:** Notifies you via `plyer` when an expedition is completed.
 - **Operations HQ:** Shows the next upcoming expedition, daily server reset (04:00), and a resin counter.
 - **Claim All Ready:** Collect all completed expeditions at once.
