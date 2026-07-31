@@ -262,13 +262,13 @@ class InlineResinDialog(QFrame):
 
 
 class InlineSettingsDialog(QFrame):
-    def __init__(self, close_to_tray=True, on_submit=None, on_cancel=None, parent=None):
+    def __init__(self, close_to_tray=True, sync_server_enabled=True, sync_mode="smart", on_submit=None, on_cancel=None, parent=None):
         super().__init__(parent)
         self.on_submit_callback = on_submit
         self.on_cancel_callback = on_cancel
         theme = get_theme()
 
-        self.setFixedSize(360, 250)
+        self.setFixedSize(380, 360)  # Etwas vergrößert für das neue Dropdown
         self.setStyleSheet(f"""
             InlineSettingsDialog {{
                 background-color: {theme['card_bg']};
@@ -330,12 +330,31 @@ class InlineSettingsDialog(QFrame):
         lbl_title.setStyleSheet(f"font-size: 14px; color: {theme['cyan']}; margin-bottom: 4px;")
         layout.addWidget(lbl_title)
 
-        # Autostart Option (Englisch)
+        # Autostart Option
         self.chk_autostart = QCheckBox("Start with System (Autostart)")
         self.chk_autostart.setChecked(is_autostart_enabled())
         layout.addWidget(self.chk_autostart)
 
-        # Close Action Option (Englisch)
+        # WLAN Sync Server Option
+        self.chk_sync = QCheckBox("Enable WLAN Sync Server (Port 5000)")
+        self.chk_sync.setChecked(sync_server_enabled)
+        layout.addWidget(self.chk_sync)
+
+        # Sync Mode Dropdown (NEU)
+        lbl_sync_mode = QLabel("Sync Strategy:")
+        layout.addWidget(lbl_sync_mode)
+
+        self.combo_sync_mode = QComboBox()
+        self.combo_sync_mode.addItem("Newest Wins (Smart Sync)", userData="smart")
+        self.combo_sync_mode.addItem("PC ➔ Android (PC is Master)", userData="pc_to_android")
+        self.combo_sync_mode.addItem("Android ➔ PC (Android is Master)", userData="android_to_pc")
+
+        # Richtigen Index vorauswählen
+        index_map = {"smart": 0, "pc_to_android": 1, "android_to_pc": 2}
+        self.combo_sync_mode.setCurrentIndex(index_map.get(sync_mode, 0))
+        layout.addWidget(self.combo_sync_mode)
+
+        # Close Action Option
         lbl_close_action = QLabel("On Window Close (✕):")
         layout.addWidget(lbl_close_action)
 
@@ -368,9 +387,11 @@ class InlineSettingsDialog(QFrame):
 
     def submit_click(self):
         autostart = self.chk_autostart.isChecked()
+        sync_enabled = self.chk_sync.isChecked()
+        sync_mode = self.combo_sync_mode.currentData()
         close_to_tray = self.combo_close_action.currentData()
         if self.on_submit_callback:
-            self.on_submit_callback(autostart, close_to_tray)
+            self.on_submit_callback(autostart, close_to_tray, sync_enabled, sync_mode)
 
     def cancel_click(self):
         if self.on_cancel_callback:
