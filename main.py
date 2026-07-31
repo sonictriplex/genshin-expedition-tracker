@@ -742,7 +742,7 @@ class InlineResinDialog(QFrame):
                 color: white;
                 border: 1px solid #3d4254;
                 border-radius: 5px;
-                padding: 5px 8px;
+                padding: 5px 24px 5px 8px;
                 font-size: 14px;
                 font-weight: bold;
             }}
