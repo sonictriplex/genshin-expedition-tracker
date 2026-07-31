@@ -118,7 +118,7 @@ genshin-expedition-tracker/
 ├── main.py                          # Main window, system tray & app entry point
 ├── download_genshin_icons.py        # Helper script to download character icons
 ├── expeditions.json                 # Auto-created save file (Desktop)
-└── README.md                        # Project documentation & Git info                                                                                                            
+└── README.md                        # Project documentation & Git info                               
 ```                                                                                                                                                 
                                                                                                                                                     
 ## License & Disclaimer                                                                                                                             
