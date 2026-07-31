@@ -52,10 +52,6 @@ class GenshinTrackerWindow(QMainWindow):
         self.current_theme_name = "Mondstadt (Anemo)"
         self.close_to_tray = True  # Standard-Verhalten beim Schließen
 
-        icon_path = os.path.join(ASSETS_DIR, "traveller.png")
-        if os.path.exists(icon_path):
-            self.setWindowIcon(QIcon(icon_path))
-
         self.init_system_tray()
 
         self.central_widget = QWidget()
@@ -126,10 +122,24 @@ class GenshinTrackerWindow(QMainWindow):
 
     def init_system_tray(self):
         self.tray_icon = QSystemTrayIcon(self)
-        theme = get_theme()
-        pixmap = QPixmap(32, 32)
-        pixmap.fill(QColor(theme["cyan"]))
-        self.tray_icon.setIcon(QIcon(pixmap))
+
+        # Sichere Icon-Kette für Windows & Linux/CachyOS
+        icon_path_1 = os.path.join(ASSETS_DIR, "traveler.png")
+        icon_path_2 = os.path.join(ASSETS_DIR, "traveller.png")
+
+        if os.path.exists(icon_path_1):
+            app_icon = QIcon(icon_path_1)
+        elif os.path.exists(icon_path_2):
+            app_icon = QIcon(icon_path_2)
+        else:
+            app_icon = QIcon.fromTheme("applications-games", QIcon.fromTheme("clock"))
+            if app_icon.isNull():
+                pixmap = QPixmap(32, 32)
+                pixmap.fill(QColor(get_theme()["cyan"]))
+                app_icon = QIcon(pixmap)
+
+        self.setWindowIcon(app_icon)
+        self.tray_icon.setIcon(app_icon)
 
         tray_menu = QMenu()
         action_show = QAction("Open Tracker", self)
@@ -159,7 +169,6 @@ class GenshinTrackerWindow(QMainWindow):
         self.raise_()
 
     def closeEvent(self, event):
-        # Dynamisches Verhalten beim Klick auf 'X'
         if self.close_to_tray and self.tray_icon.isSystemTrayAvailable():
             event.ignore()
             self.hide()
@@ -226,7 +235,6 @@ class GenshinTrackerWindow(QMainWindow):
         self.save_expeditions()
         self.close_overlay()
 
-    # (Restliche Methoden wie apply_theme, open_add_dialog, regrid_cards etc. bleiben genau wie vorher)
     def apply_theme(self, theme_name):
         self.current_theme_name = theme_name
         set_active_theme(theme_name)
@@ -469,6 +477,7 @@ class GenshinTrackerWindow(QMainWindow):
 
 
 if __name__ == "__main__":
+    QApplication.setDesktopFileName("genshin-expedition-tracker")
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
 
