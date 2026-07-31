@@ -125,7 +125,6 @@ class GenshinTrackerWindow(QMainWindow):
 
         # Sichere Icon-Kette für Windows & Linux/CachyOS
         icon_path_1 = os.path.join(ASSETS_DIR, "traveler.png")
-        icon_path_2 = os.path.join(ASSETS_DIR, "traveller.png")
 
         if os.path.exists(icon_path_1):
             app_icon = QIcon(icon_path_1)
