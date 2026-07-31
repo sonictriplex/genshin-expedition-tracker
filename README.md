@@ -103,39 +103,22 @@ python main.py
 ## Project Structure                                                                                                                                
                                                                                                                                                     
 ```                                                                                                                                                 
-genshin-expedition-tracker/                                                                                                                         
-├── assets/                                                                                                                                         
-│   └── characters/          # Character icons (optional, Desktop)                                                                                  
-├── main.py                  # Desktop main program (PyQt6)                                                                                         
-├── download_genshin_icons.py # Script to download icons                                                                                            
-├── expeditions.json         # Auto‑created save file (Desktop)                                                                                     
-├── android/                 # Android project root                                                                                                 
-│   ├── app/                                                                                                                                        
-│   │   ├── src/                                                                                                                                    
-│   │   │   ├── main/                                                                                                                               
-│   │   │   │   ├── java/com/mediamatrix/genshintracker/                                                                                            
-│   │   │   │   │   ├── MainActivity.kt          # Main activity with Compose UI                                                                    
-│   │   │   │   │   ├── Expedition.kt            # Data model & character list                                                                      
-│   │   │   │   │   ├── ExpeditionWorker.kt      # WorkManager worker for notifications                                                             
-│   │   │   │   │   ├── NotificationHelper.kt    # Notification channel & helper                                                                    
-│   │   │   │   │   └── ui/theme/                # Material 3 theme files                                                                           
-│   │   │   │   ├── res/                                                                                                                            
-│   │   │   │   │   ├── drawable/                # Character images & launcher icons                                                                
-│   │   │   │   │   ├── mipmap-*/                # Launcher icons                                                                                   
-│   │   │   │   │   ├── values/                  # strings.xml, colors.xml, themes.xml                                                              
-│   │   │   │   │   └── xml/                     # Backup & data extraction rules                                                                   
-│   │   │   │   └── AndroidManifest.xml                                                                                                             
-│   │   │   ├── androidTest/                     # Instrumented tests                                                                               
-│   │   │   └── test/                            # Unit tests                                                                                       
-│   │   └── build.gradle.kts                                                                                                                        
-│   ├── build.gradle.kts                         # Top-level build file                                                                             
-│   ├── settings.gradle.kts                                                                                                                         
-│   ├── gradle.properties                                                                                                                           
-│   ├── gradle/                                                                                                                                     
-│   │   ├── libs.versions.toml                   # Version catalog                                                                                  
-│   │   └── wrapper/                             # Gradle wrapper                                                                                   
-│   └── gradlew / gradlew.bat                                                                                                                       
-└── README.md                # This file                                                                                                            
+genshin-expedition-tracker/
+├── assets/
+│   └── characters/                  # Character icons / images
+├── android/                         # Android Studio project root
+│   └── app/src/main/java/com/mediamatrix/genshintracker/
+│       ├── Expedition.kt            # Data models, constants & SharedPrefs logic
+│       ├── ExpeditionWorker.kt      # WorkManager for background timer & notifications
+│       ├── MainActivity.kt          # UI, adapters & main app logic
+│       └── NotificationHelper.kt    # Notification channel & builder
+├── config.py                        # Themes, paths, character data & cross-platform autostart
+├── dialogs.py                       # Overlay dialogs (Add Expedition, Resin, Settings)
+├── widgets.py                       # Custom UI widgets (ExpeditionCard, OperationsHQCard)
+├── main.py                          # Main window, system tray & app entry point
+├── download_genshin_icons.py        # Helper script to download character icons
+├── expeditions.json                 # Auto-created save file (Desktop)
+└── README.md                        # Project documentation & Git info                                                                                                            
 ```                                                                                                                                                 
                                                                                                                                                     
 ## License & Disclaimer                                                                                                                             
