@@ -43,7 +43,6 @@ from config import (
 )
 from dialogs import InlineAddDialog, InlineResinDialog, InlineSettingsDialog
 from widgets import ExpeditionCard, OperationsHQCard
-from sync_server import start_sync_server, stop_sync_server, is_server_running
 
 
 class GenshinTrackerWindow(QMainWindow):
@@ -52,8 +51,6 @@ class GenshinTrackerWindow(QMainWindow):
         self.setWindowTitle("Genshin Impact Expedition Tracker")
         self.current_theme_name = "Mondstadt (Anemo)"
         self.close_to_tray = True  # Standard-Verhalten beim Schließen
-        self.sync_server_enabled = True  # Standardmäßig an
-        self.sync_mode = "smart"  # Standard Sync-Modus (Neueste gewinnt)
 
         self.init_system_tray()
 
@@ -67,40 +64,11 @@ class GenshinTrackerWindow(QMainWindow):
         header_layout = QHBoxLayout()
         header_layout.setSpacing(15)
 
-        # --- LINKS: Nur der Titel ---
+        # --- LINKS: Titel ---
         lbl_title = QLabel("Active Expeditions")
         lbl_title.setStyleSheet("font-size: 18px; font-weight: bold; color: white;")
         header_layout.addWidget(lbl_title)
 
-        header_layout.addStretch()
-
-        # --- MITTE: Server Status Text, Punkt & Sync Strategy ---
-        center_layout = QHBoxLayout()
-        center_layout.setSpacing(5)
-
-        lbl_server_status_text = QLabel("Server Status:")
-        lbl_server_status_text.setStyleSheet("font-size: 12px; color: #aaa;")
-        center_layout.addWidget(lbl_server_status_text)
-
-        # Der Status-Punkt
-        self.lbl_sync_status = QLabel()
-        self.lbl_sync_status.setFixedSize(10, 10)
-        self.lbl_sync_status.setStyleSheet("""
-            background-color: #2ecc71;
-            border-radius: 5px;
-        """)
-        self.lbl_sync_status.setToolTip("WLAN Sync Server aktiv (Port 5000)")
-        center_layout.addWidget(self.lbl_sync_status)
-
-        # Mehr Abstand vor dem Sync-Text (20px)
-        center_layout.addSpacing(20)
-
-        # Sync-Strategie Text dahinter
-        self.lbl_sync_strategy_info = QLabel()
-        self.lbl_sync_strategy_info.setStyleSheet("font-size: 12px; color: #aaa;")
-        center_layout.addWidget(self.lbl_sync_strategy_info)
-
-        header_layout.addLayout(center_layout)
         header_layout.addStretch()
 
         # --- RECHTS: Theme & Hamburger Menü ---
@@ -157,10 +125,6 @@ class GenshinTrackerWindow(QMainWindow):
         self.load_expeditions()
         self.apply_theme(self.current_theme_name)
         self.update_add_button_state()
-        self.update_sync_strategy_label()
-
-        # Status einmal leicht verzögert prüfen, damit der Server-Thread bereit ist
-        QTimer.singleShot(100, self.update_sync_indicator)
 
         self.setMinimumSize(1500, 975)
         self.resize(1500, 975)
@@ -224,7 +188,6 @@ class GenshinTrackerWindow(QMainWindow):
             self.quit_application()
 
     def quit_application(self):
-        stop_sync_server()
         self.tray_icon.hide()
         QApplication.quit()
 
@@ -250,13 +213,6 @@ class GenshinTrackerWindow(QMainWindow):
             }}
         """)
 
-        # Manueller Sync-Button ganz oben
-        action_sync_now = QAction("🔄 Sync Now", self)
-        action_sync_now.triggered.connect(self.manual_sync_trigger)
-        menu.addAction(action_sync_now)
-
-        menu.addSeparator()
-
         action_settings = QAction("⚙️ Settings", self)
         action_settings.triggered.connect(self.open_settings_dialog)
         menu.addAction(action_settings)
@@ -264,35 +220,12 @@ class GenshinTrackerWindow(QMainWindow):
         btn_pos = self.btn_menu.mapToGlobal(self.btn_menu.rect().bottomLeft())
         menu.exec(btn_pos)
 
-    def manual_sync_trigger(self):
-        if not self.sync_server_enabled:
-            if self.tray_icon.isSystemTrayAvailable():
-                self.tray_icon.showMessage(
-                    "WLAN Sync",
-                    "Sync-Server ist aktuell deaktiviert!",
-                    QSystemTrayIcon.MessageIcon.Warning,
-                    3000,
-                )
-            return
-
-        self.save_expeditions()
-
-        if self.tray_icon.isSystemTrayAvailable():
-            self.tray_icon.showMessage(
-                "WLAN Sync",
-                "Daten für Sync bereitgestellt / Aktualisiert!",
-                QSystemTrayIcon.MessageIcon.Information,
-                2000,
-            )
-
     def open_settings_dialog(self):
         if self.overlay_dialog:
             return
 
         self.overlay_dialog = InlineSettingsDialog(
             close_to_tray=self.close_to_tray,
-            sync_server_enabled=self.sync_server_enabled,
-            sync_mode=self.sync_mode,
             on_submit=self.on_settings_submit,
             on_cancel=self.close_overlay,
             parent=self.central_widget,
@@ -301,43 +234,11 @@ class GenshinTrackerWindow(QMainWindow):
         self.overlay_dialog.raise_()
         self.position_overlay()
 
-    def on_settings_submit(self, autostart_enabled, close_to_tray_enabled, sync_server_enabled, sync_mode):
+    def on_settings_submit(self, autostart_enabled, close_to_tray_enabled):
         set_autostart(autostart_enabled)
         self.close_to_tray = close_to_tray_enabled
-        self.sync_server_enabled = sync_server_enabled
-        self.sync_mode = sync_mode
-
-        if self.sync_server_enabled:
-            start_sync_server(SAVE_FILE, sync_mode=self.sync_mode)
-        else:
-            stop_sync_server()
-
-        QTimer.singleShot(50, self.update_sync_indicator)
-        self.update_sync_strategy_label()
         self.save_expeditions()
         self.close_overlay()
-
-    def update_sync_indicator(self):
-        if is_server_running():
-            self.lbl_sync_status.setStyleSheet("""
-                background-color: #2ecc71;
-                border-radius: 5px;
-            """)
-            self.lbl_sync_status.setToolTip("WLAN Sync Server aktiv (Port 5000)")
-        else:
-            self.lbl_sync_status.setStyleSheet("""
-                background-color: #e74c3c;
-                border-radius: 5px;
-            """)
-            self.lbl_sync_status.setToolTip("WLAN Sync Server gestoppt")
-
-    def update_sync_strategy_label(self):
-        labels = {
-            "smart": "Sync: Newest Wins",
-            "pc_to_android": "Sync: PC to Android",
-            "android_to_pc": "Sync: Android to PC"
-        }
-        self.lbl_sync_strategy_info.setText(labels.get(self.sync_mode, "Sync: Newest Wins"))
 
     def apply_theme(self, theme_name):
         self.current_theme_name = theme_name
@@ -544,8 +445,6 @@ class GenshinTrackerWindow(QMainWindow):
             "last_resin_update": self.hq_card.last_resin_update,
             "theme": self.current_theme_name,
             "close_to_tray": self.close_to_tray,
-            "sync_server_enabled": self.sync_server_enabled,
-            "sync_mode": self.sync_mode,
         }
         try:
             with open(SAVE_FILE, "w", encoding="utf-8") as f:
@@ -567,8 +466,6 @@ class GenshinTrackerWindow(QMainWindow):
                     self.hq_card.last_resin_update = data.get("last_resin_update", time.time())
                     self.current_theme_name = data.get("theme", "Mondstadt (Anemo)")
                     self.close_to_tray = data.get("close_to_tray", True)
-                    self.sync_server_enabled = data.get("sync_server_enabled", True)
-                    self.sync_mode = data.get("sync_mode", "smart")
                 else:
                     expeditions = data
 
@@ -582,7 +479,6 @@ class GenshinTrackerWindow(QMainWindow):
                 if hasattr(self, "combo_theme"):
                     self.combo_theme.setCurrentText(self.current_theme_name)
 
-                self.update_sync_strategy_label()
         except Exception as e:
             print(f"Error loading: {e}")
 
@@ -593,14 +489,6 @@ if __name__ == "__main__":
     app.setQuitOnLastWindowClosed(False)
 
     window = GenshinTrackerWindow()
-
-    # Server je nach geladenem Zustand beim Start hochfahren
-    if window.sync_server_enabled:
-        start_sync_server(SAVE_FILE, sync_mode=window.sync_mode)
-
     window.show()
-
-    # Nochmals Status aktualisieren, sobald das Fenster da ist
-    window.update_sync_indicator()
 
     sys.exit(app.exec())
