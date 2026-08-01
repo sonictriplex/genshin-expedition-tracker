@@ -23,7 +23,6 @@ from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
     QComboBox,
-    QFormLayout,
     QFrame,
     QGridLayout,
     QHBoxLayout,
@@ -46,9 +45,14 @@ from config import (
     set_active_theme,
     set_autostart,
 )
+from crafting import CraftingCalculatorWidget
 from dialogs import InlineAddDialog, InlineResinDialog
 from journal import TeyvatJournalWidget
+from resin_planner import ResinPlannerWidget
+from team_goals import TeamGoalsWidget
+from weekly_bosses import WeeklyBossTrackerWidget
 from widgets import ExpeditionCard, OperationsHQCard
+from wishes import WishPityCounterWidget
 
 
 class GenshinTrackerWindow(QMainWindow):
@@ -60,7 +64,7 @@ class GenshinTrackerWindow(QMainWindow):
 
         self.init_system_tray()
 
-        # Main Central Widget mit HORIZONTALEM Layout (Sidebar + Content)
+        # Main Central Widget with HORIZONTAL Layout (Sidebar + Content)
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
 
@@ -69,47 +73,68 @@ class GenshinTrackerWindow(QMainWindow):
         self.root_layout.setSpacing(0)
 
         # ---------------------------------------------------------------------
-        # 1. VERTIKALE SIDEBAR (LINKS)
+        # 1. VERTICAL SIDEBAR (LEFT)
         # ---------------------------------------------------------------------
         self.sidebar_frame = QFrame()
+        self.sidebar_frame.setObjectName("sidebar_frame")
         self.sidebar_frame.setFixedWidth(64)
         self.sidebar_layout = QVBoxLayout(self.sidebar_frame)
         self.sidebar_layout.setContentsMargins(8, 12, 8, 12)
         self.sidebar_layout.setSpacing(12)
 
-        # App Logo / Header-Icon oben
+        # App Logo Header
         self.lbl_logo = QLabel("⚔️")
         self.lbl_logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lbl_logo.setStyleSheet("font-size: 20px; margin-bottom: 8px;")
         self.sidebar_layout.addWidget(self.lbl_logo)
 
-        # Navigations-Buttons (Oben)
-        self.btn_nav_expeditions = self.create_nav_button("⏳", "Expeditionen")
+        # Navigation Buttons (Top to Bottom)
+        self.btn_nav_expeditions = self.create_nav_button("⏳", "Expeditions")
         self.btn_nav_expeditions.clicked.connect(lambda: self.switch_page(0))
         self.sidebar_layout.addWidget(self.btn_nav_expeditions)
 
-        self.btn_nav_journal = self.create_nav_button("📖", "Reisetagebuch")
+        self.btn_nav_journal = self.create_nav_button("📖", "Teyvat Journal")
         self.btn_nav_journal.clicked.connect(lambda: self.switch_page(1))
         self.sidebar_layout.addWidget(self.btn_nav_journal)
 
+        self.btn_nav_crafting = self.create_nav_button("🧪", "Crafting Calculator")
+        self.btn_nav_crafting.clicked.connect(lambda: self.switch_page(2))
+        self.sidebar_layout.addWidget(self.btn_nav_crafting)
+
+        self.btn_nav_wishes = self.create_nav_button("🌠", "Wish & Pity Counter")
+        self.btn_nav_wishes.clicked.connect(lambda: self.switch_page(3))
+        self.sidebar_layout.addWidget(self.btn_nav_wishes)
+
+        self.btn_nav_resin = self.create_nav_button("⚡", "Resin Planner")
+        self.btn_nav_resin.clicked.connect(lambda: self.switch_page(4))
+        self.sidebar_layout.addWidget(self.btn_nav_resin)
+
+        self.btn_nav_bosses = self.create_nav_button("🐲", "Weekly Boss Tracker")
+        self.btn_nav_bosses.clicked.connect(lambda: self.switch_page(5))
+        self.sidebar_layout.addWidget(self.btn_nav_bosses)
+
+        self.btn_nav_team = self.create_nav_button("🎯", "Team & Farming Goals")
+        self.btn_nav_team.clicked.connect(lambda: self.switch_page(6))
+        self.sidebar_layout.addWidget(self.btn_nav_team)
+
         self.sidebar_layout.addStretch()
 
-        # Settings-Button (Ganz unten verankert)
-        self.btn_nav_settings = self.create_nav_button("⚙️", "Einstellungen")
-        self.btn_nav_settings.clicked.connect(lambda: self.switch_page(2))
+        # Settings Button (Fixed at Bottom)
+        self.btn_nav_settings = self.create_nav_button("⚙️", "Settings")
+        self.btn_nav_settings.clicked.connect(lambda: self.switch_page(7))
         self.sidebar_layout.addWidget(self.btn_nav_settings)
 
         self.root_layout.addWidget(self.sidebar_frame)
 
         # ---------------------------------------------------------------------
-        # 2. HAUPTCONTENT MIT STACKED WIDGET (RECHTS)
+        # 2. MAIN CONTENT AREA WITH STACKED WIDGET (RIGHT)
         # ---------------------------------------------------------------------
         self.content_container = QWidget()
         self.content_layout = QVBoxLayout(self.content_container)
         self.content_layout.setContentsMargins(16, 16, 16, 16)
         self.content_layout.setSpacing(10)
 
-        # Gemeinsamer Header oben (Theme Selector)
+        # Header Bar
         header_layout = QHBoxLayout()
         self.lbl_page_title = QLabel("Active Expeditions")
         self.lbl_page_title.setStyleSheet("font-size: 18px; font-weight: bold; color: white;")
@@ -129,10 +154,10 @@ class GenshinTrackerWindow(QMainWindow):
 
         self.content_layout.addLayout(header_layout)
 
-        # STACKED WIDGET FÜR SEITEN-WECHSEL
+        # STACKED WIDGET FOR PAGE SWITCHING
         self.stacked_widget = QStackedWidget()
 
-        # PAGE 0: Expeditionen Grid
+        # PAGE 0: Expeditions Grid
         self.page_expeditions = QWidget()
         v_exp_layout = QVBoxLayout(self.page_expeditions)
         v_exp_layout.setContentsMargins(0, 10, 0, 0)
@@ -155,11 +180,31 @@ class GenshinTrackerWindow(QMainWindow):
 
         self.stacked_widget.addWidget(self.page_expeditions)
 
-        # PAGE 1: Reisetagebuch (Journal)
+        # PAGE 1: Teyvat Journal
         self.journal_widget = TeyvatJournalWidget(parent_window=self)
         self.stacked_widget.addWidget(self.journal_widget)
 
-        # PAGE 2: Einstellungen (Settings Page)
+        # PAGE 2: Crafting Calculator
+        self.crafting_widget = CraftingCalculatorWidget(parent_window=self)
+        self.stacked_widget.addWidget(self.crafting_widget)
+
+        # PAGE 3: Wish & Pity Counter
+        self.wishes_widget = WishPityCounterWidget(parent_window=self)
+        self.stacked_widget.addWidget(self.wishes_widget)
+
+        # PAGE 4: Resin Planner
+        self.resin_widget = ResinPlannerWidget(parent_window=self)
+        self.stacked_widget.addWidget(self.resin_widget)
+
+        # PAGE 5: Weekly Boss Tracker
+        self.bosses_widget = WeeklyBossTrackerWidget(parent_window=self)
+        self.stacked_widget.addWidget(self.bosses_widget)
+
+        # PAGE 6: Team & Farming Goals
+        self.team_widget = TeamGoalsWidget(parent_window=self)
+        self.stacked_widget.addWidget(self.team_widget)
+
+        # PAGE 7: Settings Page
         self.page_settings = self.create_settings_page()
         self.stacked_widget.addWidget(self.page_settings)
 
@@ -177,7 +222,7 @@ class GenshinTrackerWindow(QMainWindow):
 
         self.load_expeditions()
         self.apply_theme(self.current_theme_name)
-        self.switch_page(0)  # Start auf Expeditionen
+        self.switch_page(0)  # Default page: Expeditions
 
         self.setMinimumSize(1280, 850)
         self.resize(1280, 850)
@@ -191,13 +236,31 @@ class GenshinTrackerWindow(QMainWindow):
 
     def switch_page(self, index):
         self.stacked_widget.setCurrentIndex(index)
-        titles = ["Active Expeditions", "Teyvat Reisetagebuch", "Settings & Preferences"]
+        titles = [
+            "Active Expeditions",
+            "Teyvat Journal & HQ Operations",
+            "Alchemy & Crafting Bench Calculator",
+            "Wish & Pity Savings Counter",
+            "Original Resin Overflow & Cap Planner",
+            "Weekly Boss Discount & Claim Tracker",
+            "Team Building & Farming Goals",
+            "Settings & Preferences",
+        ]
         self.lbl_page_title.setText(titles[index])
         self.update_nav_styles(index)
 
     def update_nav_styles(self, active_index):
         theme = get_theme()
-        buttons = [self.btn_nav_expeditions, self.btn_nav_journal, self.btn_nav_settings]
+        buttons = [
+            self.btn_nav_expeditions,
+            self.btn_nav_journal,
+            self.btn_nav_crafting,
+            self.btn_nav_wishes,
+            self.btn_nav_resin,
+            self.btn_nav_bosses,
+            self.btn_nav_team,
+            self.btn_nav_settings,
+        ]
 
         for i, btn in enumerate(buttons):
             if i == active_index:
@@ -238,7 +301,7 @@ class GenshinTrackerWindow(QMainWindow):
         card_layout.setContentsMargins(20, 20, 20, 20)
         card_layout.setSpacing(15)
 
-        lbl_sec = QLabel("Systemeinstellungen")
+        lbl_sec = QLabel("System Settings")
         lbl_sec.setStyleSheet("font-size: 16px; font-weight: bold; color: white;")
         card_layout.addWidget(lbl_sec)
 
@@ -247,13 +310,13 @@ class GenshinTrackerWindow(QMainWindow):
         self.chk_autostart.stateChanged.connect(self.on_settings_changed)
         card_layout.addWidget(self.chk_autostart)
 
-        lbl_close = QLabel("Verhalten beim Schließen des Fensters (✕):")
+        lbl_close = QLabel("Window Close Behavior (✕):")
         lbl_close.setStyleSheet("font-size: 12px; font-weight: bold; color: #aaa;")
         card_layout.addWidget(lbl_close)
 
         self.combo_close_action = QComboBox()
-        self.combo_close_action.addItem("In den System Tray minimieren", userData=True)
-        self.combo_close_action.addItem("Anwendung komplett beenden", userData=False)
+        self.combo_close_action.addItem("Minimize to System Tray", userData=True)
+        self.combo_close_action.addItem("Exit Application Completely", userData=False)
         self.combo_close_action.currentIndexChanged.connect(self.on_settings_changed)
         card_layout.addWidget(self.combo_close_action)
 
@@ -306,6 +369,26 @@ class GenshinTrackerWindow(QMainWindow):
         if hasattr(self, "journal_widget"):
             self.journal_widget.apply_theme_style()
 
+        if hasattr(self, "crafting_widget"):
+            self.crafting_widget.apply_theme_style()
+            self.crafting_widget.calculate()
+
+        if hasattr(self, "wishes_widget"):
+            self.wishes_widget.apply_theme_style()
+            self.wishes_widget.calculate()
+
+        if hasattr(self, "resin_widget"):
+            self.resin_widget.apply_theme_style()
+            self.resin_widget.calculate()
+
+        if hasattr(self, "bosses_widget"):
+            self.bosses_widget.apply_theme_style()
+            self.bosses_widget.update_summary()
+
+        if hasattr(self, "team_widget"):
+            self.team_widget.apply_theme_style()
+            self.team_widget.update_summary()
+
         for card in self.active_cards:
             card.style_card(active=card.get_remaining_seconds() > 0)
             card.ring_timer.update()
@@ -316,10 +399,10 @@ class GenshinTrackerWindow(QMainWindow):
     def init_system_tray(self):
         self.tray_icon = QSystemTrayIcon(self)
 
-        icon_path_1 = os.path.join(ASSETS_DIR, "traveler.png")
+        icon_path = os.path.join(ASSETS_DIR, "traveler.png")
 
-        if os.path.exists(icon_path_1):
-            app_icon = QIcon(icon_path_1)
+        if os.path.exists(icon_path):
+            app_icon = QIcon(icon_path)
         else:
             app_icon = QIcon.fromTheme("applications-games", QIcon.fromTheme("clock"))
             if app_icon.isNull():
@@ -464,6 +547,10 @@ class GenshinTrackerWindow(QMainWindow):
         self.hq_card.current_resin = new_resin_val
         self.hq_card.last_resin_update = time.time()
         self.hq_card.update_info()
+
+        if hasattr(self, "resin_widget"):
+            self.resin_widget.spin_resin.setValue(new_resin_val)
+
         self.save_expeditions()
         self.close_overlay()
 
