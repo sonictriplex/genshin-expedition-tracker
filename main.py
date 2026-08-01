@@ -21,13 +21,17 @@ from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QAction, QColor, QIcon, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
+    QCheckBox,
     QComboBox,
+    QFormLayout,
+    QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
     QMainWindow,
     QMenu,
     QPushButton,
+    QStackedWidget,
     QSystemTrayIcon,
     QVBoxLayout,
     QWidget,
@@ -38,12 +42,13 @@ from config import (
     REGION_THEMES,
     SAVE_FILE,
     get_theme,
+    is_autostart_enabled,
     set_active_theme,
     set_autostart,
 )
-from dialogs import InlineAddDialog, InlineResinDialog, InlineSettingsDialog
+from dialogs import InlineAddDialog, InlineResinDialog
+from journal import TeyvatJournalWidget
 from widgets import ExpeditionCard, OperationsHQCard
-from journal import TeyvatJournalWidget  # <--- NEU IMPORTIERT
 
 
 class GenshinTrackerWindow(QMainWindow):
@@ -51,55 +56,88 @@ class GenshinTrackerWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Genshin Impact Expedition Tracker")
         self.current_theme_name = "Mondstadt (Anemo)"
-        self.close_to_tray = True  # Standard-Verhalten beim Schließen
+        self.close_to_tray = True
 
         self.init_system_tray()
 
+        # Main Central Widget mit HORIZONTALEM Layout (Sidebar + Content)
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
 
-        self.main_layout = QVBoxLayout(self.central_widget)
-        self.main_layout.setContentsMargins(16, 16, 16, 16)
+        self.root_layout = QHBoxLayout(self.central_widget)
+        self.root_layout.setContentsMargins(0, 0, 0, 0)
+        self.root_layout.setSpacing(0)
 
-        # Header
+        # ---------------------------------------------------------------------
+        # 1. VERTIKALE SIDEBAR (LINKS)
+        # ---------------------------------------------------------------------
+        self.sidebar_frame = QFrame()
+        self.sidebar_frame.setFixedWidth(64)
+        self.sidebar_layout = QVBoxLayout(self.sidebar_frame)
+        self.sidebar_layout.setContentsMargins(8, 12, 8, 12)
+        self.sidebar_layout.setSpacing(12)
+
+        # App Logo / Header-Icon oben
+        self.lbl_logo = QLabel("⚔️")
+        self.lbl_logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lbl_logo.setStyleSheet("font-size: 20px; margin-bottom: 8px;")
+        self.sidebar_layout.addWidget(self.lbl_logo)
+
+        # Navigations-Buttons (Oben)
+        self.btn_nav_expeditions = self.create_nav_button("⏳", "Expeditionen")
+        self.btn_nav_expeditions.clicked.connect(lambda: self.switch_page(0))
+        self.sidebar_layout.addWidget(self.btn_nav_expeditions)
+
+        self.btn_nav_journal = self.create_nav_button("📖", "Reisetagebuch")
+        self.btn_nav_journal.clicked.connect(lambda: self.switch_page(1))
+        self.sidebar_layout.addWidget(self.btn_nav_journal)
+
+        self.sidebar_layout.addStretch()
+
+        # Settings-Button (Ganz unten verankert)
+        self.btn_nav_settings = self.create_nav_button("⚙️", "Einstellungen")
+        self.btn_nav_settings.clicked.connect(lambda: self.switch_page(2))
+        self.sidebar_layout.addWidget(self.btn_nav_settings)
+
+        self.root_layout.addWidget(self.sidebar_frame)
+
+        # ---------------------------------------------------------------------
+        # 2. HAUPTCONTENT MIT STACKED WIDGET (RECHTS)
+        # ---------------------------------------------------------------------
+        self.content_container = QWidget()
+        self.content_layout = QVBoxLayout(self.content_container)
+        self.content_layout.setContentsMargins(16, 16, 16, 16)
+        self.content_layout.setSpacing(10)
+
+        # Gemeinsamer Header oben (Theme Selector)
         header_layout = QHBoxLayout()
-        header_layout.setSpacing(15)
-
-        # --- LINKS: Titel ---
-        lbl_title = QLabel("Active Expeditions")
-        lbl_title.setStyleSheet("font-size: 18px; font-weight: bold; color: white;")
-        header_layout.addWidget(lbl_title)
+        self.lbl_page_title = QLabel("Active Expeditions")
+        self.lbl_page_title.setStyleSheet("font-size: 18px; font-weight: bold; color: white;")
+        header_layout.addWidget(self.lbl_page_title)
 
         header_layout.addStretch()
 
-        # --- RECHTS: Theme & Hamburger Menü ---
-        right_layout = QHBoxLayout()
-        right_layout.setSpacing(10)
-
         lbl_theme = QLabel("Theme:")
         lbl_theme.setStyleSheet("font-size: 12px; font-weight: bold; color: #aaa;")
-        right_layout.addWidget(lbl_theme)
+        header_layout.addWidget(lbl_theme)
 
         self.combo_theme = QComboBox()
         self.combo_theme.addItems(list(REGION_THEMES.keys()))
         self.combo_theme.setCurrentText(self.current_theme_name)
         self.combo_theme.currentTextChanged.connect(self.apply_theme)
-        right_layout.addWidget(self.combo_theme)
+        header_layout.addWidget(self.combo_theme)
 
-        self.btn_menu = QPushButton("☰")
-        self.btn_menu.setObjectName("btn_menu")
-        self.btn_menu.setFixedSize(32, 32)
-        self.btn_menu.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_menu.clicked.connect(self.show_hamburger_menu)
-        right_layout.addWidget(self.btn_menu)
+        self.content_layout.addLayout(header_layout)
 
-        header_layout.addLayout(right_layout)
-        self.main_layout.addLayout(header_layout)
-        self.main_layout.addSpacing(10)
+        # STACKED WIDGET FÜR SEITEN-WECHSEL
+        self.stacked_widget = QStackedWidget()
 
-        # Grid
-        self.grid_widget = QWidget()
-        self.cards_grid = QGridLayout(self.grid_widget)
+        # PAGE 0: Expeditionen Grid
+        self.page_expeditions = QWidget()
+        v_exp_layout = QVBoxLayout(self.page_expeditions)
+        v_exp_layout.setContentsMargins(0, 10, 0, 0)
+
+        self.cards_grid = QGridLayout()
         self.cards_grid.setContentsMargins(0, 0, 0, 0)
         self.cards_grid.setSpacing(12)
 
@@ -108,18 +146,27 @@ class GenshinTrackerWindow(QMainWindow):
         for row in range(2):
             self.cards_grid.setRowStretch(row, 1)
 
-        self.main_layout.addWidget(self.grid_widget, stretch=1)
-        self.main_layout.addSpacing(10)
-
-        # --- TEYVAT JOURNAL WIDGET (NEU EINGEBAUT) ---
-        self.journal_widget = TeyvatJournalWidget(parent_window=self)
-        self.main_layout.addWidget(self.journal_widget)
-        self.main_layout.addSpacing(10)
+        v_exp_layout.addLayout(self.cards_grid, stretch=1)
+        v_exp_layout.addSpacing(10)
 
         self.btn_start_new = QPushButton()
         self.btn_start_new.clicked.connect(self.open_add_dialog)
-        self.main_layout.addWidget(self.btn_start_new)
+        v_exp_layout.addWidget(self.btn_start_new)
 
+        self.stacked_widget.addWidget(self.page_expeditions)
+
+        # PAGE 1: Reisetagebuch (Journal)
+        self.journal_widget = TeyvatJournalWidget(parent_window=self)
+        self.stacked_widget.addWidget(self.journal_widget)
+
+        # PAGE 2: Einstellungen (Settings Page)
+        self.page_settings = self.create_settings_page()
+        self.stacked_widget.addWidget(self.page_settings)
+
+        self.content_layout.addWidget(self.stacked_widget, stretch=1)
+        self.root_layout.addWidget(self.content_container, stretch=1)
+
+        # State & Timer Initialization
         self.active_cards = []
         self.overlay_dialog = None
         self.hq_card = OperationsHQCard(parent_window=self)
@@ -130,10 +177,141 @@ class GenshinTrackerWindow(QMainWindow):
 
         self.load_expeditions()
         self.apply_theme(self.current_theme_name)
-        self.update_add_button_state()
+        self.switch_page(0)  # Start auf Expeditionen
 
-        self.setMinimumSize(1500, 1080)
-        self.resize(1500, 1080)
+        self.setMinimumSize(1280, 850)
+        self.resize(1280, 850)
+
+    def create_nav_button(self, icon_str, tooltip):
+        btn = QPushButton(icon_str)
+        btn.setFixedSize(44, 44)
+        btn.setToolTip(tooltip)
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        return btn
+
+    def switch_page(self, index):
+        self.stacked_widget.setCurrentIndex(index)
+        titles = ["Active Expeditions", "Teyvat Reisetagebuch", "Settings & Preferences"]
+        self.lbl_page_title.setText(titles[index])
+        self.update_nav_styles(index)
+
+    def update_nav_styles(self, active_index):
+        theme = get_theme()
+        buttons = [self.btn_nav_expeditions, self.btn_nav_journal, self.btn_nav_settings]
+
+        for i, btn in enumerate(buttons):
+            if i == active_index:
+                btn.setStyleSheet(f"""
+                    QPushButton {{
+                        background-color: {theme['cyan']};
+                        color: #1a1c24;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 18px;
+                        font-weight: bold;
+                    }}
+                """)
+            else:
+                btn.setStyleSheet(f"""
+                    QPushButton {{
+                        background-color: #1a1c24;
+                        color: #ffffff;
+                        border: 1px solid #3d4254;
+                        border-radius: 8px;
+                        font-size: 18px;
+                    }}
+                    QPushButton:hover {{
+                        border-color: {theme['cyan']};
+                        color: {theme['cyan']};
+                    }}
+                """)
+
+    def create_settings_page(self):
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(15)
+
+        card = QFrame()
+        card.setObjectName("settings_card")
+        card_layout = QVBoxLayout(card)
+        card_layout.setContentsMargins(20, 20, 20, 20)
+        card_layout.setSpacing(15)
+
+        lbl_sec = QLabel("Systemeinstellungen")
+        lbl_sec.setStyleSheet("font-size: 16px; font-weight: bold; color: white;")
+        card_layout.addWidget(lbl_sec)
+
+        self.chk_autostart = QCheckBox("Start with System (Autostart)")
+        self.chk_autostart.setChecked(is_autostart_enabled())
+        self.chk_autostart.stateChanged.connect(self.on_settings_changed)
+        card_layout.addWidget(self.chk_autostart)
+
+        lbl_close = QLabel("Verhalten beim Schließen des Fensters (✕):")
+        lbl_close.setStyleSheet("font-size: 12px; font-weight: bold; color: #aaa;")
+        card_layout.addWidget(lbl_close)
+
+        self.combo_close_action = QComboBox()
+        self.combo_close_action.addItem("In den System Tray minimieren", userData=True)
+        self.combo_close_action.addItem("Anwendung komplett beenden", userData=False)
+        self.combo_close_action.currentIndexChanged.connect(self.on_settings_changed)
+        card_layout.addWidget(self.combo_close_action)
+
+        card_layout.addStretch()
+        layout.addWidget(card)
+        layout.addStretch()
+
+        return page
+
+    def on_settings_changed(self):
+        autostart = self.chk_autostart.isChecked()
+        close_to_tray = self.combo_close_action.currentData()
+        set_autostart(autostart)
+        self.close_to_tray = close_to_tray if close_to_tray is not None else True
+        self.save_expeditions()
+
+    def apply_theme(self, theme_name):
+        self.current_theme_name = theme_name
+        set_active_theme(theme_name)
+        theme = get_theme()
+
+        self.setStyleSheet(f"""
+            QMainWindow {{ background-color: {theme['bg_dark']}; }}
+            QWidget {{ color: #e6e6e6; font-family: 'Segoe UI', sans-serif; }}
+            QFrame#sidebar_frame {{
+                background-color: #15171e;
+                border-right: 1px solid #2d313e;
+            }}
+            QFrame#settings_card {{
+                background-color: {theme['card_bg']};
+                border: 1px solid #333847;
+                border-radius: 12px;
+            }}
+            QComboBox {{
+                background-color: #1a1c24;
+                color: white;
+                border: 1px solid {theme['cyan']};
+                border-radius: 5px;
+                padding: 4px 8px;
+                font-size: 12px;
+            }}
+        """)
+
+        self.update_nav_styles(self.stacked_widget.currentIndex())
+
+        if hasattr(self, "hq_card"):
+            self.hq_card.apply_theme_style()
+            self.hq_card.update_info()
+
+        if hasattr(self, "journal_widget"):
+            self.journal_widget.apply_theme_style()
+
+        for card in self.active_cards:
+            card.style_card(active=card.get_remaining_seconds() > 0)
+            card.ring_timer.update()
+
+        self.update_add_button_state()
+        self.save_expeditions()
 
     def init_system_tray(self):
         self.tray_icon = QSystemTrayIcon(self)
@@ -196,95 +374,6 @@ class GenshinTrackerWindow(QMainWindow):
     def quit_application(self):
         self.tray_icon.hide()
         QApplication.quit()
-
-    def show_hamburger_menu(self):
-        theme = get_theme()
-        menu = QMenu(self)
-        menu.setStyleSheet(f"""
-            QMenu {{
-                background-color: {theme['card_bg']};
-                color: white;
-                border: 1px solid #3d4254;
-                border-radius: 6px;
-                padding: 4px;
-            }}
-            QMenu::item {{
-                padding: 8px 20px;
-                border-radius: 4px;
-            }}
-            QMenu::item:selected {{
-                background-color: {theme['cyan']};
-                color: #1a1c24;
-                font-weight: bold;
-            }}
-        """)
-
-        action_settings = QAction("⚙️ Settings", self)
-        action_settings.triggered.connect(self.open_settings_dialog)
-        menu.addAction(action_settings)
-
-        btn_pos = self.btn_menu.mapToGlobal(self.btn_menu.rect().bottomLeft())
-        menu.exec(btn_pos)
-
-    def open_settings_dialog(self):
-        if self.overlay_dialog:
-            return
-
-        self.overlay_dialog = InlineSettingsDialog(
-            close_to_tray=self.close_to_tray,
-            on_submit=self.on_settings_submit,
-            on_cancel=self.close_overlay,
-            parent=self.central_widget,
-        )
-        self.overlay_dialog.show()
-        self.overlay_dialog.raise_()
-        self.position_overlay()
-
-    def on_settings_submit(self, autostart_enabled, close_to_tray_enabled):
-        set_autostart(autostart_enabled)
-        self.close_to_tray = close_to_tray_enabled
-        self.save_expeditions()
-        self.close_overlay()
-
-    def apply_theme(self, theme_name):
-        self.current_theme_name = theme_name
-        set_active_theme(theme_name)
-        theme = get_theme()
-
-        self.setStyleSheet(f"""
-            QMainWindow {{ background-color: {theme['bg_dark']}; }}
-            QWidget {{ color: #e6e6e6; font-family: 'Segoe UI', sans-serif; }}
-            QComboBox {{
-                background-color: #1a1c24;
-                color: white;
-                border: 1px solid {theme['cyan']};
-                border-radius: 5px;
-                padding: 4px 8px;
-                font-size: 12px;
-            }}
-            QPushButton#btn_menu {{
-                background-color: {theme['card_bg']};
-                color: {theme['cyan']};
-                border: 1px solid #3d4254;
-                border-radius: 5px;
-                font-weight: bold;
-            }}
-        """)
-
-        if hasattr(self, "hq_card"):
-            self.hq_card.apply_theme_style()
-            self.hq_card.update_info()
-
-        # NEU EINGEBAUT
-        if hasattr(self, "journal_widget"):
-            self.journal_widget.apply_theme_style()
-
-        for card in self.active_cards:
-            card.style_card(active=card.get_remaining_seconds() > 0)
-            card.ring_timer.update()
-
-        self.update_add_button_state()
-        self.save_expeditions()
 
     def update_add_button_state(self):
         theme = get_theme()
@@ -445,6 +534,9 @@ class GenshinTrackerWindow(QMainWindow):
                         5000,
                     )
 
+        if hasattr(self, "journal_widget"):
+            self.journal_widget.update_timers()
+
         self.hq_card.update_info()
 
     def save_expeditions(self):
@@ -455,7 +547,7 @@ class GenshinTrackerWindow(QMainWindow):
             "last_resin_update": self.hq_card.last_resin_update,
             "theme": self.current_theme_name,
             "close_to_tray": self.close_to_tray,
-            "teyvat_journal": self.journal_widget.get_state_dict() if hasattr(self, "journal_widget") else {} # NEU EINGEBAUT
+            "teyvat_journal": self.journal_widget.get_state_dict() if hasattr(self, "journal_widget") else {},
         }
         try:
             with open(SAVE_FILE, "w", encoding="utf-8") as f:
@@ -478,7 +570,9 @@ class GenshinTrackerWindow(QMainWindow):
                     self.current_theme_name = data.get("theme", "Mondstadt (Anemo)")
                     self.close_to_tray = data.get("close_to_tray", True)
 
-                    # NEU EINGEBAUT
+                    idx = 0 if self.close_to_tray else 1
+                    self.combo_close_action.setCurrentIndex(idx)
+
                     journal_data = data.get("teyvat_journal", {})
                     if hasattr(self, "journal_widget"):
                         self.journal_widget.load_state_dict(journal_data)
