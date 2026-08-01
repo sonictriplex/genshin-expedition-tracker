@@ -43,6 +43,7 @@ from config import (
 )
 from dialogs import InlineAddDialog, InlineResinDialog, InlineSettingsDialog
 from widgets import ExpeditionCard, OperationsHQCard
+from journal import TeyvatJournalWidget  # <--- NEU IMPORTIERT
 
 
 class GenshinTrackerWindow(QMainWindow):
@@ -110,6 +111,11 @@ class GenshinTrackerWindow(QMainWindow):
         self.main_layout.addWidget(self.grid_widget, stretch=1)
         self.main_layout.addSpacing(10)
 
+        # --- TEYVAT JOURNAL WIDGET (NEU EINGEBAUT) ---
+        self.journal_widget = TeyvatJournalWidget(parent_window=self)
+        self.main_layout.addWidget(self.journal_widget)
+        self.main_layout.addSpacing(10)
+
         self.btn_start_new = QPushButton()
         self.btn_start_new.clicked.connect(self.open_add_dialog)
         self.main_layout.addWidget(self.btn_start_new)
@@ -126,8 +132,8 @@ class GenshinTrackerWindow(QMainWindow):
         self.apply_theme(self.current_theme_name)
         self.update_add_button_state()
 
-        self.setMinimumSize(1500, 975)
-        self.resize(1500, 975)
+        self.setMinimumSize(1500, 1080)
+        self.resize(1500, 1080)
 
     def init_system_tray(self):
         self.tray_icon = QSystemTrayIcon(self)
@@ -268,6 +274,10 @@ class GenshinTrackerWindow(QMainWindow):
         if hasattr(self, "hq_card"):
             self.hq_card.apply_theme_style()
             self.hq_card.update_info()
+
+        # NEU EINGEBAUT
+        if hasattr(self, "journal_widget"):
+            self.journal_widget.apply_theme_style()
 
         for card in self.active_cards:
             card.style_card(active=card.get_remaining_seconds() > 0)
@@ -445,6 +455,7 @@ class GenshinTrackerWindow(QMainWindow):
             "last_resin_update": self.hq_card.last_resin_update,
             "theme": self.current_theme_name,
             "close_to_tray": self.close_to_tray,
+            "teyvat_journal": self.journal_widget.get_state_dict() if hasattr(self, "journal_widget") else {} # NEU EINGEBAUT
         }
         try:
             with open(SAVE_FILE, "w", encoding="utf-8") as f:
@@ -466,6 +477,11 @@ class GenshinTrackerWindow(QMainWindow):
                     self.hq_card.last_resin_update = data.get("last_resin_update", time.time())
                     self.current_theme_name = data.get("theme", "Mondstadt (Anemo)")
                     self.close_to_tray = data.get("close_to_tray", True)
+
+                    # NEU EINGEBAUT
+                    journal_data = data.get("teyvat_journal", {})
+                    if hasattr(self, "journal_widget"):
+                        self.journal_widget.load_state_dict(journal_data)
                 else:
                     expeditions = data
 
