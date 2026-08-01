@@ -20,12 +20,10 @@ class TeamGoalsWidget(QFrame):
         main_layout.setSpacing(14)
         main_layout.setContentsMargins(16, 16, 16, 16)
 
-        # --- Header ---
         title_label = QLabel("🎯 Team Building & Material Farming Goals")
         title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #ffffff;")
         main_layout.addWidget(title_label)
 
-        # --- Grid Layout for 4 Team Slots ---
         grid = QGridLayout()
         grid.setSpacing(12)
 
@@ -59,14 +57,13 @@ class TeamGoalsWidget(QFrame):
             combo_book = QComboBox()
             combo_book.addItems(book_options)
 
-            # Select matching default
             for idx, opt in enumerate(book_options):
                 if default_team[i][1].split(" ")[0] in opt:
                     combo_book.setCurrentIndex(idx)
                     break
 
-            char_edit.textChanged.connect(self.update_summary)
-            combo_book.currentIndexChanged.connect(self.update_summary)
+            char_edit.textChanged.connect(self.on_changed)
+            combo_book.currentIndexChanged.connect(self.on_changed)
 
             grid.addWidget(char_edit, i + 1, 0)
             grid.addWidget(combo_book, i + 1, 1)
@@ -75,7 +72,6 @@ class TeamGoalsWidget(QFrame):
 
         main_layout.addLayout(grid)
 
-        # --- Summary Section ---
         self.summary_card = QFrame()
         self.summary_card.setObjectName("sub_card")
         v_sum = QVBoxLayout(self.summary_card)
@@ -102,6 +98,11 @@ class TeamGoalsWidget(QFrame):
         self.apply_theme_style()
         self.update_summary()
 
+    def on_changed(self):
+        self.update_summary()
+        if self.parent_window and hasattr(self.parent_window, "save_expeditions"):
+            self.parent_window.save_expeditions()
+
     def update_summary(self):
         schedule = {
             "Mon/Thu": [],
@@ -122,8 +123,6 @@ class TeamGoalsWidget(QFrame):
             elif "Wed/Sat" in book:
                 schedule["Wed/Sat"].append(f"<b>{name}</b> ({book.split(' ')[0]})")
 
-        theme = get_theme()
-
         mon_txt = ", ".join(schedule["Mon/Thu"]) if schedule["Mon/Thu"] else "None"
         tue_txt = ", ".join(schedule["Tue/Fri"]) if schedule["Tue/Fri"] else "None"
         wed_txt = ", ".join(schedule["Wed/Sat"]) if schedule["Wed/Sat"] else "None"
@@ -131,6 +130,27 @@ class TeamGoalsWidget(QFrame):
         self.lbl_mon_thu.setText(f"📅 <b>Mon / Thu:</b> {mon_txt}")
         self.lbl_tue_fri.setText(f"📅 <b>Tue / Fri:</b> {tue_txt}")
         self.lbl_wed_sat.setText(f"📅 <b>Wed / Sat:</b> {wed_txt}")
+
+    def get_state_dict(self):
+        return [
+            {
+                "character": char_edit.text(),
+                "book": combo_book.currentText()
+            }
+            for char_edit, combo_book in self.team_inputs
+        ]
+
+    def load_state_dict(self, data):
+        if not data or not isinstance(data, list):
+            return
+        for i, item in enumerate(data):
+            if i < len(self.team_inputs):
+                char_edit, combo_book = self.team_inputs[i]
+                char_edit.setText(item.get("character", ""))
+                idx = combo_book.findText(item.get("book", ""))
+                if idx >= 0:
+                    combo_book.setCurrentIndex(idx)
+        self.update_summary()
 
     def apply_theme_style(self):
         theme = get_theme()

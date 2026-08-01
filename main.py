@@ -635,6 +635,9 @@ class GenshinTrackerWindow(QMainWindow):
             "theme": self.current_theme_name,
             "close_to_tray": self.close_to_tray,
             "teyvat_journal": self.journal_widget.get_state_dict() if hasattr(self, "journal_widget") else {},
+            "wishes": self.wishes_widget.get_state_dict() if hasattr(self, "wishes_widget") else {},
+            "weekly_bosses": self.bosses_widget.get_state_dict() if hasattr(self, "bosses_widget") else {},
+            "team_goals": self.team_widget.get_state_dict() if hasattr(self, "team_widget") else [],
         }
         try:
             with open(SAVE_FILE, "w", encoding="utf-8") as f:
@@ -660,9 +663,14 @@ class GenshinTrackerWindow(QMainWindow):
                     idx = 0 if self.close_to_tray else 1
                     self.combo_close_action.setCurrentIndex(idx)
 
-                    journal_data = data.get("teyvat_journal", {})
                     if hasattr(self, "journal_widget"):
-                        self.journal_widget.load_state_dict(journal_data)
+                        self.journal_widget.load_state_dict(data.get("teyvat_journal", {}))
+                    if hasattr(self, "wishes_widget"):
+                        self.wishes_widget.load_state_dict(data.get("wishes", {}))
+                    if hasattr(self, "bosses_widget"):
+                        self.bosses_widget.load_state_dict(data.get("weekly_bosses", {}))
+                    if hasattr(self, "team_widget"):
+                        self.team_widget.load_state_dict(data.get("team_goals", []))
                 else:
                     expeditions = data
 

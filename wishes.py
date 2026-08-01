@@ -20,35 +20,30 @@ class WishPityCounterWidget(QFrame):
         main_layout.setSpacing(14)
         main_layout.setContentsMargins(16, 16, 16, 16)
 
-        # --- Header ---
         title_label = QLabel("🌠 Wish & Pity Savings Counter")
         title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #ffffff;")
         main_layout.addWidget(title_label)
 
-        # --- Grid Layout for Controls ---
         grid = QGridLayout()
         grid.setSpacing(12)
 
-        # Current Pity
         lbl_pity = QLabel("Current Pity (Wishes since last 5★):")
         lbl_pity.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
         grid.addWidget(lbl_pity, 0, 0)
 
         self.spin_pity = QSpinBox()
         self.spin_pity.setRange(0, 89)
-        self.spin_pity.valueChanged.connect(self.calculate)
+        self.spin_pity.valueChanged.connect(self.on_changed)
         grid.addWidget(self.spin_pity, 0, 1)
 
-        # 50/50 Status
         lbl_guaranteed = QLabel("50/50 Status:")
         lbl_guaranteed.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
         grid.addWidget(lbl_guaranteed, 1, 0)
 
         self.chk_guaranteed = QCheckBox("Next 5★ is Guaranteed (Lost last 50/50)")
-        self.chk_guaranteed.stateChanged.connect(self.calculate)
+        self.chk_guaranteed.stateChanged.connect(self.on_changed)
         grid.addWidget(self.chk_guaranteed, 1, 1)
 
-        # Savings Input: Primogems
         lbl_primos = QLabel("💎 Primogems Owned:")
         lbl_primos.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
         grid.addWidget(lbl_primos, 2, 0)
@@ -56,22 +51,20 @@ class WishPityCounterWidget(QFrame):
         self.spin_primos = QSpinBox()
         self.spin_primos.setRange(0, 999999)
         self.spin_primos.setSingleStep(160)
-        self.spin_primos.valueChanged.connect(self.calculate)
+        self.spin_primos.valueChanged.connect(self.on_changed)
         grid.addWidget(self.spin_primos, 2, 1)
 
-        # Savings Input: Intertwined Fates
         lbl_fates = QLabel("💫 Intertwined Fates Owned:")
         lbl_fates.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
         grid.addWidget(lbl_fates, 3, 0)
 
         self.spin_fates = QSpinBox()
         self.spin_fates.setRange(0, 9999)
-        self.spin_fates.valueChanged.connect(self.calculate)
+        self.spin_fates.valueChanged.connect(self.on_changed)
         grid.addWidget(self.spin_fates, 3, 1)
 
         main_layout.addLayout(grid)
 
-        # --- Results Box ---
         self.results_card = QFrame()
         self.results_card.setObjectName("sub_card")
         v_res = QVBoxLayout(self.results_card)
@@ -98,16 +91,19 @@ class WishPityCounterWidget(QFrame):
         self.apply_theme_style()
         self.calculate()
 
+    def on_changed(self):
+        self.calculate()
+        if self.parent_window and hasattr(self.parent_window, "save_expeditions"):
+            self.parent_window.save_expeditions()
+
     def calculate(self):
         pity = self.spin_pity.value()
         primos = self.spin_primos.value()
         fates = self.spin_fates.value()
         is_guaranteed = self.chk_guaranteed.isChecked()
 
-        # Calculation
         wishes_from_primos = primos // 160
         total_wishes = fates + wishes_from_primos
-        effective_pity_total = pity + total_wishes
 
         wishes_to_soft = max(0, 75 - pity)
         wishes_to_hard = max(0, 90 - pity)
@@ -133,6 +129,23 @@ class WishPityCounterWidget(QFrame):
             self.lbl_guarantee_status.setText(
                 "🎲 Target Status: <b style='color: #ffaa00;'>50/50 Chance</b>"
             )
+
+    def get_state_dict(self):
+        return {
+            "pity": self.spin_pity.value(),
+            "guaranteed": self.chk_guaranteed.isChecked(),
+            "primogems": self.spin_primos.value(),
+            "fates": self.spin_fates.value(),
+        }
+
+    def load_state_dict(self, data):
+        if not data:
+            return
+        self.spin_pity.setValue(data.get("pity", 0))
+        self.chk_guaranteed.setChecked(data.get("guaranteed", False))
+        self.spin_primos.setValue(data.get("primogems", 0))
+        self.spin_fates.setValue(data.get("fates", 0))
+        self.calculate()
 
     def apply_theme_style(self):
         theme = get_theme()

@@ -19,12 +19,10 @@ class WeeklyBossTrackerWidget(QFrame):
         main_layout.setSpacing(14)
         main_layout.setContentsMargins(16, 16, 16, 16)
 
-        # --- Header ---
         title_label = QLabel("🐲 Weekly Boss Discount Tracker (Half Resin)")
         title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #ffffff;")
         main_layout.addWidget(title_label)
 
-        # --- Section 1: Discount Slots (3 per week) ---
         slots_card = QFrame()
         slots_card.setObjectName("sub_card")
         v_slots = QVBoxLayout(slots_card)
@@ -41,13 +39,12 @@ class WeeklyBossTrackerWidget(QFrame):
         self.cb_discount3 = QCheckBox("Discount Slot 3 (30 Resin)")
 
         for cb in [self.cb_discount1, self.cb_discount2, self.cb_discount3]:
-            cb.stateChanged.connect(self.update_summary)
+            cb.stateChanged.connect(self.on_changed)
             h_cb_layout.addWidget(cb)
 
         v_slots.addLayout(h_cb_layout)
         main_layout.addWidget(slots_card)
 
-        # --- Section 2: Boss Checklist ---
         lbl_bosses_header = QLabel("DEFEATED WEEKLY BOSSES THIS WEEK:")
         lbl_bosses_header.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
         main_layout.addWidget(lbl_bosses_header)
@@ -71,7 +68,7 @@ class WeeklyBossTrackerWidget(QFrame):
         self.boss_checkboxes = []
         for i, (boss_name, region) in enumerate(boss_list):
             cb = QCheckBox(f"{boss_name} ({region})")
-            cb.stateChanged.connect(self.update_summary)
+            cb.stateChanged.connect(self.on_changed)
             row = i // 2
             col = i % 2
             grid_bosses.addWidget(cb, row, col)
@@ -79,7 +76,6 @@ class WeeklyBossTrackerWidget(QFrame):
 
         main_layout.addLayout(grid_bosses)
 
-        # --- Section 3: Summary Box ---
         self.summary_card = QFrame()
         self.summary_card.setObjectName("sub_card")
         v_sum = QVBoxLayout(self.summary_card)
@@ -98,6 +94,11 @@ class WeeklyBossTrackerWidget(QFrame):
         self.apply_theme_style()
         self.update_summary()
 
+    def on_changed(self):
+        self.update_summary()
+        if self.parent_window and hasattr(self.parent_window, "save_expeditions"):
+            self.parent_window.save_expeditions()
+
     def update_summary(self):
         used_discounts = sum([
             1 for cb in [self.cb_discount1, self.cb_discount2, self.cb_discount3] if cb.isChecked()
@@ -114,6 +115,32 @@ class WeeklyBossTrackerWidget(QFrame):
             f"💰 Resin Saved This Week: <b style='color: {theme['amber']};'>{saved_resin} Resin</b> "
             f"<span style='color: #aaa;'>(Equivalates to {used_discounts * 4} hours regen time)</span>"
         )
+
+    def get_state_dict(self):
+        return {
+            "discounts": [
+                self.cb_discount1.isChecked(),
+                self.cb_discount2.isChecked(),
+                self.cb_discount3.isChecked(),
+            ],
+            "bosses": [cb.isChecked() for cb in self.boss_checkboxes],
+        }
+
+    def load_state_dict(self, data):
+        if not data:
+            return
+        discounts = data.get("discounts", [False, False, False])
+        if len(discounts) == 3:
+            self.cb_discount1.setChecked(discounts[0])
+            self.cb_discount2.setChecked(discounts[1])
+            self.cb_discount3.setChecked(discounts[2])
+
+        bosses = data.get("bosses", [])
+        for i, checked in enumerate(bosses):
+            if i < len(self.boss_checkboxes):
+                self.boss_checkboxes[i].setChecked(checked)
+
+        self.update_summary()
 
     def apply_theme_style(self):
         theme = get_theme()
