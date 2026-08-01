@@ -16,6 +16,12 @@ A cross‑platform tracker for expeditions in Genshin Impact, available as a **P
 - **Regional Themes:** Choose between seven Teyvat regions (Mondstadt, Liyue, Inazuma, Sumeru, Fontaine, Natlan, Snezhnaya) that customize the entire color scheme of the app.
 - **System Tray:** Minimize to tray and continue running in the background.
 - **Autostart:** Option to start with the system (Windows registry or Linux `.desktop` file).
+- **Teyvat Journal:** Daily commissions, weekly bosses, Katheryne, Parametric Transformer, artifact route, and endgame star counters (Abyss & Theater).
+- **Crafting Calculator:** Alchemy & crafting bench calculator with passive character bonuses (Sucrose/Albedo, Mona/Xingqiu).
+- **Wish & Pity Counter:** Track pity, guaranteed status, primogems, and fates.
+- **Resin Planner:** Shows time until full resin cap and warning time.
+- **Weekly Boss Tracker:** Manage half‑resin discounts and defeated bosses.
+- **Team & Farming Goals:** Plan talent book farming schedule for up to 4 characters.
 
 ### Android (Jetpack Compose)
 
@@ -99,6 +105,7 @@ python main.py
 6. Data is automatically saved and restored on next launch.
 7. **Switch Theme:** Select a region from the dropdown menu in the top right to customize the entire color scheme of the app.
 8. **System Tray:** Close the window to minimize to tray; use the tray icon to reopen or quit.
+9. **Sidebar Navigation:** Use the left sidebar to switch between Expeditions, Teyvat Journal, Crafting Calculator, Wish & Pity Counter, Resin Planner, Weekly Boss Tracker, Team & Farming Goals, and Settings.
 
 #### Screenshot:
 
@@ -114,7 +121,7 @@ python main.py
 6. Use the **Operations HQ** card to see the next arrival, daily reset, and resin counter.
 7. Tap the gear icon next to **RESIN COUNTER** to manually adjust resin.
 8. **Switch Theme:** Tap the region name in the top right to customize the entire color scheme of the app.
-9. Use the bottom navigation to access **Crafting**, **Wishes**, and **Bosses** screens.
+9. Use the bottom navigation to access **Tracker**, **Crafting**, **Wishes**, and **Bosses** screens.
 
 #### Screenshot:
 
@@ -135,9 +142,15 @@ genshin-expedition-tracker/
 │       ├── Screens.kt               # Additional Compose screens (Crafting, Wishes, Bosses)
 │       └── ui/theme/                # Material theme definitions
 ├── config.py                        # Themes, paths, character data & cross-platform autostart
+├── crafting.py                      # Crafting Calculator widget (Desktop)
 ├── dialogs.py                       # Overlay dialogs (Add Expedition, Resin, Settings)
-├── widgets.py                       # Custom UI widgets (ExpeditionCard, OperationsHQCard)
+├── journal.py                       # Teyvat Journal widget (Desktop)
 ├── main.py                          # Main window, system tray & app entry point
+├── resin_planner.py                 # Resin Planner widget (Desktop)
+├── team_goals.py                    # Team & Farming Goals widget (Desktop)
+├── weekly_bosses.py                 # Weekly Boss Tracker widget (Desktop)
+├── widgets.py                       # Custom UI widgets (ExpeditionCard, OperationsHQCard)
+├── wishes.py                        # Wish & Pity Counter widget (Desktop)
 ├── download_genshin_icons.py        # Helper script to download character icons
 ├── expeditions.json                 # Auto-created save file (Desktop)
 └── README.md                        # Project documentation & Git info
