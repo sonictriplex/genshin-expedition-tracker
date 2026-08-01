@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -54,12 +56,12 @@ data class RegionTheme(
 
 val REGION_THEMES = mapOf(
     "Mondstadt (Anemo)" to RegionTheme("Mondstadt (Anemo)", Color(0xFF38E3E3), Color(0xFFFFAA00), Color(0xFF1A1C24), Color(0xFF252833)),
-                          "Liyue (Geo)" to RegionTheme("Liyue (Geo)", Color(0xFFE6A000), Color(0xFFFFD266), Color(0xFF221D14), Color(0xFF30291D)),
-                          "Inazuma (Electro)" to RegionTheme("Inazuma (Electro)", Color(0xFFA855F7), Color(0xFFF0ABFC), Color(0xFF1A1325), Color(0xFF251B36)),
-                          "Sumeru (Dendro)" to RegionTheme("Sumeru (Dendro)", Color(0xFF22C55E), Color(0xFFFACC15), Color(0xFF122017), Color(0xFF1A2E21)),
-                          "Fontaine (Hydro)" to RegionTheme("Fontaine (Hydro)", Color(0xFF38BDF8), Color(0xFFF472B6), Color(0xFF111C28), Color(0xFF182838)),
-                          "Natlan (Pyro)" to RegionTheme("Natlan (Pyro)", Color(0xFFEF4444), Color(0xFFFBBF24), Color(0xFF241313), Color(0xFF331C1C)),
-                          "Snezhnaya (Cryo)" to RegionTheme("Snezhnaya (Cryo)", Color(0xFF99F6E4), Color(0xFFA5F3FC), Color(0xFF121D24), Color(0xFF1A2933))
+    "Liyue (Geo)" to RegionTheme("Liyue (Geo)", Color(0xFFE6A000), Color(0xFFFFD266), Color(0xFF221D14), Color(0xFF30291D)),
+    "Inazuma (Electro)" to RegionTheme("Inazuma (Electro)", Color(0xFFA855F7), Color(0xFFF0ABFC), Color(0xFF1A1325), Color(0xFF251B36)),
+    "Sumeru (Dendro)" to RegionTheme("Sumeru (Dendro)", Color(0xFF22C55E), Color(0xFFFACC15), Color(0xFF122017), Color(0xFF1A2E21)),
+    "Fontaine (Hydro)" to RegionTheme("Fontaine (Hydro)", Color(0xFF38BDF8), Color(0xFFF472B6), Color(0xFF111C28), Color(0xFF182838)),
+    "Natlan (Pyro)" to RegionTheme("Natlan (Pyro)", Color(0xFFEF4444), Color(0xFFFBBF24), Color(0xFF241313), Color(0xFF331C1C)),
+    "Snezhnaya (Cryo)" to RegionTheme("Snezhnaya (Cryo)", Color(0xFF99F6E4), Color(0xFFA5F3FC), Color(0xFF121D24), Color(0xFF1A2933))
 )
 
 // --- Bonus-Zuordnung: Charakter zu Heimatregion (-25% Zeitersparnis) ---
@@ -83,9 +85,9 @@ val DURATIONS_STANDARD = listOf(
 
 val DURATIONS_BONUS = listOf(
     "3 Hours (Bonus 4h)" to 3,
-                             "6 Hours (Bonus 8h)" to 6,
-                             "9 Hours (Bonus 12h)" to 9,
-                             "15 Hours (Bonus 20h)" to 15
+    "6 Hours (Bonus 8h)" to 6,
+    "9 Hours (Bonus 12h)" to 9,
+    "15 Hours (Bonus 20h)" to 15
 )
 
 class MainActivity : ComponentActivity() {
@@ -115,9 +117,9 @@ class MainActivity : ComponentActivity() {
     private fun checkAndRequestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
@@ -139,6 +141,7 @@ fun MainScreen() {
     var showAddDialog by remember { mutableStateOf(false) }
     var showResinDialog by remember { mutableStateOf(false) }
     var themeExpanded by remember { mutableStateOf(false) }
+    var selectedTab by remember { mutableIntStateOf(0) }
     val maxResin = 200
 
     LaunchedEffect(activeExpeditions) {
@@ -168,13 +171,14 @@ fun MainScreen() {
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-            color = currentTheme.bgDark
+        color = currentTheme.bgDark
     ) {
         Column(
             modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .padding(16.dp)
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(16.dp)
         ) {
             // Header mit App-Titel & Theme-Dropdown
             Row(
@@ -184,23 +188,23 @@ fun MainScreen() {
             ) {
                 Text(
                     text = "Genshin Tracker",
-                     color = Color.White,
-                     fontSize = 18.sp,
-                     fontWeight = FontWeight.Bold
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
                 )
 
                 Box {
                     OutlinedButton(
                         onClick = { themeExpanded = true },
                         shape = RoundedCornerShape(8.dp),
-                                   contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                                   border = androidx.compose.foundation.BorderStroke(1.dp, currentTheme.cyan)
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, currentTheme.cyan)
                     ) {
                         Text(
                             text = currentThemeName,
-                             color = currentTheme.cyan,
-                             fontSize = 11.sp,
-                             fontWeight = FontWeight.Bold
+                            color = currentTheme.cyan,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                     DropdownMenu(
@@ -210,10 +214,10 @@ fun MainScreen() {
                         REGION_THEMES.keys.forEach { tName ->
                             DropdownMenuItem(
                                 text = { Text(tName) },
-                                             onClick = {
-                                                 currentThemeName = tName
-                                                 themeExpanded = false
-                                             }
+                                onClick = {
+                                    currentThemeName = tName
+                                    themeExpanded = false
+                                }
                             )
                         }
                     }
@@ -222,65 +226,66 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Haupt-Grid (HQ-Card + Expeditionskarten)
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(1),
-                             verticalArrangement = Arrangement.spacedBy(12.dp),
-                             horizontalArrangement = Arrangement.spacedBy(12.dp),
-                             modifier = Modifier.weight(1f)
-            ) {
-                item {
-                    OperationsHQCard(
-                        expeditions = activeExpeditions,
+            // Hauptinhalt basierend auf der Tab-Auswahl
+            Box(modifier = Modifier.weight(1f)) {
+                when (selectedTab) {
+                    0 -> ExpeditionMainContent(
+                        activeExpeditions = activeExpeditions,
                         currentResin = currentResin,
                         maxResin = maxResin,
                         lastResinUpdate = lastResinUpdate,
                         theme = currentTheme,
+                        context = context,
                         onEditResin = { showResinDialog = true },
                         onClaimAll = {
                             val now = System.currentTimeMillis() / 1000
                             activeExpeditions = activeExpeditions.filter { it.endTimestampEpochSec > now }
-                        }
-                    )
-                }
-
-                items(activeExpeditions, key = { it.id }) { expedition ->
-                    ExpeditionCard(
-                        expedition = expedition,
-                        theme = currentTheme,
-                        onDelete = { target ->
+                        },
+                        onDeleteExpedition = { target ->
                             WorkManager.getInstance(context).cancelAllWorkByTag(target.id)
                             activeExpeditions = activeExpeditions.filter { it.id != target.id }
-                        }
+                        },
+                        onStartExpedition = { if (activeExpeditions.size < 5) showAddDialog = true },
+                        limitReached = activeExpeditions.size >= 5
                     )
+                    1 -> CraftingCalculatorScreen(theme = currentTheme)
+                    2 -> WishCounterScreen(theme = currentTheme)
+                    3 -> WeeklyBossScreen(theme = currentTheme)
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // "+ Start New Expedition" Button (Jetzt ganz unten!)
-            val limitReached = activeExpeditions.size >= 5
-            Button(
-                onClick = { if (!limitReached) showAddDialog = true },
-                   enabled = !limitReached,
-                   colors = ButtonDefaults.buttonColors(
-                       containerColor = if (limitReached) Color(0xFF1E2029) else currentTheme.cardBg,
-                                                        disabledContainerColor = Color(0xFF1E2029)
-                   ),
-                   shape = RoundedCornerShape(8.dp),
-                   modifier = Modifier
-                   .fillMaxWidth()
-                   .border(
-                       width = 1.dp,
-                       color = if (limitReached) Color(0xFF333745) else currentTheme.cyan,
-                           shape = RoundedCornerShape(8.dp)
-                   )
+            // Untere Navigationsleiste
+            NavigationBar(
+                containerColor = currentTheme.cardBg,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
             ) {
-                Text(
-                    text = if (limitReached) "Limit Reached (${activeExpeditions.size}/5)"
-                    else "+ Start New Expedition (${activeExpeditions.size}/5)",
-                        color = if (limitReached) Color(0xFF555866) else currentTheme.cyan,
-                     fontWeight = FontWeight.Bold
+                NavigationBarItem(
+                    selected = selectedTab == 0,
+                    onClick = { selectedTab = 0 },
+                    icon = { Text("⏳", fontSize = 16.sp) },
+                    label = { Text("Tracker", fontSize = 9.sp) }
+                )
+                NavigationBarItem(
+                    selected = selectedTab == 1,
+                    onClick = { selectedTab = 1 },
+                    icon = { Text("🧪", fontSize = 16.sp) },
+                    label = { Text("Crafting", fontSize = 9.sp) }
+                )
+                NavigationBarItem(
+                    selected = selectedTab == 2,
+                    onClick = { selectedTab = 2 },
+                    icon = { Text("🌠", fontSize = 16.sp) },
+                    label = { Text("Wishes", fontSize = 9.sp) }
+                )
+                NavigationBarItem(
+                    selected = selectedTab == 3,
+                    onClick = { selectedTab = 3 },
+                    icon = { Text("🐲", fontSize = 16.sp) },
+                    label = { Text("Bosses", fontSize = 9.sp) }
                 )
             }
         }
@@ -329,6 +334,75 @@ fun MainScreen() {
     }
 }
 
+@Composable
+fun ExpeditionMainContent(
+    activeExpeditions: List<Expedition>,
+    currentResin: Int,
+    maxResin: Int,
+    lastResinUpdate: Long,
+    theme: RegionTheme,
+    context: Context,
+    onEditResin: () -> Unit,
+    onClaimAll: () -> Unit,
+    onDeleteExpedition: (Expedition) -> Unit,
+    onStartExpedition: () -> Unit,
+    limitReached: Boolean
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(1),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        item {
+            OperationsHQCard(
+                expeditions = activeExpeditions,
+                currentResin = currentResin,
+                maxResin = maxResin,
+                lastResinUpdate = lastResinUpdate,
+                theme = theme,
+                onEditResin = onEditResin,
+                onClaimAll = onClaimAll
+            )
+        }
+
+        items(activeExpeditions, key = { it.id }) { expedition ->
+            ExpeditionCard(
+                expedition = expedition,
+                theme = theme,
+                onDelete = onDeleteExpedition
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(4.dp))
+            Button(
+                onClick = onStartExpedition,
+                enabled = !limitReached,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (limitReached) Color(0xFF1E2029) else theme.cardBg,
+                    disabledContainerColor = Color(0xFF1E2029)
+                ),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        width = 1.dp,
+                        color = if (limitReached) Color(0xFF333745) else theme.cyan,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+            ) {
+                Text(
+                    text = if (limitReached) "Limit Reached (${activeExpeditions.size}/5)"
+                    else "+ Start New Expedition (${activeExpeditions.size}/5)",
+                    color = if (limitReached) Color(0xFF555866) else theme.cyan,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
 // =========================================================
 // UI Komponente: Operations HQ
 // =========================================================
@@ -340,7 +414,7 @@ fun OperationsHQCard(
     lastResinUpdate: Long,
     theme: RegionTheme,
     onEditResin: () -> Unit,
-                     onClaimAll: () -> Unit
+    onClaimAll: () -> Unit
 ) {
     var currentTime by remember { mutableLongStateOf(System.currentTimeMillis() / 1000) }
 
@@ -353,30 +427,30 @@ fun OperationsHQCard(
 
     Card(
         colors = CardDefaults.cardColors(containerColor = theme.cardBg),
-         shape = RoundedCornerShape(12.dp),
-         modifier = Modifier
-         .fillMaxWidth()
-         .border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = "OPERATIONS HQ",
-                 color = theme.cyan,
-                 fontWeight = FontWeight.Bold,
-                 fontSize = 13.sp
+                color = theme.cyan,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             val readyCards = expeditions.filter { it.endTimestampEpochSec <= currentTime }
             val nextCard = expeditions.filter { it.endTimestampEpochSec > currentTime }
-            .minByOrNull { it.endTimestampEpochSec }
+                .minByOrNull { it.endTimestampEpochSec }
 
             Box(
                 modifier = Modifier
-                .fillMaxWidth()
-                .background(theme.boxDark, RoundedCornerShape(6.dp))
-                .padding(8.dp)
+                    .fillMaxWidth()
+                    .background(theme.boxDark, RoundedCornerShape(6.dp))
+                    .padding(8.dp)
             ) {
                 Column {
                     Text("NEXT ARRIVAL", color = Color.Gray, fontSize = 9.sp, fontWeight = FontWeight.Bold)
@@ -398,9 +472,9 @@ fun OperationsHQCard(
 
             val cal = Calendar.getInstance().apply {
                 if (get(Calendar.HOUR_OF_DAY) >= 4) add(Calendar.DAY_OF_YEAR, 1)
-                    set(Calendar.HOUR_OF_DAY, 4)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
+                set(Calendar.HOUR_OF_DAY, 4)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
             }
             val secondsToReset = ((cal.timeInMillis / 1000) - currentTime).coerceAtLeast(0)
             val resH = secondsToReset / 3600
@@ -408,9 +482,9 @@ fun OperationsHQCard(
 
             Box(
                 modifier = Modifier
-                .fillMaxWidth()
-                .background(theme.boxDark, RoundedCornerShape(6.dp))
-                .padding(8.dp)
+                    .fillMaxWidth()
+                    .background(theme.boxDark, RoundedCornerShape(6.dp))
+                    .padding(8.dp)
             ) {
                 Column {
                     Text("DAILY RESET (04:00)", color = Color.Gray, fontSize = 9.sp, fontWeight = FontWeight.Bold)
@@ -422,9 +496,9 @@ fun OperationsHQCard(
 
             Box(
                 modifier = Modifier
-                .fillMaxWidth()
-                .background(theme.boxDark, RoundedCornerShape(6.dp))
-                .padding(8.dp)
+                    .fillMaxWidth()
+                    .background(theme.boxDark, RoundedCornerShape(6.dp))
+                    .padding(8.dp)
             ) {
                 Column {
                     Row(
@@ -454,7 +528,7 @@ fun OperationsHQCard(
             Button(
                 onClick = onClaimAll,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E323F)),
-                   modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Claim All Ready", color = theme.cyan)
             }
@@ -483,22 +557,22 @@ fun ExpeditionCard(expedition: Expedition, theme: RegionTheme, onDelete: (Expedi
 
     Card(
         colors = CardDefaults.cardColors(containerColor = theme.cardBg),
-         shape = RoundedCornerShape(12.dp),
-         modifier = Modifier
-         .fillMaxWidth()
-         .border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             if (imageResId != 0) {
                 Image(
                     painter = painterResource(id = imageResId),
-                      contentDescription = expedition.charName,
-                      contentScale = ContentScale.Crop,
-                      colorFilter = ColorFilter.tint(
-                          Color.Black.copy(alpha = 0.55f),
-                                                     BlendMode.Darken
-                      ),
-                      modifier = Modifier.matchParentSize()
+                    contentDescription = expedition.charName,
+                    contentScale = ContentScale.Crop,
+                    colorFilter = ColorFilter.tint(
+                        Color.Black.copy(alpha = 0.55f),
+                        BlendMode.Darken
+                    ),
+                    modifier = Modifier.matchParentSize()
                 )
             }
 
@@ -510,9 +584,9 @@ fun ExpeditionCard(expedition: Expedition, theme: RegionTheme, onDelete: (Expedi
                 ) {
                     Text(
                         text = expedition.charName,
-                         color = Color.White,
-                         fontWeight = FontWeight.Bold,
-                         fontSize = 14.sp
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
                     )
                     IconButton(onClick = { onDelete(expedition) }, modifier = Modifier.size(24.dp)) {
                         Text("✕", color = Color.Gray, fontSize = 12.sp)
@@ -523,8 +597,8 @@ fun ExpeditionCard(expedition: Expedition, theme: RegionTheme, onDelete: (Expedi
 
                 Box(
                     modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
+                        .fillMaxWidth()
+                        .padding(8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     if (isComplete) {
@@ -535,9 +609,9 @@ fun ExpeditionCard(expedition: Expedition, theme: RegionTheme, onDelete: (Expedi
                         val s = rem % 60
                         Text(
                             text = String.format(Locale.getDefault(), "%02d:%02d:%02d", h, m, s),
-                             color = theme.cyan,
-                             fontWeight = FontWeight.Bold,
-                             fontSize = 16.sp
+                            color = theme.cyan,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
                         )
                     }
                 }
@@ -546,20 +620,20 @@ fun ExpeditionCard(expedition: Expedition, theme: RegionTheme, onDelete: (Expedi
 
                 Text(
                     text = "📍 ${expedition.location}",
-                     color = theme.cyan,
-                     fontSize = 11.sp,
-                     modifier = Modifier
-                     .background(theme.boxDark.copy(alpha = 0.85f), RoundedCornerShape(6.dp))
-                     .padding(horizontal = 8.dp, vertical = 4.dp)
-                     .align(Alignment.CenterHorizontally)
+                    color = theme.cyan,
+                    fontSize = 11.sp,
+                    modifier = Modifier
+                        .background(theme.boxDark.copy(alpha = 0.85f), RoundedCornerShape(6.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .align(Alignment.CenterHorizontally)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Button(
                     onClick = { if (isComplete) onDelete(expedition) },
-                       colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E323F).copy(alpha = 0.9f)),
-                       modifier = Modifier.fillMaxWidth()
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E323F).copy(alpha = 0.9f)),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(if (isComplete) "Claim Reward" else "Running", color = activeColor)
                 }
@@ -569,13 +643,13 @@ fun ExpeditionCard(expedition: Expedition, theme: RegionTheme, onDelete: (Expedi
 }
 
 // =========================================================
-// Dialog: Neue Expedition hinzufügen (mit dynamischer Bonuslogik)
+// Dialog: Neue Expedition hinzufügen
 // =========================================================
 @Composable
 fun AddExpeditionDialog(
     theme: RegionTheme,
     onDismiss: () -> Unit,
-                        onSubmit: (String, String, Int) -> Unit
+    onSubmit: (String, String, Int) -> Unit
 ) {
     val charList = CHARACTERS.keys.toList().sorted()
     var selectedChar by remember { mutableStateOf(charList.firstOrNull() ?: "Bennett") }
@@ -603,124 +677,124 @@ fun AddExpeditionDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("New Expedition", color = theme.cyan) },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Character:", color = Color.White, fontSize = 12.sp)
-                        Box {
-                            OutlinedButton(
-                                onClick = { charExpanded = true },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(selectedChar, color = theme.cyan, fontWeight = FontWeight.Bold)
-                            }
-                            DropdownMenu(
-                                expanded = charExpanded,
-                                onDismissRequest = { charExpanded = false }
-                            ) {
-                                charList.forEach { charName ->
-                                    DropdownMenuItem(
-                                        text = { Text(charName) },
-                                                     onClick = {
-                                                         selectedChar = charName
-                                                         charExpanded = false
-                                                     }
-                                    )
-                                }
-                            }
-                        }
-
-                        Text("Region:", color = Color.White, fontSize = 12.sp)
-                        Box {
-                            OutlinedButton(
-                                onClick = { regionExpanded = true },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(selectedRegion, color = Color.White)
-                            }
-                            DropdownMenu(
-                                expanded = regionExpanded,
-                                onDismissRequest = { regionExpanded = false }
-                            ) {
-                                REGIONS.forEach { region ->
-                                    DropdownMenuItem(
-                                        text = { Text(region) },
-                                                     onClick = {
-                                                         selectedRegion = region
-                                                         regionExpanded = false
-                                                     }
-                                    )
-                                }
-                            }
-                        }
-
-                        Text("Resource:", color = Color.White, fontSize = 12.sp)
-                        Box {
-                            OutlinedButton(
-                                onClick = { resourceExpanded = true },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(selectedResource, color = Color.White)
-                            }
-                            DropdownMenu(
-                                expanded = resourceExpanded,
-                                onDismissRequest = { resourceExpanded = false }
-                            ) {
-                                RESOURCES.forEach { resource ->
-                                    DropdownMenuItem(
-                                        text = { Text(resource) },
-                                                     onClick = {
-                                                         selectedResource = resource
-                                                         resourceExpanded = false
-                                                     }
-                                    )
-                                }
-                            }
-                        }
-
-                        Text("Duration:", color = Color.White, fontSize = 12.sp)
-                        Box {
-                            OutlinedButton(
-                                onClick = { durationExpanded = true },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = selectedDuration.first,
-                                     color = if (hasBonus) theme.amber else theme.cyan,
-                                     fontWeight = FontWeight.Bold
-                                )
-                            }
-                            DropdownMenu(
-                                expanded = durationExpanded,
-                                onDismissRequest = { durationExpanded = false }
-                            ) {
-                                durationOptions.forEachIndexed { index, option ->
-                                    DropdownMenuItem(
-                                        text = { Text(option.first) },
-                                                     onClick = {
-                                                         selectedIndex = index
-                                                         durationExpanded = false
-                                                     }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            val loc = "$selectedRegion ($selectedResource)"
-                            onSubmit(selectedChar, loc, selectedDuration.second)
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = theme.cyan)
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Character:", color = Color.White, fontSize = 12.sp)
+                Box {
+                    OutlinedButton(
+                        onClick = { charExpanded = true },
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Start", color = Color.Black)
+                        Text(selectedChar, color = theme.cyan, fontWeight = FontWeight.Bold)
                     }
+                    DropdownMenu(
+                        expanded = charExpanded,
+                        onDismissRequest = { charExpanded = false }
+                    ) {
+                        charList.forEach { charName ->
+                            DropdownMenuItem(
+                                text = { Text(charName) },
+                                onClick = {
+                                    selectedChar = charName
+                                    charExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Text("Region:", color = Color.White, fontSize = 12.sp)
+                Box {
+                    OutlinedButton(
+                        onClick = { regionExpanded = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(selectedRegion, color = Color.White)
+                    }
+                    DropdownMenu(
+                        expanded = regionExpanded,
+                        onDismissRequest = { regionExpanded = false }
+                    ) {
+                        REGIONS.forEach { region ->
+                            DropdownMenuItem(
+                                text = { Text(region) },
+                                onClick = {
+                                    selectedRegion = region
+                                    regionExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Text("Resource:", color = Color.White, fontSize = 12.sp)
+                Box {
+                    OutlinedButton(
+                        onClick = { resourceExpanded = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(selectedResource, color = Color.White)
+                    }
+                    DropdownMenu(
+                        expanded = resourceExpanded,
+                        onDismissRequest = { resourceExpanded = false }
+                    ) {
+                        RESOURCES.forEach { resource ->
+                            DropdownMenuItem(
+                                text = { Text(resource) },
+                                onClick = {
+                                    selectedResource = resource
+                                    resourceExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Text("Duration:", color = Color.White, fontSize = 12.sp)
+                Box {
+                    OutlinedButton(
+                        onClick = { durationExpanded = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = selectedDuration.first,
+                            color = if (hasBonus) theme.amber else theme.cyan,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = durationExpanded,
+                        onDismissRequest = { durationExpanded = false }
+                    ) {
+                        durationOptions.forEachIndexed { index, option ->
+                            DropdownMenuItem(
+                                text = { Text(option.first) },
+                                onClick = {
+                                    selectedIndex = index
+                                    durationExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val loc = "$selectedRegion ($selectedResource)"
+                    onSubmit(selectedChar, loc, selectedDuration.second)
                 },
-                dismissButton = {
-                    TextButton(onClick = onDismiss) { Text("Cancel", color = Color.Gray) }
-                },
-                containerColor = theme.cardBg
+                colors = ButtonDefaults.buttonColors(containerColor = theme.cyan)
+            ) {
+                Text("Start", color = Color.Black)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel", color = Color.Gray) }
+        },
+        containerColor = theme.cardBg
     )
 }
 
@@ -733,53 +807,253 @@ fun AdjustResinDialog(
     maxResin: Int,
     theme: RegionTheme,
     onDismiss: () -> Unit,
-                      onConfirm: (Int) -> Unit
+    onConfirm: (Int) -> Unit
 ) {
     var textVal by remember { mutableStateOf(currentResin.toString()) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Adjust Resin", color = theme.cyan) },
-                text = {
-                    Column {
-                        Text("Current Resin (0-$maxResin):", color = Color.White)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedTextField(
-                            value = textVal,
-                            onValueChange = { textVal = it },
-                            singleLine = true,
-                            textStyle = androidx.compose.ui.text.TextStyle(
-                                color = Color.White,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = theme.cyan,
-                                unfocusedBorderColor = Color.Gray,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                cursorColor = theme.cyan
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+        text = {
+            Column {
+                Text("Current Resin (0-$maxResin):", color = Color.White)
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = textVal,
+                    onValueChange = { textVal = it },
+                    singleLine = true,
+                    textStyle = androidx.compose.ui.text.TextStyle(
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = theme.cyan,
+                        unfocusedBorderColor = Color.Gray,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        cursorColor = theme.cyan
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val parsed = textVal.toIntOrNull() ?: currentResin
+                    onConfirm(parsed.coerceIn(0, maxResin))
                 },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            val parsed = textVal.toIntOrNull() ?: currentResin
-                            onConfirm(parsed.coerceIn(0, maxResin))
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = theme.cyan)
-                    ) {
-                        Text("OK", color = Color.Black)
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = onDismiss) { Text("Cancel", color = Color.Gray) }
-                },
-                containerColor = theme.cardBg
+                colors = ButtonDefaults.buttonColors(containerColor = theme.cyan)
+            ) {
+                Text("OK", color = Color.Black)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel", color = Color.Gray) }
+        },
+        containerColor = theme.cardBg
     )
+}
+
+// =========================================================
+// Crafting Calculator Screen (Mobile Modul)
+// =========================================================
+@Composable
+fun CraftingCalculatorScreen(theme: RegionTheme) {
+    var tier1 by remember { mutableStateOf("0") }
+    var tier2 by remember { mutableStateOf("0") }
+    var tier3 by remember { mutableStateOf("0") }
+    var passiveMode by remember { mutableStateOf(0) }
+
+    val t1Val = tier1.toIntOrNull() ?: 0
+    val t2Val = tier2.toIntOrNull() ?: 0
+    val t3Val = tier3.toIntOrNull() ?: 0
+
+    val multiplier = when (passiveMode) {
+        1 -> 1.10
+        2 -> 1.0833
+        else -> 1.0
+    }
+
+    val craftedT2 = Math.floor((t1Val / 3.0) * multiplier).toInt()
+    val totalT2 = t2Val + craftedT2
+    val craftedT3 = Math.floor((totalT2 / 3.0) * multiplier).toInt()
+    val totalT3 = t3Val + craftedT3
+    val totalSteps = (t1Val / 3) + (totalT2 / 3)
+    val estimatedMora = totalSteps * 175
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("🧪 Alchemy & Crafting Calculator", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+
+        Card(
+            colors = CardDefaults.cardColors(containerColor = theme.cardBg),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth().border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Crafting Passive:", color = Color.Gray, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Button(onClick = { passiveMode = 0 }, colors = ButtonDefaults.buttonColors(containerColor = if (passiveMode == 0) theme.cyan else Color(0xFF2E323F))) { Text("None", fontSize = 10.sp, color = if (passiveMode == 0) Color.Black else Color.White) }
+                    Button(onClick = { passiveMode = 1 }, colors = ButtonDefaults.buttonColors(containerColor = if (passiveMode == 1) theme.cyan else Color(0xFF2E323F))) { Text("Sucrose (2x)", fontSize = 10.sp, color = if (passiveMode == 1) Color.Black else Color.White) }
+                    Button(onClick = { passiveMode = 2 }, colors = ButtonDefaults.buttonColors(containerColor = if (passiveMode == 2) theme.cyan else Color(0xFF2E323F))) { Text("Mona (Refund)", fontSize = 10.sp, color = if (passiveMode == 2) Color.Black else Color.White) }
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(value = tier1, onValueChange = { tier1 = it }, label = { Text("🟢 Tier 1 (Green / 2★)") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = tier2, onValueChange = { tier2 = it }, label = { Text("🔵 Tier 2 (Blue / 3★)") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = tier3, onValueChange = { tier3 = it }, label = { Text("🟣 Tier 3 (Purple / 4★)") }, modifier = Modifier.fillMaxWidth())
+            }
+        }
+
+        Card(
+            colors = CardDefaults.cardColors(containerColor = theme.cardBg),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth().border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text("CRAFTING SUMMARY", color = Color.Gray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                Text("🔵 Total Blue Materials (3★): $totalT2 (+ $craftedT2 crafted)", color = Color.White, fontSize = 12.sp)
+                Text("🟣 Max Purple Materials (4★): $totalT3 (+ $craftedT3 crafted)", color = Color.White, fontSize = 12.sp)
+                Text("💰 Estimated Cost: $estimatedMora Mora", color = theme.amber, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            }
+        }
+    }
+}
+
+// =========================================================
+// Wish & Pity Counter Screen (Mobile Modul)
+// =========================================================
+@Composable
+fun WishCounterScreen(theme: RegionTheme) {
+    var pityStr by remember { mutableStateOf("0") }
+    var isGuaranteed by remember { mutableStateOf(false) }
+    var primosStr by remember { mutableStateOf("0") }
+    var fatesStr by remember { mutableStateOf("0") }
+
+    val pity = pityStr.toIntOrNull() ?: 0
+    val primos = primosStr.toIntOrNull() ?: 0
+    val fates = fatesStr.toIntOrNull() ?: 0
+
+    val wishesFromPrimos = primos / 160
+    val totalWishes = fates + wishesFromPrimos
+    val toSoft = (75 - pity).coerceAtLeast(0)
+    val toHard = (90 - pity).coerceAtLeast(0)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("🌠 Wish & Pity Savings Counter", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+
+        Card(
+            colors = CardDefaults.cardColors(containerColor = theme.cardBg),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth().border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(value = pityStr, onValueChange = { pityStr = it }, label = { Text("Current Pity (0-89)") }, modifier = Modifier.fillMaxWidth())
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(checked = isGuaranteed, onCheckedChange = { isGuaranteed = it })
+                    Text("Next 5★ is Guaranteed", color = Color.White, fontSize = 12.sp)
+                }
+                OutlinedTextField(value = primosStr, onValueChange = { primosStr = it }, label = { Text("Primogems Owned") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = fatesStr, onValueChange = { fatesStr = it }, label = { Text("Intertwined Fates Owned") }, modifier = Modifier.fillMaxWidth())
+            }
+        }
+
+        Card(
+            colors = CardDefaults.cardColors(containerColor = theme.cardBg),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth().border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text("PITY & SAVINGS SUMMARY", color = Color.Gray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                Text("💫 Total Available Pulls: $totalWishes Wishes", color = theme.cyan, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text("🎯 Wishes to Soft Pity (75): $toSoft", color = Color.White, fontSize = 12.sp)
+                Text("🛡️ Wishes to Hard Pity (90): $toHard", color = Color.White, fontSize = 12.sp)
+                Text(if (isGuaranteed) "✨ Status: GUARANTEED 5★" else "🎲 Status: 50/50 Chance", color = if (isGuaranteed) Color.Green else theme.amber, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            }
+        }
+    }
+}
+
+// =========================================================
+// Weekly Boss Tracker Screen (Mobile Modul)
+// =========================================================
+@Composable
+fun WeeklyBossScreen(theme: RegionTheme) {
+    val bossList = listOf(
+        "Stormterror Dvalin", "Wolf of the North", "Childe",
+        "Azhdaha", "La Signora", "Narukami no Mikoto",
+        "Scaramouche", "Apep's Oasis", "Narwhal", "Arlecchino"
+    )
+
+    var slot1 by remember { mutableStateOf(false) }
+    var slot2 by remember { mutableStateOf(false) }
+    var slot3 by remember { mutableStateOf(false) }
+    val bossStates = remember { mutableStateMapOf<String, Boolean>() }
+
+    val usedDiscounts = listOf(slot1, slot2, slot3).count { it }
+    val remaining = 3 - usedDiscounts
+    val savedResin = usedDiscounts * 30
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("🐲 Weekly Boss Discount Tracker", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+
+        Card(
+            colors = CardDefaults.cardColors(containerColor = theme.cardBg),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth().border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("50% RESIN DISCOUNTS ($remaining / 3 AVAILABLE)", color = Color.Gray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(checked = slot1, onCheckedChange = { slot1 = it })
+                    Text("Discount Slot 1 (30 Resin)", color = Color.White, fontSize = 12.sp)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(checked = slot2, onCheckedChange = { slot2 = it })
+                    Text("Discount Slot 2 (30 Resin)", color = Color.White, fontSize = 12.sp)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(checked = slot3, onCheckedChange = { slot3 = it })
+                    Text("Discount Slot 3 (30 Resin)", color = Color.White, fontSize = 12.sp)
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text("💰 Resin Saved: $savedResin Resin", color = theme.amber, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            }
+        }
+
+        Card(
+            colors = CardDefaults.cardColors(containerColor = theme.cardBg),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth().border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("DEFEATED BOSSES THIS WEEK:", color = Color.Gray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                bossList.forEach { boss ->
+                    val checked = bossStates[boss] ?: false
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(checked = checked, onCheckedChange = { bossStates[boss] = it })
+                        Text(boss, color = Color.White, fontSize = 12.sp)
+                    }
+                }
+            }
+        }
+    }
 }
 
 // =========================================================
@@ -798,10 +1072,10 @@ fun scheduleExpeditionNotification(
     )
 
     val workRequest = OneTimeWorkRequestBuilder<ExpeditionWorker>()
-    .setInitialDelay(delaySeconds, TimeUnit.SECONDS)
-    .setInputData(inputData)
-    .addTag(expeditionId)
-    .build()
+        .setInitialDelay(delaySeconds, TimeUnit.SECONDS)
+        .setInputData(inputData)
+        .addTag(expeditionId)
+        .build()
 
     WorkManager.getInstance(context).enqueue(workRequest)
 }
@@ -865,10 +1139,10 @@ private fun loadExpeditions(context: Context): List<Expedition> {
             list.add(
                 Expedition(
                     id = obj.getString("id"),
-                           charName = obj.getString("charName"),
-                           location = obj.getString("location"),
-                           totalSeconds = obj.getLong("totalSeconds"),
-                           endTimestampEpochSec = obj.getLong("endTimestampEpochSec")
+                    charName = obj.getString("charName"),
+                    location = obj.getString("location"),
+                    totalSeconds = obj.getLong("totalSeconds"),
+                    endTimestampEpochSec = obj.getLong("endTimestampEpochSec")
                 )
             )
         }
@@ -881,9 +1155,9 @@ private fun loadExpeditions(context: Context): List<Expedition> {
 private fun saveResinData(context: Context, resin: Int, lastUpdateSec: Long) {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     prefs.edit()
-    .putInt(KEY_RESIN, resin)
-    .putLong(KEY_LAST_RESIN_UPDATE, lastUpdateSec)
-    .apply()
+        .putInt(KEY_RESIN, resin)
+        .putLong(KEY_LAST_RESIN_UPDATE, lastUpdateSec)
+        .apply()
 }
 
 private fun loadResin(context: Context): Int {
