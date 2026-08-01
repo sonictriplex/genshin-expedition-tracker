@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtWidgets import (
     QCheckBox,
     QFrame,
@@ -8,7 +8,57 @@ from PyQt6.QtWidgets import (
     QSpinBox,
     QVBoxLayout,
 )
+from datetime import datetime
 from config import get_theme
+
+
+class BannerCountdownWidget(QFrame):
+    """
+    Ein kompaktes Widget für die Wunsch-Ansicht,
+    das die verbleibende Zeit des aktuellen Genshin-Banners anzeigt.
+    """
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("sub_card")
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 10, 12, 10)
+        layout.setSpacing(4)
+
+        self.title_label = QLabel("⏳ Aktuelles Aktionsgebet endet in:")
+        self.title_label.setStyleSheet("font-size: 11px; font-weight: bold; color: #ffaa00;")
+
+        self.timer_label = QLabel("Lade Banner-Zeit...")
+        self.timer_label.setStyleSheet("font-size: 13px; font-weight: bold; color: #ffffff;")
+
+        layout.addWidget(self.title_label)
+        layout.addWidget(self.timer_label)
+
+        # Enddatum für das aktuelle Banner (auf August/September 2026 angepasst)
+        self.banner_end = datetime(2026, 8, 25, 17, 59, 0)
+
+        # QTimer, der jede Sekunde das Display aktualisiert
+        self.clock_timer = QTimer(self)
+        self.clock_timer.timeout.connect(self.update_countdown)
+        self.clock_timer.start(1000)
+
+        self.update_countdown()
+
+    def update_countdown(self):
+        now = datetime.now()
+        remaining = self.banner_end - now
+
+        if remaining.total_seconds() <= 0:
+            self.timer_label.setText("Banner beendet / Neues Banner aktiv!")
+            return
+
+        days = remaining.days
+        hours = remaining.seconds // 3600
+        minutes = (remaining.seconds % 3600) // 60
+        seconds = remaining.seconds % 60
+
+        text = f"{days} Tage, {hours:02d}:{minutes:02d}:{seconds:02d} Std."
+        self.timer_label.setText(text)
 
 
 class WishPityCounterWidget(QFrame):
@@ -23,6 +73,10 @@ class WishPityCounterWidget(QFrame):
         title_label = QLabel("🌠 Wish & Pity Savings Counter")
         title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #ffffff;")
         main_layout.addWidget(title_label)
+
+        # Banner Countdown direkt als erste Sektion integriert
+        self.banner_countdown = BannerCountdownWidget(self)
+        main_layout.addWidget(self.banner_countdown)
 
         grid = QGridLayout()
         grid.setSpacing(12)
