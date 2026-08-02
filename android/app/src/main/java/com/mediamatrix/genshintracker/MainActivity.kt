@@ -21,6 +21,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -129,7 +130,7 @@ class MainActivity : ComponentActivity() {
 fun MainScreen() {
     val context = LocalContext.current
 
-    var activeExpeditions by remember { mutableStateOf(loadExpeditions(context)) }
+    var activeExpeditions by remember { mutableStateOf<List<Expedition>>(loadExpeditions(context)) }
     var currentResin by remember { mutableIntStateOf(loadResin(context)) }
     var lastResinUpdate by remember { mutableLongStateOf(loadLastResinUpdate(context)) }
 
@@ -224,7 +225,7 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Hauptinhalt basierend auf der Tab-Auswahl (greift auf Screens.kt zu)
+            // Hauptinhalt basierend auf der Tab-Auswahl
             Box(modifier = Modifier.weight(1f)) {
                 when (selectedTab) {
                     0 -> ExpeditionMainContent(
@@ -259,31 +260,68 @@ fun MainScreen() {
                 containerColor = currentTheme.cardBg,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
                     .border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
             ) {
+                val itemColors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = Color.Black,
+                    selectedTextColor = currentTheme.cyan,
+                    indicatorColor = currentTheme.cyan,
+                    unselectedIconColor = Color.White,
+                    unselectedTextColor = Color(0xFFE2E8F0)
+                )
+
                 NavigationBarItem(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
                     icon = { Text("⏳", fontSize = 16.sp) },
-                    label = { Text("Tracker", fontSize = 9.sp) }
+                    label = {
+                        Text(
+                            text = "Tracker",
+                            fontSize = 10.sp,
+                            fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Medium
+                        )
+                    },
+                    colors = itemColors
                 )
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
                     icon = { Text("🧪", fontSize = 16.sp) },
-                    label = { Text("Crafting", fontSize = 9.sp) }
+                    label = {
+                        Text(
+                            text = "Crafting",
+                            fontSize = 10.sp,
+                            fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Medium
+                        )
+                    },
+                    colors = itemColors
                 )
                 NavigationBarItem(
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 },
                     icon = { Text("🌠", fontSize = 16.sp) },
-                    label = { Text("Wishes", fontSize = 9.sp) }
+                    label = {
+                        Text(
+                            text = "Wishes",
+                            fontSize = 10.sp,
+                            fontWeight = if (selectedTab == 2) FontWeight.Bold else FontWeight.Medium
+                        )
+                    },
+                    colors = itemColors
                 )
                 NavigationBarItem(
                     selected = selectedTab == 3,
                     onClick = { selectedTab = 3 },
                     icon = { Text("🐲", fontSize = 16.sp) },
-                    label = { Text("Bosses", fontSize = 9.sp) }
+                    label = {
+                        Text(
+                            text = "Bosses",
+                            fontSize = 10.sp,
+                            fontWeight = if (selectedTab == 3) FontWeight.Bold else FontWeight.Medium
+                        )
+                    },
+                    colors = itemColors
                 )
             }
         }
@@ -897,17 +935,17 @@ private const val KEY_RESIN = "key_resin"
 private const val KEY_LAST_RESIN_UPDATE = "key_last_resin_update"
 private const val KEY_THEME = "key_theme"
 
-private fun saveTheme(context: Context, themeName: String) {
+fun saveTheme(context: Context, themeName: String) {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     prefs.edit().putString(KEY_THEME, themeName).apply()
 }
 
-private fun loadTheme(context: Context): String {
+fun loadTheme(context: Context): String {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     return prefs.getString(KEY_THEME, "Mondstadt (Anemo)") ?: "Mondstadt (Anemo)"
 }
 
-private fun saveExpeditions(context: Context, expeditions: List<Expedition>) {
+fun saveExpeditions(context: Context, expeditions: List<Expedition>) {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     val jsonArray = JSONArray()
 
@@ -925,7 +963,7 @@ private fun saveExpeditions(context: Context, expeditions: List<Expedition>) {
     prefs.edit().putString(KEY_EXPEDITIONS, jsonArray.toString()).apply()
 }
 
-private fun loadExpeditions(context: Context): List<Expedition> {
+fun loadExpeditions(context: Context): List<Expedition> {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     val jsonStr = prefs.getString(KEY_EXPEDITIONS, null) ?: return emptyList()
     val list = mutableListOf<Expedition>()
@@ -950,7 +988,7 @@ private fun loadExpeditions(context: Context): List<Expedition> {
     return list
 }
 
-private fun saveResinData(context: Context, resin: Int, lastUpdateSec: Long) {
+fun saveResinData(context: Context, resin: Int, lastUpdateSec: Long) {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     prefs.edit()
         .putInt(KEY_RESIN, resin)
@@ -958,12 +996,12 @@ private fun saveResinData(context: Context, resin: Int, lastUpdateSec: Long) {
         .apply()
 }
 
-private fun loadResin(context: Context): Int {
+fun loadResin(context: Context): Int {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     return prefs.getInt(KEY_RESIN, 120)
 }
 
-private fun loadLastResinUpdate(context: Context): Long {
+fun loadLastResinUpdate(context: Context): Long {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     return prefs.getLong(KEY_LAST_RESIN_UPDATE, System.currentTimeMillis() / 1000)
 }
