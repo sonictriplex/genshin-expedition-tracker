@@ -2,11 +2,11 @@ import time
 from datetime import datetime
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
+    QCheckBox,
     QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
-    QCheckBox,
     QPushButton,
     QSpinBox,
     QVBoxLayout,
@@ -19,7 +19,7 @@ class TeyvatJournalWidget(QFrame):
         super().__init__(parent_window)
         self.parent_window = parent_window
 
-        # Statustimer
+        # Timer states
         self.transformer_end_time = 0.0
         self.artifact_end_time = 0.0
 
@@ -27,34 +27,34 @@ class TeyvatJournalWidget(QFrame):
         main_layout.setSpacing(10)
         main_layout.setContentsMargins(14, 12, 14, 12)
 
-        # --- Header mit AR-Stufen-Auswahl ---
+        # --- Header with AR Selector ---
         header_layout = QHBoxLayout()
-        title_label = QLabel("📖 Teyvat Reisetagebuch & Checklisten")
+        title_label = QLabel("📖 Teyvat Travel Journal & Checklists")
         title_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #ffffff;")
         header_layout.addWidget(title_label)
 
         header_layout.addStretch()
 
-        lbl_ar = QLabel("Abenteuerstufe (AR):")
+        lbl_ar = QLabel("Adventure Rank (AR):")
         lbl_ar.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
         header_layout.addWidget(lbl_ar)
 
-        # Standard auf AR 21
+        # Default to AR 21
         self.spin_ar = QSpinBox()
         self.spin_ar.setRange(1, 60)
         self.spin_ar.setValue(21)
-        self.spin_ar.setToolTip("Schaltet Features basierend auf deiner Abenteuerstufe frei.")
+        self.spin_ar.setToolTip("Unlocks features based on your Adventure Rank.")
         self.spin_ar.valueChanged.connect(self.on_ar_changed)
         header_layout.addWidget(self.spin_ar)
 
         main_layout.addLayout(header_layout)
 
-        # --- GRID FÜR CARDS ---
+        # --- CARDS GRID ---
         self.grid_layout = QGridLayout()
         self.grid_layout.setSpacing(10)
 
         # =========================================================================
-        # Box 1: Daily Commissions & Katheryne (Ab AR 1)
+        # Box 1: Daily Commissions & Katheryne (Unlocked at AR 1)
         # =========================================================================
         self.box_comm = QFrame()
         self.box_comm.setObjectName("sub_card")
@@ -62,7 +62,7 @@ class TeyvatJournalWidget(QFrame):
         v_comm.setContentsMargins(10, 8, 10, 8)
         v_comm.setSpacing(6)
 
-        lbl_comm = QLabel("TÄGLICHE MISSIONEN")
+        lbl_comm = QLabel("DAILY COMMISSIONS")
         lbl_comm.setStyleSheet("font-size: 10px; font-weight: bold; color: #aaa;")
         v_comm.addWidget(lbl_comm)
 
@@ -83,7 +83,7 @@ class TeyvatJournalWidget(QFrame):
         self.grid_layout.addWidget(self.box_comm, 0, 0)
 
         # =========================================================================
-        # Box 2: Wochenbosse & Material-Rotation (Ab AR 1)
+        # Box 2: Weekly Bosses & Material Rotation (Unlocked at AR 1)
         # =========================================================================
         self.box_boss = QFrame()
         self.box_boss.setObjectName("sub_card")
@@ -91,7 +91,7 @@ class TeyvatJournalWidget(QFrame):
         v_boss.setContentsMargins(10, 8, 10, 8)
         v_boss.setSpacing(6)
 
-        lbl_boss = QLabel("WOCHENBOSSE & ROTATION")
+        lbl_boss = QLabel("WEEKLY BOSSES & ROTATION")
         lbl_boss.setStyleSheet("font-size: 10px; font-weight: bold; color: #aaa;")
         v_boss.addWidget(lbl_boss)
 
@@ -112,7 +112,7 @@ class TeyvatJournalWidget(QFrame):
         self.grid_layout.addWidget(self.box_boss, 0, 1)
 
         # =========================================================================
-        # Box 3: Kannenreich-Manager (Freigeschaltet ab AR 28)
+        # Box 3: Serenitea Pot Manager (Unlocked at AR 28)
         # =========================================================================
         self.box_pot = QFrame()
         self.box_pot.setObjectName("sub_card")
@@ -120,16 +120,16 @@ class TeyvatJournalWidget(QFrame):
         v_pot.setContentsMargins(10, 8, 10, 8)
         v_pot.setSpacing(6)
 
-        lbl_pot = QLabel("KANNENREICH (AB AR 28)")
+        lbl_pot = QLabel("SERENITEA POT (UNLOCKED AT AR 28)")
         lbl_pot.setStyleSheet("font-size: 10px; font-weight: bold; color: #aaa;")
         v_pot.addWidget(lbl_pot)
 
         h_pot_items = QHBoxLayout()
-        self.pot_resin_cb = QCheckBox("Flüchtiges Harz")
+        self.pot_resin_cb = QCheckBox("Transient Resin")
         self.pot_resin_cb.stateChanged.connect(self.on_state_changed)
-        self.pot_books_cb = QCheckBox("XP/Bücher")
+        self.pot_books_cb = QCheckBox("XP/Books")
         self.pot_books_cb.stateChanged.connect(self.on_state_changed)
-        self.pot_arte_cb = QCheckBox("Artefakt-Münzen")
+        self.pot_arte_cb = QCheckBox("Artifact Coins")
         self.pot_arte_cb.stateChanged.connect(self.on_state_changed)
 
         h_pot_items.addWidget(self.pot_resin_cb)
@@ -141,7 +141,7 @@ class TeyvatJournalWidget(QFrame):
         self.grid_layout.addWidget(self.box_pot, 1, 0)
 
         # =========================================================================
-        # Box 4: Parametrischer Konverter (Freigeschaltet ab AR 31)
+        # Box 4: Parametric Transformer (Unlocked at AR 31)
         # =========================================================================
         self.box_trans = QFrame()
         self.box_trans.setObjectName("sub_card")
@@ -149,17 +149,17 @@ class TeyvatJournalWidget(QFrame):
         v_trans.setContentsMargins(10, 8, 10, 8)
         v_trans.setSpacing(6)
 
-        lbl_trans = QLabel("PARAMETRISCHER KONVERTER (AB AR 31)")
+        lbl_trans = QLabel("PARAMETRIC TRANSFORMER (UNLOCKED AT AR 31)")
         lbl_trans.setStyleSheet("font-size: 10px; font-weight: bold; color: #aaa;")
         v_trans.addWidget(lbl_trans)
 
         h_trans = QHBoxLayout()
-        self.lbl_trans_status = QLabel("Bereit!")
+        self.lbl_trans_status = QLabel("Ready!")
         self.lbl_trans_status.setStyleSheet("font-size: 11px; font-weight: bold; color: #38e3e3;")
         h_trans.addWidget(self.lbl_trans_status)
         h_trans.addStretch()
 
-        self.btn_trans_reset = QPushButton("Jetzt nutzen (7d)")
+        self.btn_trans_reset = QPushButton("Use Now (7d)")
         self.btn_trans_reset.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_trans_reset.clicked.connect(self.reset_transformer_timer)
         h_trans.addWidget(self.btn_trans_reset)
@@ -168,7 +168,7 @@ class TeyvatJournalWidget(QFrame):
         self.grid_layout.addWidget(self.box_trans, 1, 1)
 
         # =========================================================================
-        # Box 5: Artefakt-Routen-Timer (Freigeschaltet ab AR 45)
+        # Box 5: Artifact Route Timer (Unlocked at AR 45)
         # =========================================================================
         self.box_art = QFrame()
         self.box_art.setObjectName("sub_card")
@@ -176,17 +176,17 @@ class TeyvatJournalWidget(QFrame):
         v_art.setContentsMargins(10, 8, 10, 8)
         v_art.setSpacing(6)
 
-        lbl_art = QLabel("ARTEFAKT-ROUTE (AB AR 45)")
+        lbl_art = QLabel("ARTIFACT ROUTE (UNLOCKED AT AR 45)")
         lbl_art.setStyleSheet("font-size: 10px; font-weight: bold; color: #aaa;")
         v_art.addWidget(lbl_art)
 
         h_art = QHBoxLayout()
-        self.lbl_art_status = QLabel("Bereit zum Farmen!")
+        self.lbl_art_status = QLabel("Ready to Farm!")
         self.lbl_art_status.setStyleSheet("font-size: 11px; font-weight: bold; color: #38e3e3;")
         h_art.addWidget(self.lbl_art_status)
         h_art.addStretch()
 
-        self.btn_art_reset = QPushButton("Route gelaufen")
+        self.btn_art_reset = QPushButton("Route Finished")
         self.btn_art_reset.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_art_reset.clicked.connect(self.reset_artifact_timer)
         h_art.addWidget(self.btn_art_reset)
@@ -195,7 +195,7 @@ class TeyvatJournalWidget(QFrame):
         self.grid_layout.addWidget(self.box_art, 2, 0)
 
         # =========================================================================
-        # Box 6: Endgame Content (Abyss & Theater - Freigeschaltet ab AR 45)
+        # Box 6: Endgame Content (Abyss & Theater - Unlocked at AR 45)
         # =========================================================================
         self.box_endgame = QFrame()
         self.box_endgame.setObjectName("sub_card")
@@ -203,13 +203,13 @@ class TeyvatJournalWidget(QFrame):
         v_endgame.setContentsMargins(10, 8, 10, 8)
         v_endgame.setSpacing(6)
 
-        lbl_endgame = QLabel("ENDGAME STERNE (AB AR 45)")
+        lbl_endgame = QLabel("ENDGAME STARS (UNLOCKED AT AR 45)")
         lbl_endgame.setStyleSheet("font-size: 10px; font-weight: bold; color: #aaa;")
         v_endgame.addWidget(lbl_endgame)
 
         h_stars = QHBoxLayout()
 
-        lbl_abyss = QLabel("Abgrund:")
+        lbl_abyss = QLabel("Abyss:")
         self.spin_abyss = QSpinBox()
         self.spin_abyss.setRange(0, 36)
         self.spin_abyss.valueChanged.connect(self.on_state_changed)
@@ -241,7 +241,7 @@ class TeyvatJournalWidget(QFrame):
     def update_visibility_by_ar(self):
         ar = self.spin_ar.value()
 
-        # AR-Schwellenwerte steuern die Sichtbarkeit
+        # AR threshold controls visibility
         self.box_pot.setVisible(ar >= 28)
         self.box_trans.setVisible(ar >= 31)
         self.box_art.setVisible(ar >= 45)
@@ -269,7 +269,7 @@ class TeyvatJournalWidget(QFrame):
             self.lbl_trans_status.setText(f"In {d}d {h:02d}h {m:02d}m")
             self.lbl_trans_status.setStyleSheet("font-size: 11px; font-weight: bold; color: #ffaa00;")
         else:
-            self.lbl_trans_status.setText("Bereit!")
+            self.lbl_trans_status.setText("Ready!")
             self.lbl_trans_status.setStyleSheet(f"font-size: 11px; font-weight: bold; color: {theme['cyan']};")
 
         if self.artifact_end_time > now:
@@ -280,19 +280,19 @@ class TeyvatJournalWidget(QFrame):
             self.lbl_art_status.setText(f"In {h:02d}h {m:02d}m {s:02d}s")
             self.lbl_art_status.setStyleSheet("font-size: 11px; font-weight: bold; color: #ffaa00;")
         else:
-            self.lbl_art_status.setText("Bereit zum Farmen!")
+            self.lbl_art_status.setText("Ready to Farm!")
             self.lbl_art_status.setStyleSheet(f"font-size: 11px; font-weight: bold; color: {theme['cyan']};")
 
     def get_today_rotation(self):
         weekday = datetime.today().weekday()
         if weekday in [0, 3]:
-            return "Mo / Do: Freiheit, Wohlstand, Lehre, Versteck, Gleichmut"
+            return "Mon / Thu: Freedom, Prosperity, Transience, Admonition, Equity, Contention"
         elif weekday in [1, 4]:
-            return "Di / Fr: Widerstand, Gold, Ewigkeit, Einfachheit, Gerechtigkeit"
+            return "Tue / Fri: Resistance, Diligence, Elegance, Ingenuity, Justice, Kindling"
         elif weekday in [2, 5]:
-            return "Mi / Sa: Ballade, Fleiß, Vergeltung, Praxis, Ordnung"
+            return "Wed / Sat: Ballad, Gold, Light, Praxis, Order, Conflict"
         else:
-            return "🌟 Sonntag: Alle Sphären & Domänen sind offen!"
+            return "🌟 Sunday: All Talent Domains Open!"
 
     def apply_theme_style(self):
         theme = get_theme()
@@ -380,7 +380,7 @@ class TeyvatJournalWidget(QFrame):
         today_str = datetime.now().strftime("%Y-%m-%d")
         is_today = saved_date == today_str
 
-        # AR Level laden
+        # Load AR Level
         self.spin_ar.setValue(data.get("ar_level", 21))
 
         # Daily Reset
@@ -394,7 +394,7 @@ class TeyvatJournalWidget(QFrame):
         self.transformer_end_time = data.get("transformer_end_time", 0.0)
         self.artifact_end_time = data.get("artifact_end_time", 0.0)
 
-        # Wöchentliches & Kannenreich
+        # Weekly & Serenitea Pot
         boss_states = data.get("bosses", [False] * 3)
         for i, cb in enumerate(self.boss_boxes):
             cb.setChecked(boss_states[i])

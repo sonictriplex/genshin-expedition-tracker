@@ -12,10 +12,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -225,7 +227,7 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Hauptinhalt basierend auf der Tab-Auswahl
+            // Hauptinhalt basierend auf der Tab-Auswahl (alle 7 Screens Parität zu Python)
             Box(modifier = Modifier.weight(1f)) {
                 when (selectedTab) {
                     0 -> ExpeditionMainContent(
@@ -247,82 +249,72 @@ fun MainScreen() {
                         onStartExpedition = { if (activeExpeditions.size < 5) showAddDialog = true },
                         limitReached = activeExpeditions.size >= 5
                     )
-                    1 -> CraftingCalculatorScreen(theme = currentTheme)
-                    2 -> WishCounterScreen(theme = currentTheme)
-                    3 -> WeeklyBossScreen(theme = currentTheme)
+                    1 -> TeyvatJournalScreen(theme = currentTheme)
+                    2 -> CraftingCalculatorScreen(theme = currentTheme)
+                    3 -> WishCounterScreen(theme = currentTheme)
+                    4 -> ResinPlannerScreen(theme = currentTheme)
+                    5 -> WeeklyBossScreen(theme = currentTheme)
+                    6 -> TeamGoalsScreen(theme = currentTheme)
                 }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Untere Navigationsleiste
-            NavigationBar(
-                containerColor = currentTheme.cardBg,
+            // Untere Navigationsleiste (Scrollbar für alle 7 Menüpunkte)
+            Surface(
+                color = currentTheme.cardBg,
+                shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
                     .border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
             ) {
-                val itemColors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.Black,
-                    selectedTextColor = currentTheme.cyan,
-                    indicatorColor = currentTheme.cyan,
-                    unselectedIconColor = Color.White,
-                    unselectedTextColor = Color(0xFFE2E8F0)
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val itemColors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color.Black,
+                        selectedTextColor = currentTheme.cyan,
+                        indicatorColor = currentTheme.cyan,
+                        unselectedIconColor = Color.White,
+                        unselectedTextColor = Color(0xFFE2E8F0)
+                    )
 
-                NavigationBarItem(
-                    selected = selectedTab == 0,
-                    onClick = { selectedTab = 0 },
-                    icon = { Text("⏳", fontSize = 16.sp) },
-                    label = {
-                        Text(
-                            text = "Tracker",
-                            fontSize = 10.sp,
-                            fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Medium
+                    val navItems = listOf(
+                        Triple(0, "⏳", "Tracker"),
+                        Triple(1, "📖", "Journal"),
+                        Triple(2, "🧪", "Crafting"),
+                        Triple(3, "🌠", "Wishes"),
+                        Triple(4, "⚡", "Resin"),
+                        Triple(5, "🐲", "Bosses"),
+                        Triple(6, "🎯", "Goals")
+                    )
+
+                    navItems.forEach { item ->
+                        val tabIndex = item.first
+                        val iconStr = item.second
+                        val titleStr = item.third
+                        val isSelected = selectedTab == tabIndex
+
+                        NavigationBarItem(
+                            selected = isSelected,
+                            onClick = { selectedTab = tabIndex },
+                            icon = { Text(iconStr, fontSize = 16.sp) },
+                            label = {
+                                Text(
+                                    text = titleStr,
+                                    fontSize = 10.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                )
+                            },
+                            colors = itemColors
                         )
-                    },
-                    colors = itemColors
-                )
-                NavigationBarItem(
-                    selected = selectedTab == 1,
-                    onClick = { selectedTab = 1 },
-                    icon = { Text("🧪", fontSize = 16.sp) },
-                    label = {
-                        Text(
-                            text = "Crafting",
-                            fontSize = 10.sp,
-                            fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Medium
-                        )
-                    },
-                    colors = itemColors
-                )
-                NavigationBarItem(
-                    selected = selectedTab == 2,
-                    onClick = { selectedTab = 2 },
-                    icon = { Text("🌠", fontSize = 16.sp) },
-                    label = {
-                        Text(
-                            text = "Wishes",
-                            fontSize = 10.sp,
-                            fontWeight = if (selectedTab == 2) FontWeight.Bold else FontWeight.Medium
-                        )
-                    },
-                    colors = itemColors
-                )
-                NavigationBarItem(
-                    selected = selectedTab == 3,
-                    onClick = { selectedTab = 3 },
-                    icon = { Text("🐲", fontSize = 16.sp) },
-                    label = {
-                        Text(
-                            text = "Bosses",
-                            fontSize = 10.sp,
-                            fontWeight = if (selectedTab == 3) FontWeight.Bold else FontWeight.Medium
-                        )
-                    },
-                    colors = itemColors
-                )
+                    }
+                }
             }
         }
 
