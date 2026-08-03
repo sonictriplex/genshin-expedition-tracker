@@ -15,13 +15,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 // =========================================================
-// 1. Teyvat Journal Screen (English Dashboard)
+// 1. Teyvat Journal Screen
 // =========================================================
 @Composable
 fun TeyvatJournalScreen(theme: RegionTheme) {
     var arLevel by remember { mutableIntStateOf(60) }
 
-    // Checkbox States
     var daily1 by remember { mutableStateOf(false) }
     var daily2 by remember { mutableStateOf(false) }
     var daily3 by remember { mutableStateOf(false) }
@@ -51,7 +50,6 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Top Bar: Title & Adventure Rank
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -76,7 +74,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
             }
         }
 
-        // 1. DAILY COMMISSIONS
+        // 1. Daily Commissions
         Card(
             colors = CardDefaults.cardColors(containerColor = theme.cardBg),
             shape = RoundedCornerShape(12.dp),
@@ -109,7 +107,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
             }
         }
 
-        // 2. WEEKLY BOSSES & ROTATION
+        // 2. Weekly Bosses
         Card(
             colors = CardDefaults.cardColors(containerColor = theme.cardBg),
             shape = RoundedCornerShape(12.dp),
@@ -133,7 +131,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
             }
         }
 
-        // 3. SERENITEA POT (UNLOCKS AT AR 28)
+        // 3. Serenitea Pot
         if (arLevel >= 28) {
             Card(
                 colors = CardDefaults.cardColors(containerColor = theme.cardBg),
@@ -159,7 +157,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
             }
         }
 
-        // 4. PARAMETRIC TRANSFORMER (UNLOCKS AT AR 31)
+        // 4. Parametric Transformer
         if (arLevel >= 31) {
             Card(
                 colors = CardDefaults.cardColors(containerColor = theme.cardBg),
@@ -180,7 +178,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
                         Text("Ready!", color = Color(0xFF4ADE80), fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     }
                     Button(
-                        onClick = { /* Reset Timer */ },
+                        onClick = { },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E323F)),
                         shape = RoundedCornerShape(6.dp),
                         border = androidx.compose.foundation.BorderStroke(1.dp, theme.cyan)
@@ -191,7 +189,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
             }
         }
 
-        // 5. ARTIFACT ROUTE (UNLOCKS AT AR 45)
+        // 5. Artifact Route
         if (arLevel >= 45) {
             Card(
                 colors = CardDefaults.cardColors(containerColor = theme.cardBg),
@@ -212,7 +210,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
                         Text("Ready to Farm!", color = Color(0xFF4ADE80), fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     }
                     Button(
-                        onClick = { /* Set Cooldown */ },
+                        onClick = { },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E323F)),
                         shape = RoundedCornerShape(6.dp),
                         border = androidx.compose.foundation.BorderStroke(1.dp, theme.cyan)
@@ -223,7 +221,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
             }
         }
 
-        // 6. ENDGAME STARS (UNLOCKS AT AR 45)
+        // 6. Endgame Stars
         if (arLevel >= 45) {
             Card(
                 colors = CardDefaults.cardColors(containerColor = theme.cardBg),
@@ -724,61 +722,130 @@ fun WeeklyBossScreen(theme: RegionTheme) {
 }
 
 // =========================================================
-// 6. Team Building & Farming Goals Screen (Mobil-Dashboard)
+// 6. Team Building & Material Farming Goals Screen
 // =========================================================
+
+val CHARACTER_BOOKS = mapOf(
+    // Mondstadt
+    "Amber" to "Freedom (Mon/Thu/Sun)",
+    "Barbara" to "Freedom (Mon/Thu/Sun)",
+    "Bennett" to "Resistance (Tue/Fri/Sun)",
+    "Diluc" to "Resistance (Tue/Fri/Sun)",
+    "Diona" to "Freedom (Mon/Thu/Sun)",
+    "Eula" to "Resistance (Tue/Fri/Sun)",
+    "Fischl" to "Resistance (Tue/Fri/Sun)",
+    "Jean" to "Resistance (Tue/Fri/Sun)",
+    "Kaeya" to "Ballad (Wed/Sat/Sun)",
+    "Klee" to "Freedom (Mon/Thu/Sun)",
+    "Lisa" to "Ballad (Wed/Sat/Sun)",
+    "Mona" to "Resistance (Tue/Fri/Sun)",
+    "Mika" to "Ballad (Wed/Sat/Sun)",
+    "Noelle" to "Resistance (Tue/Fri/Sun)",
+    "Razor" to "Resistance (Tue/Fri/Sun)",
+    "Rosaria" to "Ballad (Wed/Sat/Sun)",
+    "Sucrose" to "Freedom (Mon/Thu/Sun)",
+    "Traveler (Anemo)" to "Freedom (Mon/Thu/Sun)",
+    "Traveler (Geo)" to "Prosperity (Mon/Thu/Sun)",
+    "Venti" to "Ballad (Wed/Sat/Sun)",
+
+    // Liyue
+    "Beidou" to "Gold (Wed/Sat/Sun)",
+    "Chongyun" to "Diligence (Tue/Fri/Sun)",
+    "Ganyu" to "Diligence (Tue/Fri/Sun)",
+    "Gaming" to "Prosperity (Mon/Thu/Sun)",
+    "Hu Tao" to "Diligence (Tue/Fri/Sun)",
+    "Keqing" to "Prosperity (Mon/Thu/Sun)",
+    "Ningguang" to "Prosperity (Mon/Thu/Sun)",
+    "Qiqi" to "Prosperity (Mon/Thu/Sun)",
+    "Shenhe" to "Prosperity (Mon/Thu/Sun)",
+    "Xiangling" to "Gold (Wed/Sat/Sun)",
+    "Xianyun" to "Gold (Wed/Sat/Sun)",
+    "Xingqiu" to "Gold (Wed/Sat/Sun)",
+    "Xinyan" to "Gold (Wed/Sat/Sun)",
+    "Yanfei" to "Gold (Wed/Sat/Sun)",
+    "Yelan" to "Prosperity (Mon/Thu/Sun)",
+    "Yao Yao" to "Diligence (Tue/Fri/Sun)",
+    "Yun Jin" to "Diligence (Tue/Fri/Sun)",
+    "Zhongli" to "Gold (Wed/Sat/Sun)",
+
+    // Inazuma
+    "Arataki Itto" to "Elegance (Tue/Fri/Sun)",
+    "Gorou" to "Light (Wed/Sat/Sun)",
+    "Kaedehara Kazuha" to "Diligence (Tue/Fri/Sun)",
+    "Kamisato Ayaka" to "Elegance (Tue/Fri/Sun)",
+    "Kamisato Ayato" to "Elegance (Tue/Fri/Sun)",
+    "Kirara" to "Transience (Mon/Thu/Sun)",
+    "Kujou Sara" to "Elegance (Tue/Fri/Sun)",
+    "Kuki Shinobu" to "Elegance (Tue/Fri/Sun)",
+    "Raiden Shogun" to "Light (Wed/Sat/Sun)",
+    "Sangonomiya Kokomi" to "Transience (Mon/Thu/Sun)",
+    "Sayu" to "Light (Wed/Sat/Sun)",
+    "Shikanoin Heizou" to "Transience (Mon/Thu/Sun)",
+    "Thoma" to "Transience (Mon/Thu/Sun)",
+    "Yae Miko" to "Light (Wed/Sat/Sun)",
+    "Yoimiya" to "Transience (Mon/Thu/Sun)",
+
+    // Sumeru
+    "Alhaitham" to "Ingenuity (Tue/Fri/Sun)",
+    "Candace" to "Admonition (Mon/Thu/Sun)",
+    "Collei" to "Praxis (Wed/Sat/Sun)",
+    "Cyno" to "Admonition (Mon/Thu/Sun)",
+    "Dehya" to "Praxis (Wed/Sat/Sun)",
+    "Faruzan" to "Admonition (Mon/Thu/Sun)",
+    "Kaveh" to "Ingenuity (Tue/Fri/Sun)",
+    "Layla" to "Ingenuity (Tue/Fri/Sun)",
+    "Nahida" to "Ingenuity (Tue/Fri/Sun)",
+    "Nilou" to "Praxis (Wed/Sat/Sun)",
+    "Tighnari" to "Admonition (Mon/Thu/Sun)",
+    "Wanderer" to "Praxis (Wed/Sat/Sun)",
+
+    // Fontaine
+    "Arlecchino" to "Order (Wed/Sat/Sun)",
+    "Clorinde" to "Justice (Tue/Fri/Sun)",
+    "Charlotte" to "Justice (Tue/Fri/Sun)",
+    "Chevreuse" to "Order (Wed/Sat/Sun)",
+    "Freminet" to "Justice (Tue/Fri/Sun)",
+    "Furina" to "Justice (Tue/Fri/Sun)",
+    "Lynette" to "Freedom (Mon/Thu/Sun)",
+    "Lyney" to "Equity (Mon/Thu/Sun)",
+    "Navia" to "Equity (Mon/Thu/Sun)",
+    "Neuvillette" to "Equity (Mon/Thu/Sun)",
+    "Wriothesley" to "Justice (Tue/Fri/Sun)",
+
+    // Natlan
+    "Kachina" to "Conflict (Wed/Sat/Sun)",
+    "Kinich" to "Kindling (Tue/Fri/Sun)",
+    "Mualani" to "Contention (Mon/Thu/Sun)",
+    "Xilonen" to "Kindling (Tue/Fri/Sun)"
+)
+
+val TALENT_BOOK_OPTIONS = listOf(
+    "Freedom (Mon/Thu/Sun)", "Resistance (Tue/Fri/Sun)", "Ballad (Wed/Sat/Sun)",
+    "Prosperity (Mon/Thu/Sun)", "Diligence (Tue/Fri/Sun)", "Gold (Wed/Sat/Sun)",
+    "Transience (Mon/Thu/Sun)", "Elegance (Tue/Fri/Sun)", "Light (Wed/Sat/Sun)",
+    "Admonition (Mon/Thu/Sun)", "Ingenuity (Tue/Fri/Sun)", "Praxis (Wed/Sat/Sun)",
+    "Equity (Mon/Thu/Sun)", "Justice (Tue/Fri/Sun)", "Order (Wed/Sat/Sun)",
+    "Contention (Mon/Thu/Sun)", "Kindling (Tue/Fri/Sun)", "Conflict (Wed/Sat/Sun)"
+)
+
+data class TeamSlotData(
+    val character: String,
+    val book: String
+)
+
 @Composable
 fun TeamGoalsScreen(theme: RegionTheme) {
-    // 4 Team slots (Default: Kaeya, Fischl, Noelle, Traveler)
-    var char1 by remember { mutableStateOf("Kaeya") }
-    var book1 by remember { mutableStateOf("Ballad (Wed/Sat/Sun)") }
+    val charList = remember { CHARACTER_BOOKS.keys.toList().sorted() }
 
-    var char2 by remember { mutableStateOf("Fischl") }
-    var book2 by remember { mutableStateOf("Resistance (Tue/Fri/Sun)") }
-
-    var char3 by remember { mutableStateOf("Noelle") }
-    var book3 by remember { mutableStateOf("Resistance (Tue/Fri/Sun)") }
-
-    var char4 by remember { mutableStateOf("Traveler (Anemo)") }
-    var book4 by remember { mutableStateOf("Freedom (Mon/Thu/Sun)") }
-
-    val talentBookOptions = listOf(
-        "Freedom (Mon/Thu/Sun)",
-        "Resistance (Tue/Fri/Sun)",
-        "Ballad (Wed/Sat/Sun)",
-        "Prosperity (Mon/Thu/Sun)",
-        "Diligence (Tue/Fri/Sun)",
-        "Gold (Wed/Sat/Sun)",
-        "Transience (Mon/Thu/Sun)",
-        "Elegance (Tue/Fri/Sun)",
-        "Light (Wed/Sat/Sun)",
-        "Admonition (Mon/Thu/Sun)",
-        "Ingenuity (Tue/Fri/Sun)",
-        "Praxis (Wed/Sat/Sun)",
-        "Equity (Mon/Thu/Sun)",
-        "Justice (Tue/Fri/Sun)",
-        "Order (Wed/Sat/Sun)",
-        "Contention (Mon/Thu/Sun)",
-        "Kindling (Tue/Fri/Sun)",
-        "Conflict (Wed/Sat/Sun)"
-    )
-
-    // Automatische Gruppierung nach Wochentagen für den Schedule
-    fun getScheduleForDays(daysKeyword: String): String {
-        val chars = mutableListOf<String>()
-        val slots = listOf(
-            Triple(char1, book1, "Freedom"),
-            Triple(char2, book2, "Resistance"),
-            Triple(char3, book3, "Ballad"),
-            Triple(char4, book4, "Freedom")
+    var slots by remember {
+        mutableStateOf(
+            listOf(
+                TeamSlotData("Kaeya", CHARACTER_BOOKS["Kaeya"] ?: TALENT_BOOK_OPTIONS[2]),
+                TeamSlotData("Fischl", CHARACTER_BOOKS["Fischl"] ?: TALENT_BOOK_OPTIONS[1]),
+                TeamSlotData("Xiangling", CHARACTER_BOOKS["Xiangling"] ?: TALENT_BOOK_OPTIONS[5]),
+                TeamSlotData("Barbara", CHARACTER_BOOKS["Barbara"] ?: TALENT_BOOK_OPTIONS[0])
+            )
         )
-
-        // Helper zum Zuordnen
-        if (book1.contains(daysKeyword)) chars.add("$char1 (${book1.substringBefore(" ")})")
-        if (book2.contains(daysKeyword)) chars.add("$char2 (${book2.substringBefore(" ")})")
-        if (book3.contains(daysKeyword)) chars.add("$char3 (${book3.substringBefore(" ")})")
-        if (book4.contains(daysKeyword)) chars.add("$char4 (${book4.substringBefore(" ")})")
-
-        return if (chars.isNotEmpty()) chars.joinToString(", ") else "None"
     }
 
     Column(
@@ -813,45 +880,19 @@ fun TeamGoalsScreen(theme: RegionTheme) {
                     Text("TALENT BOOK GOAL", color = Color.Gray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
 
-                // Slot 1
-                TeamSlotRow(
-                    charName = char1,
-                    onCharChange = { char1 = it },
-                    bookName = book1,
-                    onBookChange = { book1 = it },
-                    bookOptions = talentBookOptions,
-                    theme = theme
-                )
-
-                // Slot 2
-                TeamSlotRow(
-                    charName = char2,
-                    onCharChange = { char2 = it },
-                    bookName = book2,
-                    onBookChange = { book2 = it },
-                    bookOptions = talentBookOptions,
-                    theme = theme
-                )
-
-                // Slot 3
-                TeamSlotRow(
-                    charName = char3,
-                    onCharChange = { char3 = it },
-                    bookName = book3,
-                    onBookChange = { book3 = it },
-                    bookOptions = talentBookOptions,
-                    theme = theme
-                )
-
-                // Slot 4
-                TeamSlotRow(
-                    charName = char4,
-                    onCharChange = { char4 = it },
-                    bookName = book4,
-                    onBookChange = { book4 = it },
-                    bookOptions = talentBookOptions,
-                    theme = theme
-                )
+                slots.forEachIndexed { index, slot ->
+                    TeamSlotRow(
+                        slotData = slot,
+                        charList = charList,
+                        bookOptions = TALENT_BOOK_OPTIONS,
+                        theme = theme,
+                        onSlotChange = { updatedSlot ->
+                            val updatedList = slots.toMutableList()
+                            updatedList[index] = updatedSlot
+                            slots = updatedList
+                        }
+                    )
+                }
             }
         }
 
@@ -874,92 +915,112 @@ fun TeamGoalsScreen(theme: RegionTheme) {
                     fontWeight = FontWeight.Bold
                 )
 
-                Text(
-                    text = "📅 Mon / Thu: ${getScheduleForDays("Mon")}",
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
-                Text(
-                    text = "📅 Tue / Fri: ${getScheduleForDays("Tue")}",
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
-                Text(
-                    text = "📅 Wed / Sat: ${getScheduleForDays("Wed")}",
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
-                Text(
-                    text = "📅 Sunday: All Talent Domains Open!",
-                    color = theme.amber,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp
-                )
+                val monThu = mutableListOf<String>()
+                val tueFri = mutableListOf<String>()
+                val wedSat = mutableListOf<String>()
+
+                slots.forEach { s ->
+                    if (s.character.isNotBlank()) {
+                        val bookName = s.book.split(" ")[0]
+                        val entry = "${s.character} ($bookName)"
+                        when {
+                            "Mon/Thu" in s.book -> monThu.add(entry)
+                            "Tue/Fri" in s.book -> tueFri.add(entry)
+                            "Wed/Sat" in s.book -> wedSat.add(entry)
+                        }
+                    }
+                }
+
+                val monText = if (monThu.isNotEmpty()) monThu.joinToString(", ") else "None"
+                val tueText = if (tueFri.isNotEmpty()) tueFri.joinToString(", ") else "None"
+                val wedText = if (wedSat.isNotEmpty()) wedSat.joinToString(", ") else "None"
+
+                Text("📅 Mon / Thu: $monText", color = Color.White, fontSize = 12.sp)
+                Text("📅 Tue / Fri: $tueText", color = Color.White, fontSize = 12.sp)
+                Text("📅 Wed / Sat: $wedText", color = Color.White, fontSize = 12.sp)
+                Text("📅 Sunday: All Talent Domains Open!", color = theme.amber, fontWeight = FontWeight.Bold, fontSize = 12.sp)
             }
         }
     }
 }
 
-// Helper für die einzelnen Zeilen in Android
 @Composable
 fun TeamSlotRow(
-    charName: String,
-    onCharChange: (String) -> Unit,
-    bookName: String,
-    onBookChange: (String) -> Unit,
+    slotData: TeamSlotData,
+    charList: List<String>,
     bookOptions: List<String>,
-    theme: RegionTheme
+    theme: RegionTheme,
+    onSlotChange: (TeamSlotData) -> Unit
 ) {
+    var charExpanded by remember { mutableStateOf(false) }
     var bookExpanded by remember { mutableStateOf(false) }
 
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Charakter Name
-            OutlinedTextField(
-                value = charName,
-                onValueChange = onCharChange,
-                singleLine = true,
-                textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 12.sp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = theme.cyan,
-                    unfocusedBorderColor = Color(0xFF475569)
-                ),
-                modifier = Modifier.weight(1f)
-            )
-
-            // Talent Buch Dropdown
-            Box(modifier = Modifier.weight(1.2f)) {
-                OutlinedButton(
-                    onClick = { bookExpanded = true },
-                    shape = RoundedCornerShape(4.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, theme.cyan),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = bookName,
-                        color = theme.cyan,
-                        fontSize = 10.sp,
-                        maxLines = 1
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(modifier = Modifier.weight(1f)) {
+            OutlinedButton(
+                onClick = { charExpanded = true },
+                shape = RoundedCornerShape(4.dp),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, theme.cyan),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = slotData.character,
+                    color = Color.White,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+            }
+            DropdownMenu(
+                expanded = charExpanded,
+                onDismissRequest = { charExpanded = false }
+            ) {
+                charList.forEach { cName ->
+                    DropdownMenuItem(
+                        text = { Text(cName, fontSize = 12.sp) },
+                        onClick = {
+                            val autoBook = CHARACTER_BOOKS[cName] ?: slotData.book
+                            onSlotChange(TeamSlotData(character = cName, book = autoBook))
+                            charExpanded = false
+                        }
                     )
                 }
-                DropdownMenu(
-                    expanded = bookExpanded,
-                    onDismissRequest = { bookExpanded = false }
-                ) {
-                    bookOptions.forEach { opt ->
-                        DropdownMenuItem(
-                            text = { Text(opt, fontSize = 11.sp) },
-                            onClick = {
-                                onBookChange(opt)
-                                bookExpanded = false
-                            }
-                        )
-                    }
+            }
+        }
+
+        Box(modifier = Modifier.weight(1.2f)) {
+            OutlinedButton(
+                onClick = { bookExpanded = true },
+                shape = RoundedCornerShape(4.dp),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, theme.cyan),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = slotData.book,
+                    color = theme.cyan,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+            }
+            DropdownMenu(
+                expanded = bookExpanded,
+                onDismissRequest = { bookExpanded = false }
+            ) {
+                bookOptions.forEach { opt ->
+                    DropdownMenuItem(
+                        text = { Text(opt, fontSize = 11.sp) },
+                        onClick = {
+                            onSlotChange(slotData.copy(book = opt))
+                            bookExpanded = false
+                        }
+                    )
                 }
             }
         }
