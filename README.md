@@ -148,6 +148,7 @@ genshin-expedition-tracker/
 ├── main.py                          # Main window, system tray & app entry point
 ├── resin_planner.py                 # Resin Planner widget (Desktop)
 ├── team_goals.py                    # Team & Farming Goals widget (Desktop)
+├── translations.py                  # Central translation file (German & English)
 ├── weekly_bosses.py                 # Weekly Boss Tracker widget (Desktop)
 ├── widgets.py                       # Custom UI widgets (ExpeditionCard, OperationsHQCard)
 ├── wishes.py                        # Wish & Pity Counter widget (Desktop)
