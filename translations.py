@@ -157,6 +157,23 @@ TRANSLATIONS = {
         "hq_resin_full": "{max} / {max} (FULL!)",
         "hq_resin_countdown": "{current} / {max} (Full in {h:02d}h {m:02d}m)",
         "hq_reset_countdown": "In {h:02d}h {m:02d}m",
+
+        # Wishes & Banner
+        "wish_title": "🌠 Wish & Pity Savings Counter",
+        "banner_title": "⏳ Current Event Wish Ends In:",
+        "banner_loading": "Loading banner time...",
+        "banner_ended": "Banner ended / New banner active!",
+        "banner_countdown_format": "{days} Days, {hours:02d}:{minutes:02d}:{seconds:02d} Hrs.",
+        "wish_current_pity": "Current Pity (Wishes since last 5★):",
+        "wish_guaranteed": "Next 5★ is Guaranteed (Lost last 50/50)",
+        "wish_primos": "💎 Primogems Owned:",
+        "wish_fates": "💫 Intertwined Fates Owned:",
+        "wish_summary_title": "PITY & SAVINGS SUMMARY",
+        "wish_total_pulls": "💫 Total Available Pulls: <b style='color: {color};'>{total} Wishes</b> <span style='color: #aaa;'>(From {primos} primos + {fates} fates)</span>",
+        "wish_soft_pity": "🎯 Wishes to Soft Pity (75): <b>{val}</b>",
+        "wish_hard_pity": "🛡️ Wishes to Hard Pity (90): <b>{val}</b>",
+        "wish_status_guaranteed": "✨ Target Status: <b style='color: #55ff55;'>GUARANTEED 5★ Character</b>",
+        "wish_status_5050": "🎲 Target Status: <b style='color: #ffaa00;'>50/50 Chance</b>",
     },
     "Deutsch": {
         # General & App
@@ -312,6 +329,23 @@ TRANSLATIONS = {
         "hq_resin_full": "{max} / {max} (VOLL!)",
         "hq_resin_countdown": "{current} / {max} (Voll in {h:02d}h {m:02d}m)",
         "hq_reset_countdown": "In {h:02d}h {m:02d}m",
+
+        # Wishes & Banner
+        "wish_title": "🌠 Gebete- & Pity-Sparplan",
+        "banner_title": "⏳ Aktuelles Aktionsgebet endet in:",
+        "banner_loading": "Lade Banner-Zeit...",
+        "banner_ended": "Banner beendet / Neues Banner aktiv!",
+        "banner_countdown_format": "{days} Tage, {hours:02d}:{minutes:02d}:{seconds:02d} Std.",
+        "wish_current_pity": "Aktuelles Pity (Gebete seit letztem 5★):",
+        "wish_guaranteed": "Nächster 5★ ist garantiert (letzten 50/50 verloren)",
+        "wish_primos": "💎 Vorherrschende Urgesteine:",
+        "wish_fates": "💫 Vorherbestimmte Schicksale:",
+        "wish_summary_title": "PITY- & SPARPLAN-ÜBERSICHT",
+        "wish_total_pulls": "💫 Gesamte verfügbare Gebete: <b style='color: {color};'>{total} Gebete</b> <span style='color: #aaa;'>(Aus {primos} Urgestein + {fates} Schicksalen)</span>",
+        "wish_soft_pity": "🎯 Gebete bis Soft Pity (75): <b>{val}</b>",
+        "wish_hard_pity": "🛡️ Gebete bis Hard Pity (90): <b>{val}</b>",
+        "wish_status_guaranteed": "✨ Zielstatus: <b style='color: #55ff55;'>GARANTIERTER 5★-Charakter</b>",
+        "wish_status_5050": "🎲 Zielstatus: <b style='color: #ffaa00;'>50/50-Chance</b>",
     },
 }
 
