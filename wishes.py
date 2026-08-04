@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import (
 )
 from datetime import datetime
 from config import get_theme
+from translations import tr
 
 
 class BannerCountdownWidget(QFrame):
@@ -25,10 +26,10 @@ class BannerCountdownWidget(QFrame):
         layout.setContentsMargins(12, 10, 12, 10)
         layout.setSpacing(4)
 
-        self.title_label = QLabel("⏳ Aktuelles Aktionsgebet endet in:")
+        self.title_label = QLabel()
         self.title_label.setStyleSheet("font-size: 11px; font-weight: bold; color: #ffaa00;")
 
-        self.timer_label = QLabel("Lade Banner-Zeit...")
+        self.timer_label = QLabel()
         self.timer_label.setStyleSheet("font-size: 13px; font-weight: bold; color: #ffffff;")
 
         layout.addWidget(self.title_label)
@@ -42,6 +43,10 @@ class BannerCountdownWidget(QFrame):
         self.clock_timer.timeout.connect(self.update_countdown)
         self.clock_timer.start(1000)
 
+        self.retranslate_ui()
+
+    def retranslate_ui(self):
+        self.title_label.setText(tr("banner_title"))
         self.update_countdown()
 
     def update_countdown(self):
@@ -49,7 +54,7 @@ class BannerCountdownWidget(QFrame):
         remaining = self.banner_end - now
 
         if remaining.total_seconds() <= 0:
-            self.timer_label.setText("Banner beendet / Neues Banner aktiv!")
+            self.timer_label.setText(tr("banner_ended"))
             return
 
         days = remaining.days
@@ -57,7 +62,14 @@ class BannerCountdownWidget(QFrame):
         minutes = (remaining.seconds % 3600) // 60
         seconds = remaining.seconds % 60
 
-        text = f"{days} Tage, {hours:02d}:{minutes:02d}:{seconds:02d} Std."
+        # Direkt über tr() formatiert, damit keine rohen Keys stehen bleiben
+        template = tr("banner_countdown_format")
+        if template == "banner_countdown_format":
+            # Fallback falls der Key fehlen sollte
+            text = f"{days} Tage, {hours:02d}:{minutes:02d}:{seconds:02d} Std."
+        else:
+            text = template.format(days=days, hours=hours, minutes=minutes, seconds=seconds)
+
         self.timer_label.setText(text)
 
 
@@ -70,9 +82,9 @@ class WishPityCounterWidget(QFrame):
         main_layout.setSpacing(14)
         main_layout.setContentsMargins(16, 16, 16, 16)
 
-        title_label = QLabel("🌠 Wish & Pity Savings Counter")
-        title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #ffffff;")
-        main_layout.addWidget(title_label)
+        self.title_label = QLabel()
+        self.title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #ffffff;")
+        main_layout.addWidget(self.title_label)
 
         # Banner Countdown direkt als erste Sektion integriert
         self.banner_countdown = BannerCountdownWidget(self)
@@ -81,26 +93,26 @@ class WishPityCounterWidget(QFrame):
         grid = QGridLayout()
         grid.setSpacing(12)
 
-        lbl_pity = QLabel("Current Pity (Wishes since last 5★):")
-        lbl_pity.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
-        grid.addWidget(lbl_pity, 0, 0)
+        self.lbl_pity = QLabel()
+        self.lbl_pity.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
+        grid.addWidget(self.lbl_pity, 0, 0)
 
         self.spin_pity = QSpinBox()
         self.spin_pity.setRange(0, 89)
         self.spin_pity.valueChanged.connect(self.on_changed)
         grid.addWidget(self.spin_pity, 0, 1)
 
-        lbl_guaranteed = QLabel("50/50 Status:")
-        lbl_guaranteed.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
-        grid.addWidget(lbl_guaranteed, 1, 0)
+        self.lbl_guaranteed = QLabel()
+        self.lbl_guaranteed.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
+        grid.addWidget(self.lbl_guaranteed, 1, 0)
 
-        self.chk_guaranteed = QCheckBox("Next 5★ is Guaranteed (Lost last 50/50)")
+        self.chk_guaranteed = QCheckBox()
         self.chk_guaranteed.stateChanged.connect(self.on_changed)
         grid.addWidget(self.chk_guaranteed, 1, 1)
 
-        lbl_primos = QLabel("💎 Primogems Owned:")
-        lbl_primos.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
-        grid.addWidget(lbl_primos, 2, 0)
+        self.lbl_primos = QLabel()
+        self.lbl_primos.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
+        grid.addWidget(self.lbl_primos, 2, 0)
 
         self.spin_primos = QSpinBox()
         self.spin_primos.setRange(0, 999999)
@@ -108,9 +120,9 @@ class WishPityCounterWidget(QFrame):
         self.spin_primos.valueChanged.connect(self.on_changed)
         grid.addWidget(self.spin_primos, 2, 1)
 
-        lbl_fates = QLabel("💫 Intertwined Fates Owned:")
-        lbl_fates.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
-        grid.addWidget(lbl_fates, 3, 0)
+        self.lbl_fates = QLabel()
+        self.lbl_fates.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
+        grid.addWidget(self.lbl_fates, 3, 0)
 
         self.spin_fates = QSpinBox()
         self.spin_fates.setRange(0, 9999)
@@ -125,14 +137,14 @@ class WishPityCounterWidget(QFrame):
         v_res.setContentsMargins(12, 12, 12, 12)
         v_res.setSpacing(8)
 
-        lbl_res_title = QLabel("PITY & SAVINGS SUMMARY")
-        lbl_res_title.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
-        v_res.addWidget(lbl_res_title)
+        self.lbl_res_title = QLabel()
+        self.lbl_res_title.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
+        v_res.addWidget(self.lbl_res_title)
 
-        self.lbl_total_wishes = QLabel("Total Available Wishes: 0")
-        self.lbl_to_soft_pity = QLabel("Wishes to Soft Pity (75): 75")
-        self.lbl_to_hard_pity = QLabel("Wishes to Hard Pity (90): 90")
-        self.lbl_guarantee_status = QLabel("Target Guarantee: 50/50 Chance")
+        self.lbl_total_wishes = QLabel()
+        self.lbl_to_soft_pity = QLabel()
+        self.lbl_to_hard_pity = QLabel()
+        self.lbl_guarantee_status = QLabel()
 
         v_res.addWidget(self.lbl_total_wishes)
         v_res.addWidget(self.lbl_to_soft_pity)
@@ -142,7 +154,20 @@ class WishPityCounterWidget(QFrame):
         main_layout.addWidget(self.results_card)
         main_layout.addStretch()
 
+        self.retranslate_ui()
         self.apply_theme_style()
+        self.calculate()
+
+    def retranslate_ui(self):
+        """Aktualisiert alle UI-Texte dynamisch bei Sprachwechsel"""
+        self.title_label.setText(tr("wish_title"))
+        if hasattr(self, "banner_countdown"):
+            self.banner_countdown.retranslate_ui()
+        self.lbl_pity.setText(tr("wish_current_pity"))
+        self.chk_guaranteed.setText(tr("wish_guaranteed"))
+        self.lbl_primos.setText(tr("wish_primos"))
+        self.lbl_fates.setText(tr("wish_fates"))
+        self.lbl_res_title.setText(tr("wish_summary_title"))
         self.calculate()
 
     def on_changed(self):
@@ -164,25 +189,24 @@ class WishPityCounterWidget(QFrame):
 
         theme = get_theme()
 
-        self.lbl_total_wishes.setText(
-            f"💫 Total Available Pulls: <b style='color: {theme['cyan']};'>{total_wishes} Wishes</b> "
-            f"<span style='color: #aaa;'>(From {wishes_from_primos} primos + {fates} fates)</span>"
-        )
-        self.lbl_to_soft_pity.setText(
-            f"🎯 Wishes to Soft Pity (75): <b>{wishes_to_soft}</b>"
-        )
-        self.lbl_to_hard_pity.setText(
-            f"🛡️ Wishes to Hard Pity (90): <b>{wishes_to_hard}</b>"
-        )
+        # Sicherer Aufruf der Formatierung
+        pulls_template = tr("wish_total_pulls")
+        if pulls_template == "wish_total_pulls":
+            total_text = f"💫 Total Available Pulls: <b style='color: {theme['cyan']};'>{total_wishes} Wishes</b> <span style='color: #aaa;'>(From {wishes_from_primos} primos + {fates} fates)</span>"
+        else:
+            total_text = pulls_template.format(color=theme["cyan"], total=total_wishes, primos=wishes_from_primos, fates=fates)
+        self.lbl_total_wishes.setText(total_text)
+
+        soft_template = tr("wish_soft_pity")
+        self.lbl_to_soft_pity.setText(soft_template.format(val=wishes_to_soft) if soft_template != "wish_soft_pity" else f"🎯 Wishes to Soft Pity (75): <b>{wishes_to_soft}</b>")
+
+        hard_template = tr("wish_hard_pity")
+        self.lbl_to_hard_pity.setText(hard_template.format(val=wishes_to_hard) if hard_template != "wish_hard_pity" else f"🛡️ Wishes to Hard Pity (90): <b>{wishes_to_hard}</b>")
 
         if is_guaranteed:
-            self.lbl_guarantee_status.setText(
-                "✨ Target Status: <b style='color: #55ff55;'>GUARANTEED 5★ Character</b>"
-            )
+            self.lbl_guarantee_status.setText(tr("wish_status_guaranteed"))
         else:
-            self.lbl_guarantee_status.setText(
-                "🎲 Target Status: <b style='color: #ffaa00;'>50/50 Chance</b>"
-            )
+            self.lbl_guarantee_status.setText(tr("wish_status_5050"))
 
     def get_state_dict(self):
         return {

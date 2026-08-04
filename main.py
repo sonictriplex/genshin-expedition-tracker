@@ -7,6 +7,7 @@ import time
 if sys.platform.startswith("win"):
     try:
         import ctypes
+
         myappid = "genshintracker.expedition.desktop.1"
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     except Exception:
@@ -50,6 +51,7 @@ from dialogs import InlineAddDialog, InlineResinDialog
 from journal import TeyvatJournalWidget
 from resin_planner import ResinPlannerWidget
 from team_goals import TeamGoalsWidget
+from translations import set_language, tr
 from weekly_bosses import WeeklyBossTrackerWidget
 from widgets import ExpeditionCard, OperationsHQCard
 from wishes import WishPityCounterWidget
@@ -58,10 +60,12 @@ from wishes import WishPityCounterWidget
 class GenshinTrackerWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Genshin Impact Expedition Tracker")
         self.current_theme_name = "Mondstadt (Anemo)"
+        self.current_language = "Deutsch"
+        set_language(self.current_language)
         self.close_to_tray = True
 
+        self.setWindowTitle(tr("app_title"))
         self.init_system_tray()
 
         # Main Central Widget with HORIZONTAL Layout (Sidebar + Content)
@@ -89,38 +93,38 @@ class GenshinTrackerWindow(QMainWindow):
         self.sidebar_layout.addWidget(self.lbl_logo)
 
         # Navigation Buttons (Top to Bottom)
-        self.btn_nav_expeditions = self.create_nav_button("⏳", "Expeditions")
+        self.btn_nav_expeditions = self.create_nav_button("⏳", tr("nav_expeditions"))
         self.btn_nav_expeditions.clicked.connect(lambda: self.switch_page(0))
         self.sidebar_layout.addWidget(self.btn_nav_expeditions)
 
-        self.btn_nav_journal = self.create_nav_button("📖", "Teyvat Journal")
+        self.btn_nav_journal = self.create_nav_button("📖", tr("nav_journal"))
         self.btn_nav_journal.clicked.connect(lambda: self.switch_page(1))
         self.sidebar_layout.addWidget(self.btn_nav_journal)
 
-        self.btn_nav_crafting = self.create_nav_button("🧪", "Crafting Calculator")
+        self.btn_nav_crafting = self.create_nav_button("🧪", tr("nav_crafting"))
         self.btn_nav_crafting.clicked.connect(lambda: self.switch_page(2))
         self.sidebar_layout.addWidget(self.btn_nav_crafting)
 
-        self.btn_nav_wishes = self.create_nav_button("🌠", "Wish & Pity Counter")
+        self.btn_nav_wishes = self.create_nav_button("🌠", tr("nav_wishes"))
         self.btn_nav_wishes.clicked.connect(lambda: self.switch_page(3))
         self.sidebar_layout.addWidget(self.btn_nav_wishes)
 
-        self.btn_nav_resin = self.create_nav_button("⚡", "Resin Planner")
+        self.btn_nav_resin = self.create_nav_button("⚡", tr("nav_resin"))
         self.btn_nav_resin.clicked.connect(lambda: self.switch_page(4))
         self.sidebar_layout.addWidget(self.btn_nav_resin)
 
-        self.btn_nav_bosses = self.create_nav_button("🐲", "Weekly Boss Tracker")
+        self.btn_nav_bosses = self.create_nav_button("🐲", tr("nav_bosses"))
         self.btn_nav_bosses.clicked.connect(lambda: self.switch_page(5))
         self.sidebar_layout.addWidget(self.btn_nav_bosses)
 
-        self.btn_nav_team = self.create_nav_button("🎯", "Team & Farming Goals")
+        self.btn_nav_team = self.create_nav_button("🎯", tr("nav_team"))
         self.btn_nav_team.clicked.connect(lambda: self.switch_page(6))
         self.sidebar_layout.addWidget(self.btn_nav_team)
 
         self.sidebar_layout.addStretch()
 
         # Settings Button (Fixed at Bottom)
-        self.btn_nav_settings = self.create_nav_button("⚙️", "Settings")
+        self.btn_nav_settings = self.create_nav_button("⚙️", tr("nav_settings"))
         self.btn_nav_settings.clicked.connect(lambda: self.switch_page(7))
         self.sidebar_layout.addWidget(self.btn_nav_settings)
 
@@ -136,15 +140,15 @@ class GenshinTrackerWindow(QMainWindow):
 
         # Header Bar
         header_layout = QHBoxLayout()
-        self.lbl_page_title = QLabel("Active Expeditions")
+        self.lbl_page_title = QLabel(tr("title_expeditions"))
         self.lbl_page_title.setStyleSheet("font-size: 18px; font-weight: bold; color: white;")
         header_layout.addWidget(self.lbl_page_title)
 
         header_layout.addStretch()
 
-        lbl_theme = QLabel("Theme:")
-        lbl_theme.setStyleSheet("font-size: 12px; font-weight: bold; color: #aaa;")
-        header_layout.addWidget(lbl_theme)
+        self.lbl_theme = QLabel(tr("theme"))
+        self.lbl_theme.setStyleSheet("font-size: 12px; font-weight: bold; color: #aaa;")
+        header_layout.addWidget(self.lbl_theme)
 
         self.combo_theme = QComboBox()
         self.combo_theme.addItems(list(REGION_THEMES.keys()))
@@ -180,27 +184,22 @@ class GenshinTrackerWindow(QMainWindow):
 
         self.stacked_widget.addWidget(self.page_expeditions)
 
-        # PAGE 1: Teyvat Journal
+        # PAGE 1-6: Sub-Widgets
         self.journal_widget = TeyvatJournalWidget(parent_window=self)
         self.stacked_widget.addWidget(self.journal_widget)
 
-        # PAGE 2: Crafting Calculator
         self.crafting_widget = CraftingCalculatorWidget(parent_window=self)
         self.stacked_widget.addWidget(self.crafting_widget)
 
-        # PAGE 3: Wish & Pity Counter
         self.wishes_widget = WishPityCounterWidget(parent_window=self)
         self.stacked_widget.addWidget(self.wishes_widget)
 
-        # PAGE 4: Resin Planner
         self.resin_widget = ResinPlannerWidget(parent_window=self)
         self.stacked_widget.addWidget(self.resin_widget)
 
-        # PAGE 5: Weekly Boss Tracker
         self.bosses_widget = WeeklyBossTrackerWidget(parent_window=self)
         self.stacked_widget.addWidget(self.bosses_widget)
 
-        # PAGE 6: Team & Farming Goals
         self.team_widget = TeamGoalsWidget(parent_window=self)
         self.stacked_widget.addWidget(self.team_widget)
 
@@ -237,14 +236,14 @@ class GenshinTrackerWindow(QMainWindow):
     def switch_page(self, index):
         self.stacked_widget.setCurrentIndex(index)
         titles = [
-            "Active Expeditions",
-            "Teyvat Journal & HQ Operations",
-            "Alchemy & Crafting Bench Calculator",
-            "Wish & Pity Savings Counter",
-            "Original Resin Overflow & Cap Planner",
-            "Weekly Boss Discount & Claim Tracker",
-            "Team Building & Farming Goals",
-            "Settings & Preferences",
+            tr("title_expeditions"),
+            tr("title_journal"),
+            tr("title_crafting"),
+            tr("title_wishes"),
+            tr("title_resin"),
+            tr("title_bosses"),
+            tr("title_team"),
+            tr("title_settings"),
         ]
         self.lbl_page_title.setText(titles[index])
         self.update_nav_styles(index)
@@ -301,22 +300,35 @@ class GenshinTrackerWindow(QMainWindow):
         card_layout.setContentsMargins(20, 20, 20, 20)
         card_layout.setSpacing(15)
 
-        lbl_sec = QLabel("System Settings")
-        lbl_sec.setStyleSheet("font-size: 16px; font-weight: bold; color: white;")
-        card_layout.addWidget(lbl_sec)
+        self.lbl_sec = QLabel(tr("sys_settings"))
+        self.lbl_sec.setStyleSheet("font-size: 16px; font-weight: bold; color: white;")
+        card_layout.addWidget(self.lbl_sec)
 
-        self.chk_autostart = QCheckBox("Start with System (Autostart)")
+        # Sprachauswahl Dropdown
+        self.lbl_lang = QLabel(tr("language"))
+        self.lbl_lang.setStyleSheet("font-size: 12px; font-weight: bold; color: #aaa;")
+        card_layout.addWidget(self.lbl_lang)
+
+        self.combo_language = QComboBox()
+        self.combo_language.addItems(["Deutsch", "English"])
+        self.combo_language.setCurrentText(self.current_language)
+        self.combo_language.currentTextChanged.connect(self.on_language_changed)
+        card_layout.addWidget(self.combo_language)
+
+        card_layout.addSpacing(10)
+
+        self.chk_autostart = QCheckBox(tr("autostart"))
         self.chk_autostart.setChecked(is_autostart_enabled())
         self.chk_autostart.stateChanged.connect(self.on_settings_changed)
         card_layout.addWidget(self.chk_autostart)
 
-        lbl_close = QLabel("Window Close Behavior (✕):")
-        lbl_close.setStyleSheet("font-size: 12px; font-weight: bold; color: #aaa;")
-        card_layout.addWidget(lbl_close)
+        self.lbl_close = QLabel(tr("close_behavior"))
+        self.lbl_close.setStyleSheet("font-size: 12px; font-weight: bold; color: #aaa;")
+        card_layout.addWidget(self.lbl_close)
 
         self.combo_close_action = QComboBox()
-        self.combo_close_action.addItem("Minimize to System Tray", userData=True)
-        self.combo_close_action.addItem("Exit Application Completely", userData=False)
+        self.combo_close_action.addItem(tr("close_tray"), userData=True)
+        self.combo_close_action.addItem(tr("close_exit"), userData=False)
         self.combo_close_action.currentIndexChanged.connect(self.on_settings_changed)
         card_layout.addWidget(self.combo_close_action)
 
@@ -325,6 +337,58 @@ class GenshinTrackerWindow(QMainWindow):
         layout.addStretch()
 
         return page
+
+    def on_language_changed(self, new_lang):
+        self.current_language = new_lang
+        set_language(new_lang)
+        self.retranslate_ui()
+        self.save_expeditions()
+
+    def retranslate_ui(self):
+        """Aktualisiert dynamisch alle UI-Elemente bei Sprachwechsel"""
+        self.setWindowTitle(tr("app_title"))
+        self.lbl_theme.setText(tr("theme"))
+        self.lbl_sec.setText(tr("sys_settings"))
+        self.lbl_lang.setText(tr("language"))
+        self.chk_autostart.setText(tr("autostart"))
+        self.lbl_close.setText(tr("close_behavior"))
+
+        # Close action ComboBox Texte aktualisieren
+        idx = self.combo_close_action.currentIndex()
+        self.combo_close_action.setItemText(0, tr("close_tray"))
+        self.combo_close_action.setItemText(1, tr("close_exit"))
+        self.combo_close_action.setCurrentIndex(idx)
+
+        # Tooltips für Nav Buttons
+        tooltips = [
+            tr("nav_expeditions"),
+            tr("nav_journal"),
+            tr("nav_crafting"),
+            tr("nav_wishes"),
+            tr("nav_resin"),
+            tr("nav_bosses"),
+            tr("nav_team"),
+            tr("nav_settings"),
+        ]
+        buttons = [
+            self.btn_nav_expeditions,
+            self.btn_nav_journal,
+            self.btn_nav_crafting,
+            self.btn_nav_wishes,
+            self.btn_nav_resin,
+            self.btn_nav_bosses,
+            self.btn_nav_team,
+            self.btn_nav_settings,
+        ]
+        for btn, tt in zip(buttons, tooltips):
+            btn.setToolTip(tt)
+
+        # Sub-Widgets retranslaten, falls vorhanden
+        if hasattr(self, "crafting_widget") and hasattr(self.crafting_widget, "retranslate_ui"):
+            self.crafting_widget.retranslate_ui()
+
+        self.switch_page(self.stacked_widget.currentIndex())
+        self.update_add_button_state()
 
     def on_settings_changed(self):
         autostart = self.chk_autostart.isChecked()
@@ -445,8 +509,8 @@ class GenshinTrackerWindow(QMainWindow):
             event.ignore()
             self.hide()
             self.tray_icon.showMessage(
-                "Genshin Tracker",
-                "Running in background.",
+                tr("app_title"),
+                tr("tray_running"),
                 QSystemTrayIcon.MessageIcon.Information,
                 2000,
             )
@@ -465,7 +529,7 @@ class GenshinTrackerWindow(QMainWindow):
 
         if count >= max_limit:
             self.btn_start_new.setEnabled(False)
-            self.btn_start_new.setText(f"Limit Reached ({count}/{max_limit} Expeditions)")
+            self.btn_start_new.setText(tr("limit_reached").format(count=count))
             self.btn_start_new.setCursor(Qt.CursorShape.ForbiddenCursor)
             self.btn_start_new.setStyleSheet("""
                 QPushButton {
@@ -480,7 +544,7 @@ class GenshinTrackerWindow(QMainWindow):
             """)
         else:
             self.btn_start_new.setEnabled(True)
-            self.btn_start_new.setText(f"+ Start New Expedition ({count}/{max_limit})")
+            self.btn_start_new.setText(f"{tr('start_new')} ({count}/{max_limit})")
             self.btn_start_new.setCursor(Qt.CursorShape.PointingHandCursor)
             self.btn_start_new.setStyleSheet(f"""
                 QPushButton {{
@@ -602,11 +666,11 @@ class GenshinTrackerWindow(QMainWindow):
         for card in self.active_cards:
             just_finished = card.update_time()
             if just_finished:
-                msg = f"The expedition of {card.char_name} has finished!"
+                msg = tr("exp_finished").format(char=card.char_name)
                 if notification:
                     try:
                         notification.notify(
-                            title="Genshin Impact Tracker",
+                            title=tr("app_title"),
                             message=msg,
                             app_name="GenshinTimer",
                             timeout=5,
@@ -615,7 +679,7 @@ class GenshinTrackerWindow(QMainWindow):
                         pass
                 if self.tray_icon.isSystemTrayAvailable():
                     self.tray_icon.showMessage(
-                        "Expedition Complete",
+                        tr("exp_complete_title"),
                         msg,
                         QSystemTrayIcon.MessageIcon.Information,
                         5000,
@@ -633,6 +697,7 @@ class GenshinTrackerWindow(QMainWindow):
             "resin": self.hq_card.current_resin,
             "last_resin_update": self.hq_card.last_resin_update,
             "theme": self.current_theme_name,
+            "language": self.current_language,
             "close_to_tray": self.close_to_tray,
             "teyvat_journal": self.journal_widget.get_state_dict() if hasattr(self, "journal_widget") else {},
             "wishes": self.wishes_widget.get_state_dict() if hasattr(self, "wishes_widget") else {},
@@ -658,10 +723,13 @@ class GenshinTrackerWindow(QMainWindow):
                     self.hq_card.current_resin = data.get("resin", 120)
                     self.hq_card.last_resin_update = data.get("last_resin_update", time.time())
                     self.current_theme_name = data.get("theme", "Mondstadt (Anemo)")
+                    self.current_language = data.get("language", "Deutsch")
+                    set_language(self.current_language)
                     self.close_to_tray = data.get("close_to_tray", True)
 
                     idx = 0 if self.close_to_tray else 1
                     self.combo_close_action.setCurrentIndex(idx)
+                    self.combo_language.setCurrentText(self.current_language)
 
                     if hasattr(self, "journal_widget"):
                         self.journal_widget.load_state_dict(data.get("teyvat_journal", {}))
@@ -683,6 +751,8 @@ class GenshinTrackerWindow(QMainWindow):
                     )
                 if hasattr(self, "combo_theme"):
                     self.combo_theme.setCurrentText(self.current_theme_name)
+
+                self.retranslate_ui()
 
         except Exception as e:
             print(f"Error loading: {e}")

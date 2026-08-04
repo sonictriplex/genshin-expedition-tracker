@@ -61,12 +61,15 @@ REGION_THEMES = {
 
 CURRENT_THEME = REGION_THEMES["Mondstadt (Anemo)"]
 
+
 def set_active_theme(theme_name: str):
     global CURRENT_THEME
     CURRENT_THEME = REGION_THEMES.get(theme_name, REGION_THEMES["Mondstadt (Anemo)"])
 
+
 def get_theme():
     return CURRENT_THEME
+
 
 # Charaktere als einfache Liste
 CHARACTERS = [
@@ -97,6 +100,8 @@ TIME_REDUCTION_BONUS = {
 }
 
 REGIONS = ["Mondstadt", "Liyue", "Inazuma", "Sumeru", "Fontaine", "Natlan"]
+
+# Static reference fallback
 RESOURCES = [
     "Mora",
     "Ores (Iron & Crystal)",
@@ -105,10 +110,12 @@ RESOURCES = [
     "Fish",
 ]
 
+
 # --- Cross-Platform Autostart Integration ---
 def is_autostart_enabled() -> bool:
     if IS_WINDOWS:
         from PyQt6.QtCore import QSettings
+
         settings = QSettings(
             "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
             QSettings.Format.NativeFormat,
@@ -117,12 +124,14 @@ def is_autostart_enabled() -> bool:
     else:
         return os.path.exists(AUTOSTART_FILE)
 
+
 def set_autostart(enable: bool):
     script_path = os.path.abspath(os.path.join(BASE_DIR, "main.py"))
     python_executable = sys.executable
 
     if IS_WINDOWS:
         from PyQt6.QtCore import QSettings
+
         settings = QSettings(
             "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
             QSettings.Format.NativeFormat,

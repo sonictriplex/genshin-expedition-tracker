@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
 )
 
 from config import ASSETS_DIR, get_theme
+from translations import tr
 
 
 class CircularProgressTimer(QWidget):
@@ -66,7 +67,7 @@ class CircularProgressTimer(QWidget):
         painter.setFont(font)
 
         if self.is_complete:
-            time_str = "READY!"
+            time_str = tr("ready")
         else:
             h = max(0, self.remaining_seconds) // 3600
             m = (max(0, self.remaining_seconds) % 3600) // 60
@@ -129,7 +130,7 @@ class ExpeditionCard(QFrame):
         self.lbl_loc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         card_layout.addWidget(self.lbl_loc)
 
-        self.btn_action = QPushButton("Running")
+        self.btn_action = QPushButton(tr("running"))
         self.btn_action.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_action.clicked.connect(self.on_action_click)
         card_layout.addWidget(self.btn_action)
@@ -215,7 +216,7 @@ class ExpeditionCard(QFrame):
         self.ring_timer.set_time(rem, self.total_seconds)
 
         if rem <= 0:
-            self.btn_action.setText("Claim Reward")
+            self.btn_action.setText(tr("claim_reward"))
             if self.is_active:
                 self.is_active = False
                 self.style_card(active=False)
@@ -224,7 +225,7 @@ class ExpeditionCard(QFrame):
                 self.notified = True
                 return True
         else:
-            self.btn_action.setText("Running")
+            self.btn_action.setText(tr("running"))
         return False
 
     def to_dict(self):
@@ -258,7 +259,7 @@ class OperationsHQCard(QFrame):
         layout.setContentsMargins(15, 12, 15, 12)
         layout.setSpacing(6)
 
-        self.lbl_header = QLabel("OPERATIONS HQ")
+        self.lbl_header = QLabel()
         layout.addWidget(self.lbl_header)
 
         # Box 1: Next Ready
@@ -268,11 +269,11 @@ class OperationsHQCard(QFrame):
         v_next.setSpacing(2)
         v_next.setContentsMargins(10, 6, 10, 6)
 
-        lbl_next_title = QLabel("NEXT ARRIVAL")
-        lbl_next_title.setStyleSheet("font-size: 9px; color: #888; font-weight: bold;")
-        self.lbl_next_val = QLabel("No active expeditions")
+        self.lbl_next_title = QLabel()
+        self.lbl_next_title.setStyleSheet("font-size: 9px; color: #888; font-weight: bold;")
+        self.lbl_next_val = QLabel()
 
-        v_next.addWidget(lbl_next_title)
+        v_next.addWidget(self.lbl_next_title)
         v_next.addWidget(self.lbl_next_val)
         layout.addWidget(box_next)
 
@@ -283,12 +284,12 @@ class OperationsHQCard(QFrame):
         v_reset.setSpacing(2)
         v_reset.setContentsMargins(10, 6, 10, 6)
 
-        lbl_reset_title = QLabel("DAILY RESET (04:00)")
-        lbl_reset_title.setStyleSheet("font-size: 9px; color: #888; font-weight: bold;")
-        self.lbl_reset_val = QLabel("00h 00m")
+        self.lbl_reset_title = QLabel()
+        self.lbl_reset_title.setStyleSheet("font-size: 9px; color: #888; font-weight: bold;")
+        self.lbl_reset_val = QLabel()
         self.lbl_reset_val.setStyleSheet("font-size: 11px; font-weight: bold; color: white;")
 
-        v_reset.addWidget(lbl_reset_title)
+        v_reset.addWidget(self.lbl_reset_title)
         v_reset.addWidget(self.lbl_reset_val)
         layout.addWidget(box_reset)
 
@@ -300,17 +301,17 @@ class OperationsHQCard(QFrame):
         v_resin.setContentsMargins(10, 6, 10, 6)
 
         h_resin_hdr = QHBoxLayout()
-        lbl_resin_title = QLabel("RESIN COUNTER")
-        lbl_resin_title.setStyleSheet("font-size: 9px; color: #888; font-weight: bold;")
+        self.lbl_resin_title = QLabel()
+        self.lbl_resin_title.setStyleSheet("font-size: 9px; color: #888; font-weight: bold;")
         self.btn_edit_resin = QPushButton("⚙")
         self.btn_edit_resin.setFixedSize(16, 16)
         self.btn_edit_resin.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_edit_resin.clicked.connect(self.edit_resin)
-        h_resin_hdr.addWidget(lbl_resin_title)
+        h_resin_hdr.addWidget(self.lbl_resin_title)
         h_resin_hdr.addStretch()
         h_resin_hdr.addWidget(self.btn_edit_resin)
 
-        self.lbl_resin_val = QLabel("120 / 200")
+        self.lbl_resin_val = QLabel()
         self.lbl_resin_val.setStyleSheet("font-size: 10px; font-weight: bold; color: white;")
 
         v_resin.addLayout(h_resin_hdr)
@@ -319,12 +320,22 @@ class OperationsHQCard(QFrame):
 
         layout.addStretch()
 
-        self.btn_claim_all = QPushButton("Claim All Ready")
+        self.btn_claim_all = QPushButton()
         self.btn_claim_all.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_claim_all.clicked.connect(self.claim_all)
         layout.addWidget(self.btn_claim_all)
 
+        self.retranslate_ui()
         self.apply_theme_style()
+        self.update_info()
+
+    def retranslate_ui(self):
+        """Aktualisiert alle UI-Texte dynamisch bei Sprachwechsel"""
+        self.lbl_header.setText(tr("hq_title"))
+        self.lbl_next_title.setText(tr("hq_next_title"))
+        self.lbl_reset_title.setText(tr("hq_reset_title"))
+        self.lbl_resin_title.setText(tr("hq_resin_title"))
+        self.btn_claim_all.setText(tr("hq_claim_all"))
         self.update_info()
 
     def apply_theme_style(self):
@@ -382,14 +393,14 @@ class OperationsHQCard(QFrame):
             self.last_resin_update += gained * 480
 
         if self.current_resin >= self.max_resin:
-            self.lbl_resin_val.setText(f"{self.max_resin} / {self.max_resin} (FULL!)")
+            self.lbl_resin_val.setText(tr("hq_resin_full", max=self.max_resin))
             self.lbl_resin_val.setStyleSheet(f"font-size: 10px; font-weight: bold; color: {theme['amber']};")
         else:
             needed_resin = self.max_resin - self.current_resin
             seconds_left = (needed_resin * 480) - (int(now - self.last_resin_update) % 480)
             h = seconds_left // 3600
             m = (seconds_left % 3600) // 60
-            self.lbl_resin_val.setText(f"{self.current_resin} / {self.max_resin} (Full in {h:02d}h {m:02d}m)")
+            self.lbl_resin_val.setText(tr("hq_resin_countdown", current=self.current_resin, max=self.max_resin, h=h, m=m))
             self.lbl_resin_val.setStyleSheet("font-size: 10px; font-weight: bold; color: white;")
 
         dt_now = datetime.now()
@@ -399,13 +410,13 @@ class OperationsHQCard(QFrame):
         time_to_reset = dt_reset - dt_now
         res_h = int(time_to_reset.total_seconds() // 3600)
         res_m = int((time_to_reset.total_seconds() % 3600) // 60)
-        self.lbl_reset_val.setText(f"In {res_h:02d}h {res_m:02d}m")
+        self.lbl_reset_val.setText(tr("hq_reset_countdown", h=res_h, m=res_m))
 
         if self.parent_window and self.parent_window.active_cards:
             active = self.parent_window.active_cards
             ready_cards = [c for c in active if c.get_remaining_seconds() <= 0]
             if ready_cards:
-                self.lbl_next_val.setText(f"{len(ready_cards)} Ready to claim!")
+                self.lbl_next_val.setText(tr("hq_ready_count", count=len(ready_cards)))
                 self.lbl_next_val.setStyleSheet(f"font-size: 11px; font-weight: bold; color: {theme['amber']};")
             else:
                 next_card = min(active, key=lambda c: c.get_remaining_seconds())
@@ -416,5 +427,5 @@ class OperationsHQCard(QFrame):
                 self.lbl_next_val.setText(f"{next_card.char_name} in {h:02d}:{m:02d}:{s:02d}")
                 self.lbl_next_val.setStyleSheet(f"font-size: 11px; font-weight: bold; color: {theme['cyan']};")
         else:
-            self.lbl_next_val.setText("No active expeditions")
+            self.lbl_next_val.setText(tr("hq_no_active"))
             self.lbl_next_val.setStyleSheet("font-size: 11px; font-weight: bold; color: #888;")

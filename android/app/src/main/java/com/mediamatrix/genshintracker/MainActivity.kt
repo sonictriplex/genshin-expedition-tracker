@@ -65,6 +65,70 @@ val REGION_THEMES = mapOf(
     "Snezhnaya (Cryo)" to RegionTheme("Snezhnaya (Cryo)", Color(0xFF99F6E4), Color(0xFFA5F3FC), Color(0xFF121D24), Color(0xFF1A2933))
 )
 
+// --- MEHRSPRACHIGKEIT / TRANSLATION DICTIONARY ---
+object AppTranslations {
+    private val en = mapOf(
+        "app_name" to "Genshin Tracker",
+        "nav_tracker" to "Tracker",
+        "nav_journal" to "Journal",
+        "nav_crafting" to "Crafting",
+        "nav_wishes" to "Wishes",
+        "nav_resin" to "Resin",
+        "nav_bosses" to "Bosses",
+        "nav_goals" to "Goals",
+        "hq_title" to "OPERATIONS HQ",
+        "next_arrival" to "NEXT ARRIVAL",
+        "ready_claim" to "Ready to claim!",
+        "no_expeditions" to "No active expeditions",
+        "daily_reset" to "DAILY RESET (04:00)",
+        "resin_counter" to "RESIN COUNTER",
+        "claim_all" to "Claim All Ready",
+        "start_new" to "+ Start New Expedition",
+        "limit_reached" to "Limit Reached",
+        "ready" to "READY!",
+        "running" to "Running",
+        "claim_reward" to "Claim Reward",
+        "settings" to "Settings",
+        "language" to "Language / Sprache:",
+        "in" to "in",
+        "full" to "FULL!",
+        "full_in" to "Full in"
+    )
+
+    private val de = mapOf(
+        "app_name" to "Genshin Tracker",
+        "nav_tracker" to "Expeditionen",
+        "nav_journal" to "Tagebuch",
+        "nav_crafting" to "Alchemie",
+        "nav_wishes" to "Gebete",
+        "nav_resin" to "Harz",
+        "nav_bosses" to "Bosse",
+        "nav_goals" to "Ziele",
+        "hq_title" to "HAUPTQUARTIER",
+        "next_arrival" to "NÄCHSTE ANKUNFT",
+        "ready_claim" to "Bereit zum Einsammeln!",
+        "no_expeditions" to "Keine aktiven Expeditionen",
+        "daily_reset" to "TÄGLICHER RESET (04:00)",
+        "resin_counter" to "HARZ-ZÄHLER",
+        "claim_all" to "Alle Bereits Einsammeln",
+        "start_new" to "+ Neue Expedition starten",
+        "limit_reached" to "Limit erreicht",
+        "ready" to "BEREIT!",
+        "running" to "Läuft",
+        "claim_reward" to "Belohnung holen",
+        "settings" to "Einstellungen",
+        "language" to "Sprache / Language:",
+        "in" to "in",
+        "full" to "VOLL!",
+        "full_in" to "Voll in"
+    )
+
+    fun tr(key: String, lang: String): String {
+        val map = if (lang == "Deutsch") de else en
+        return map[key] ?: key
+    }
+}
+
 // --- Bonus-Zuordnung: Charakter zu Heimatregion (-25% Zeitersparnis) ---
 val TIME_REDUCTION_BONUS = mapOf(
     "Bennett" to "Mondstadt",
@@ -76,7 +140,6 @@ val TIME_REDUCTION_BONUS = mapOf(
     "Kujou Sara" to "Inazuma"
 )
 
-// --- Expeditionsdauern ---
 val DURATIONS_STANDARD = listOf(
     "4 Hours" to 4,
     "8 Hours" to 8,
@@ -137,10 +200,12 @@ fun MainScreen() {
     var lastResinUpdate by remember { mutableLongStateOf(loadLastResinUpdate(context)) }
 
     var currentThemeName by remember { mutableStateOf(loadTheme(context)) }
+    var currentLanguage by remember { mutableStateOf(loadLanguage(context)) }
     val currentTheme = REGION_THEMES[currentThemeName] ?: REGION_THEMES["Mondstadt (Anemo)"]!!
 
     var showAddDialog by remember { mutableStateOf(false) }
     var showResinDialog by remember { mutableStateOf(false) }
+    var showSettingsDialog by remember { mutableStateOf(false) }
     var themeExpanded by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableIntStateOf(0) }
     val maxResin = 200
@@ -155,6 +220,10 @@ fun MainScreen() {
 
     LaunchedEffect(currentThemeName) {
         saveTheme(context, currentThemeName)
+    }
+
+    LaunchedEffect(currentLanguage) {
+        saveLanguage(context, currentLanguage)
     }
 
     LaunchedEffect(Unit) {
@@ -181,18 +250,27 @@ fun MainScreen() {
                 .navigationBarsPadding()
                 .padding(16.dp)
         ) {
-            // Header mit App-Titel & Theme-Dropdown
+            // Header mit App-Titel, Settings-Icon & Theme-Dropdown
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Genshin Tracker",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = { showSettingsDialog = true },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Text("⚙️", fontSize = 16.sp)
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = AppTranslations.tr("app_name", currentLanguage),
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
 
                 Box {
                     OutlinedButton(
@@ -227,7 +305,7 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Hauptinhalt basierend auf der Tab-Auswahl (alle 7 Screens Parität zu Python)
+            // Hauptinhalt
             Box(modifier = Modifier.weight(1f)) {
                 when (selectedTab) {
                     0 -> ExpeditionMainContent(
@@ -236,6 +314,7 @@ fun MainScreen() {
                         maxResin = maxResin,
                         lastResinUpdate = lastResinUpdate,
                         theme = currentTheme,
+                        language = currentLanguage,
                         context = context,
                         onEditResin = { showResinDialog = true },
                         onClaimAll = {
@@ -260,7 +339,7 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Untere Navigationsleiste (Scrollbar für alle 7 Menüpunkte)
+            // Untere Navigationsleiste
             Surface(
                 color = currentTheme.cardBg,
                 shape = RoundedCornerShape(12.dp),
@@ -285,13 +364,13 @@ fun MainScreen() {
                     )
 
                     val navItems = listOf(
-                        Triple(0, "⏳", "Tracker"),
-                        Triple(1, "📖", "Journal"),
-                        Triple(2, "🧪", "Crafting"),
-                        Triple(3, "🌠", "Wishes"),
-                        Triple(4, "⚡", "Resin"),
-                        Triple(5, "🐲", "Bosses"),
-                        Triple(6, "🎯", "Goals")
+                        Triple(0, "⏳", AppTranslations.tr("nav_tracker", currentLanguage)),
+                        Triple(1, "📖", AppTranslations.tr("nav_journal", currentLanguage)),
+                        Triple(2, "🧪", AppTranslations.tr("nav_crafting", currentLanguage)),
+                        Triple(3, "🌠", AppTranslations.tr("nav_wishes", currentLanguage)),
+                        Triple(4, "⚡", AppTranslations.tr("nav_resin", currentLanguage)),
+                        Triple(5, "🐲", AppTranslations.tr("nav_bosses", currentLanguage)),
+                        Triple(6, "🎯", AppTranslations.tr("nav_goals", currentLanguage))
                     )
 
                     navItems.forEach { item ->
@@ -316,6 +395,54 @@ fun MainScreen() {
                     }
                 }
             }
+        }
+
+        // Settings-Dialog (Sprachauswahl)
+        if (showSettingsDialog) {
+            AlertDialog(
+                onDismissRequest = { showSettingsDialog = false },
+                title = { Text(AppTranslations.tr("settings", currentLanguage), color = currentTheme.cyan) },
+                text = {
+                    Column {
+                        Text(AppTranslations.tr("language", currentLanguage), color = Color.White, fontSize = 14.sp)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        var langExpanded by remember { mutableStateOf(false) }
+                        Box {
+                            OutlinedButton(
+                                onClick = { langExpanded = true },
+                                modifier = Modifier.fillMaxWidth(),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, currentTheme.cyan)
+                            ) {
+                                Text(currentLanguage, color = currentTheme.cyan, fontWeight = FontWeight.Bold)
+                            }
+                            DropdownMenu(
+                                expanded = langExpanded,
+                                onDismissRequest = { langExpanded = false }
+                            ) {
+                                listOf("Deutsch", "English").forEach { lang ->
+                                    DropdownMenuItem(
+                                        text = { Text(lang) },
+                                        onClick = {
+                                            currentLanguage = lang
+                                            langExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { showSettingsDialog = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = currentTheme.cyan)
+                    ) {
+                        Text("OK", color = Color.Black)
+                    }
+                },
+                containerColor = currentTheme.cardBg
+            )
         }
 
         if (showAddDialog) {
@@ -369,6 +496,7 @@ fun ExpeditionMainContent(
     maxResin: Int,
     lastResinUpdate: Long,
     theme: RegionTheme,
+    language: String,
     context: Context,
     onEditResin: () -> Unit,
     onClaimAll: () -> Unit,
@@ -389,6 +517,7 @@ fun ExpeditionMainContent(
                 maxResin = maxResin,
                 lastResinUpdate = lastResinUpdate,
                 theme = theme,
+                language = language,
                 onEditResin = onEditResin,
                 onClaimAll = onClaimAll
             )
@@ -398,6 +527,7 @@ fun ExpeditionMainContent(
             ExpeditionCard(
                 expedition = expedition,
                 theme = theme,
+                language = language,
                 onDelete = onDeleteExpedition
             )
         }
@@ -421,8 +551,8 @@ fun ExpeditionMainContent(
                     )
             ) {
                 Text(
-                    text = if (limitReached) "Limit Reached (${activeExpeditions.size}/5)"
-                    else "+ Start New Expedition (${activeExpeditions.size}/5)",
+                    text = if (limitReached) "${AppTranslations.tr("limit_reached", language)} (${activeExpeditions.size}/5)"
+                    else "${AppTranslations.tr("start_new", language)} (${activeExpeditions.size}/5)",
                     color = if (limitReached) Color(0xFF555866) else theme.cyan,
                     fontWeight = FontWeight.Bold
                 )
@@ -431,9 +561,6 @@ fun ExpeditionMainContent(
     }
 }
 
-// =========================================================
-// UI Komponente: Operations HQ
-// =========================================================
 @Composable
 fun OperationsHQCard(
     expeditions: List<Expedition>,
@@ -441,6 +568,7 @@ fun OperationsHQCard(
     maxResin: Int,
     lastResinUpdate: Long,
     theme: RegionTheme,
+    language: String,
     onEditResin: () -> Unit,
     onClaimAll: () -> Unit
 ) {
@@ -462,7 +590,7 @@ fun OperationsHQCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "OPERATIONS HQ",
+                text = AppTranslations.tr("hq_title", language),
                 color = theme.cyan,
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.sp
@@ -481,17 +609,17 @@ fun OperationsHQCard(
                     .padding(8.dp)
             ) {
                 Column {
-                    Text("NEXT ARRIVAL", color = Color.Gray, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    Text(AppTranslations.tr("next_arrival", language), color = Color.Gray, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                     if (readyCards.isNotEmpty()) {
-                        Text("${readyCards.size} Ready to claim!", color = theme.amber, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("${readyCards.size} ${AppTranslations.tr("ready_claim", language)}", color = theme.amber, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     } else if (nextCard != null) {
                         val rem = nextCard.endTimestampEpochSec - currentTime
                         val h = rem / 3600
                         val m = (rem % 3600) / 60
                         val s = rem % 60
-                        Text("${nextCard.charName} in ${String.format(Locale.getDefault(), "%02d:%02d:%02d", h, m, s)}", color = theme.cyan, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("${nextCard.charName} ${AppTranslations.tr("in", language)} ${String.format(Locale.getDefault(), "%02d:%02d:%02d", h, m, s)}", color = theme.cyan, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     } else {
-                        Text("No active expeditions", color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text(AppTranslations.tr("no_expeditions", language), color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -515,8 +643,8 @@ fun OperationsHQCard(
                     .padding(8.dp)
             ) {
                 Column {
-                    Text("DAILY RESET (04:00)", color = Color.Gray, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                    Text("In ${resH}h ${resM}m", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(AppTranslations.tr("daily_reset", language), color = Color.Gray, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    Text("${AppTranslations.tr("in", language)} ${resH}h ${resM}m", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -534,19 +662,19 @@ fun OperationsHQCard(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("RESIN COUNTER", color = Color.Gray, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                        Text(AppTranslations.tr("resin_counter", language), color = Color.Gray, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                         IconButton(onClick = onEditResin, modifier = Modifier.size(18.dp)) {
                             Text("⚙", color = theme.cyan, fontSize = 10.sp)
                         }
                     }
                     if (currentResin >= maxResin) {
-                        Text("$maxResin / $maxResin (FULL!)", color = theme.amber, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Text("$maxResin / $maxResin (${AppTranslations.tr("full", language)})", color = theme.amber, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     } else {
                         val needed = maxResin - currentResin
                         val secLeft = (needed * 480) - ((currentTime - lastResinUpdate) % 480)
                         val h = secLeft / 3600
                         val m = (secLeft % 3600) / 60
-                        Text("$currentResin / $maxResin (Full in ${h}h ${m}m)", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Text("$currentResin / $maxResin (${AppTranslations.tr("full_in", language)} ${h}h ${m}m)", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -558,17 +686,14 @@ fun OperationsHQCard(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E323F)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Claim All Ready", color = theme.cyan)
+                Text(AppTranslations.tr("claim_all", language), color = theme.cyan)
             }
         }
     }
 }
 
-// =========================================================
-// UI Komponente: Expeditions-Karte
-// =========================================================
 @Composable
-fun ExpeditionCard(expedition: Expedition, theme: RegionTheme, onDelete: (Expedition) -> Unit) {
+fun ExpeditionCard(expedition: Expedition, theme: RegionTheme, language: String, onDelete: (Expedition) -> Unit) {
     var currentTime by remember { mutableLongStateOf(System.currentTimeMillis() / 1000) }
 
     LaunchedEffect(Unit) {
@@ -630,7 +755,7 @@ fun ExpeditionCard(expedition: Expedition, theme: RegionTheme, onDelete: (Expedi
                     contentAlignment = Alignment.Center
                 ) {
                     if (isComplete) {
-                        Text("READY!", color = theme.amber, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text(AppTranslations.tr("ready", language), color = theme.amber, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     } else {
                         val h = rem / 3600
                         val m = (rem % 3600) / 60
@@ -663,7 +788,7 @@ fun ExpeditionCard(expedition: Expedition, theme: RegionTheme, onDelete: (Expedi
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E323F).copy(alpha = 0.9f)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(if (isComplete) "Claim Reward" else "Running", color = activeColor)
+                    Text(if (isComplete) AppTranslations.tr("claim_reward", language) else AppTranslations.tr("running", language), color = activeColor)
                 }
             }
         }
@@ -671,7 +796,7 @@ fun ExpeditionCard(expedition: Expedition, theme: RegionTheme, onDelete: (Expedi
 }
 
 // =========================================================
-// Dialog: Neue Expedition hinzufügen
+// Dialoge & Helfer
 // =========================================================
 @Composable
 fun AddExpeditionDialog(
@@ -826,9 +951,6 @@ fun AddExpeditionDialog(
     )
 }
 
-// =========================================================
-// Dialog: Harz bearbeiten
-// =========================================================
 @Composable
 fun AdjustResinDialog(
     currentResin: Int,
@@ -884,9 +1006,6 @@ fun AdjustResinDialog(
     )
 }
 
-// =========================================================
-// Helper: WorkManager Task einplanen
-// =========================================================
 fun scheduleExpeditionNotification(
     context: Context,
     expeditionId: String,
@@ -908,9 +1027,6 @@ fun scheduleExpeditionNotification(
     WorkManager.getInstance(context).enqueue(workRequest)
 }
 
-// =========================================================
-// Helper: Dynamische Resource-ID Auflösung für Bilder
-// =========================================================
 @Composable
 fun getDrawableIdForChar(charName: String): Int {
     val context = LocalContext.current
@@ -918,14 +1034,13 @@ fun getDrawableIdForChar(charName: String): Int {
     return context.resources.getIdentifier(imageName, "drawable", context.packageName)
 }
 
-// =========================================================
-// Speicher-Logik mit SharedPreferences & JSON
-// =========================================================
+// --- Speicher-Logik ---
 private const val PREFS_NAME = "GenshinTrackerPrefs"
 private const val KEY_EXPEDITIONS = "key_expeditions"
 private const val KEY_RESIN = "key_resin"
 private const val KEY_LAST_RESIN_UPDATE = "key_last_resin_update"
 private const val KEY_THEME = "key_theme"
+private const val KEY_LANGUAGE = "key_language"
 
 fun saveTheme(context: Context, themeName: String) {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -935,6 +1050,16 @@ fun saveTheme(context: Context, themeName: String) {
 fun loadTheme(context: Context): String {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     return prefs.getString(KEY_THEME, "Mondstadt (Anemo)") ?: "Mondstadt (Anemo)"
+}
+
+fun saveLanguage(context: Context, language: String) {
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    prefs.edit().putString(KEY_LANGUAGE, language).apply()
+}
+
+fun loadLanguage(context: Context): String {
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    return prefs.getString(KEY_LANGUAGE, "Deutsch") ?: "Deutsch"
 }
 
 fun saveExpeditions(context: Context, expeditions: List<Expedition>) {

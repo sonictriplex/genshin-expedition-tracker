@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 from config import get_theme
+from translations import tr
 
 
 class WeeklyBossTrackerWidget(QFrame):
@@ -19,9 +20,9 @@ class WeeklyBossTrackerWidget(QFrame):
         main_layout.setSpacing(14)
         main_layout.setContentsMargins(16, 16, 16, 16)
 
-        title_label = QLabel("🐲 Weekly Boss Discount Tracker (Half Resin)")
-        title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #ffffff;")
-        main_layout.addWidget(title_label)
+        self.title_label = QLabel()
+        self.title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #ffffff;")
+        main_layout.addWidget(self.title_label)
 
         slots_card = QFrame()
         slots_card.setObjectName("sub_card")
@@ -29,14 +30,14 @@ class WeeklyBossTrackerWidget(QFrame):
         v_slots.setContentsMargins(12, 12, 12, 12)
         v_slots.setSpacing(8)
 
-        lbl_slots_title = QLabel("WEEKLY 50% RESIN DISCOUNTS (3/3 AVAILABLE)")
-        lbl_slots_title.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
-        v_slots.addWidget(lbl_slots_title)
+        self.lbl_slots_title = QLabel()
+        self.lbl_slots_title.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
+        v_slots.addWidget(self.lbl_slots_title)
 
         h_cb_layout = QHBoxLayout()
-        self.cb_discount1 = QCheckBox("Discount Slot 1 (30 Resin)")
-        self.cb_discount2 = QCheckBox("Discount Slot 2 (30 Resin)")
-        self.cb_discount3 = QCheckBox("Discount Slot 3 (30 Resin)")
+        self.cb_discount1 = QCheckBox()
+        self.cb_discount2 = QCheckBox()
+        self.cb_discount3 = QCheckBox()
 
         for cb in [self.cb_discount1, self.cb_discount2, self.cb_discount3]:
             cb.stateChanged.connect(self.on_changed)
@@ -45,14 +46,14 @@ class WeeklyBossTrackerWidget(QFrame):
         v_slots.addLayout(h_cb_layout)
         main_layout.addWidget(slots_card)
 
-        lbl_bosses_header = QLabel("DEFEATED WEEKLY BOSSES THIS WEEK:")
-        lbl_bosses_header.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
-        main_layout.addWidget(lbl_bosses_header)
+        self.lbl_bosses_header = QLabel()
+        self.lbl_bosses_header.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
+        main_layout.addWidget(self.lbl_bosses_header)
 
         grid_bosses = QGridLayout()
         grid_bosses.setSpacing(10)
 
-        boss_list = [
+        self.boss_definitions = [
             ("Stormterror Dvalin", "Mondstadt"),
             ("Wolf of the North (Andrius)", "Mondstadt"),
             ("Childe (Enter the Golden House)", "Liyue"),
@@ -66,7 +67,7 @@ class WeeklyBossTrackerWidget(QFrame):
         ]
 
         self.boss_checkboxes = []
-        for i, (boss_name, region) in enumerate(boss_list):
+        for i, (boss_name, region) in enumerate(self.boss_definitions):
             cb = QCheckBox(f"{boss_name} ({region})")
             cb.stateChanged.connect(self.on_changed)
             row = i // 2
@@ -82,8 +83,8 @@ class WeeklyBossTrackerWidget(QFrame):
         v_sum.setContentsMargins(12, 12, 12, 12)
         v_sum.setSpacing(8)
 
-        self.lbl_discount_rem = QLabel("Remaining Half-Resin Uses: 3 / 3")
-        self.lbl_resin_saved = QLabel("Resin Saved This Week: 0 Resin")
+        self.lbl_discount_rem = QLabel()
+        self.lbl_resin_saved = QLabel()
 
         v_sum.addWidget(self.lbl_discount_rem)
         v_sum.addWidget(self.lbl_resin_saved)
@@ -91,7 +92,18 @@ class WeeklyBossTrackerWidget(QFrame):
         main_layout.addWidget(self.summary_card)
         main_layout.addStretch()
 
+        self.retranslate_ui()
         self.apply_theme_style()
+        self.update_summary()
+
+    def retranslate_ui(self):
+        """Aktualisiert alle UI-Texte dynamisch bei Sprachwechsel"""
+        self.title_label.setText(tr("boss_title"))
+        self.lbl_slots_title.setText(tr("boss_slots_title"))
+        self.cb_discount1.setText(tr("boss_discount_slot", num=1))
+        self.cb_discount2.setText(tr("boss_discount_slot", num=2))
+        self.cb_discount3.setText(tr("boss_discount_slot", num=3))
+        self.lbl_bosses_header.setText(tr("boss_header"))
         self.update_summary()
 
     def on_changed(self):
@@ -109,11 +121,10 @@ class WeeklyBossTrackerWidget(QFrame):
         theme = get_theme()
 
         self.lbl_discount_rem.setText(
-            f"⚡ Remaining Half-Resin Discounts: <b style='color: {theme['cyan']};'>{remaining_discounts} / 3</b>"
+            tr("boss_rem_disc", color=theme["cyan"], rem=remaining_discounts)
         )
         self.lbl_resin_saved.setText(
-            f"💰 Resin Saved This Week: <b style='color: {theme['amber']};'>{saved_resin} Resin</b> "
-            f"<span style='color: #aaa;'>(Equivalates to {used_discounts * 4} hours regen time)</span>"
+            tr("boss_saved_resin", color=theme["amber"], saved=saved_resin, hours=used_discounts * 4)
         )
 
     def get_state_dict(self):

@@ -12,6 +12,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 from config import get_theme
+from translations import tr
 
 
 class ResinPlannerWidget(QFrame):
@@ -24,17 +25,17 @@ class ResinPlannerWidget(QFrame):
         main_layout.setContentsMargins(16, 16, 16, 16)
 
         # --- Header ---
-        title_label = QLabel("⚡ Original Resin Overflow & Cap Planner")
-        title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #ffffff;")
-        main_layout.addWidget(title_label)
+        self.title_label = QLabel()
+        self.title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #ffffff;")
+        main_layout.addWidget(self.title_label)
 
         # --- Grid Layout for Input ---
         grid = QGridLayout()
         grid.setSpacing(12)
 
-        lbl_current_resin = QLabel("Current Resin Amount:")
-        lbl_current_resin.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
-        grid.addWidget(lbl_current_resin, 0, 0)
+        self.lbl_current_resin = QLabel()
+        self.lbl_current_resin.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
+        grid.addWidget(self.lbl_current_resin, 0, 0)
 
         self.spin_resin = QSpinBox()
         self.spin_resin.setRange(0, 200)
@@ -58,13 +59,13 @@ class ResinPlannerWidget(QFrame):
         v_res.setContentsMargins(12, 12, 12, 12)
         v_res.setSpacing(8)
 
-        lbl_res_title = QLabel("RESIN REGENERATION SUMMARY")
-        lbl_res_title.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
-        v_res.addWidget(lbl_res_title)
+        self.lbl_res_title = QLabel()
+        self.lbl_res_title.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
+        v_res.addWidget(self.lbl_res_title)
 
-        self.lbl_time_to_full = QLabel("Time until 200/200: --")
-        self.lbl_cap_timestamp = QLabel("Exact Full Cap Time: --")
-        self.lbl_warning_time = QLabel("Warning Trigger (30m before cap): --")
+        self.lbl_time_to_full = QLabel()
+        self.lbl_cap_timestamp = QLabel()
+        self.lbl_warning_time = QLabel()
 
         v_res.addWidget(self.lbl_time_to_full)
         v_res.addWidget(self.lbl_cap_timestamp)
@@ -77,20 +78,28 @@ class ResinPlannerWidget(QFrame):
         self.timer.timeout.connect(self.calculate)
         self.timer.start(10000)  # Refresh every 10 seconds
 
+        self.retranslate_ui()
         self.apply_theme_style()
+        self.calculate()
+
+    def retranslate_ui(self):
+        """Aktualisiert alle UI-Texte dynamisch bei Sprachwechsel"""
+        self.title_label.setText(tr("resin_title"))
+        self.lbl_current_resin.setText(tr("resin_current"))
+        self.lbl_res_title.setText(tr("resin_summary"))
         self.calculate()
 
     def calculate(self):
         current_resin = self.spin_resin.value()
         self.progress_bar.setValue(current_resin)
-        self.progress_bar.setFormat(f"{current_resin} / 200 Resin")
+        self.progress_bar.setFormat(tr("resin_progress_format", current=current_resin))
 
         theme = get_theme()
 
         if current_resin >= 200:
-            self.lbl_time_to_full.setText("⚡ Status: <b style='color: #ff5555;'>RESIN IS FULL (MAX CAP)!</b>")
-            self.lbl_cap_timestamp.setText("Exact Full Cap Time: <b>Already Capped</b>")
-            self.lbl_warning_time.setText("Warning Trigger: <b>Overlapping Capacity</b>")
+            self.lbl_time_to_full.setText(tr("resin_full_status"))
+            self.lbl_cap_timestamp.setText(tr("resin_cap_time_full"))
+            self.lbl_warning_time.setText(tr("resin_warning_full"))
             return
 
         needed_resin = 200 - current_resin
@@ -104,13 +113,13 @@ class ResinPlannerWidget(QFrame):
         minutes = (seconds_needed % 3600) // 60
 
         self.lbl_time_to_full.setText(
-            f"⏳ Time to Full (200/200): <b style='color: {theme['cyan']};'>{hours}h {minutes}m</b>"
+            tr("resin_time_to_full", color=theme["cyan"], hours=hours, minutes=minutes)
         )
         self.lbl_cap_timestamp.setText(
-            f"📅 Exact Full Cap Time: <b>{full_time.strftime('%H:%M:%S (%A)')}</b>"
+            tr("resin_cap_timestamp", time_str=full_time.strftime('%H:%M:%S (%A)'))
         )
         self.lbl_warning_time.setText(
-            f"🔔 Warning Time (30m Before Cap): <b style='color: {theme['amber']};'>{warning_time.strftime('%H:%M:%S')}</b>"
+            tr("resin_warning_time", color=theme["amber"], time_str=warning_time.strftime('%H:%M:%S'))
         )
 
     def apply_theme_style(self):

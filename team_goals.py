@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 from config import get_theme
+from translations import tr
 
 
 class TeamGoalsWidget(QFrame):
@@ -114,20 +115,20 @@ class TeamGoalsWidget(QFrame):
         main_layout.setSpacing(14)
         main_layout.setContentsMargins(16, 16, 16, 16)
 
-        title_label = QLabel("🎯 Team Building & Material Farming Goals")
-        title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #ffffff;")
-        main_layout.addWidget(title_label)
+        self.title_label = QLabel()
+        self.title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #ffffff;")
+        main_layout.addWidget(self.title_label)
 
         grid = QGridLayout()
         grid.setSpacing(12)
 
-        lbl_slot_header = QLabel("TEAM CHARACTER")
-        lbl_slot_header.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
-        lbl_mat_header = QLabel("TALENT BOOK GOAL")
-        lbl_mat_header.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
+        self.lbl_slot_header = QLabel()
+        self.lbl_slot_header.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
+        self.lbl_mat_header = QLabel()
+        self.lbl_mat_header.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
 
-        grid.addWidget(lbl_slot_header, 0, 0)
-        grid.addWidget(lbl_mat_header, 0, 1)
+        grid.addWidget(self.lbl_slot_header, 0, 0)
+        grid.addWidget(self.lbl_mat_header, 0, 1)
 
         self.team_inputs = []
         default_team = [
@@ -173,7 +174,6 @@ class TeamGoalsWidget(QFrame):
             combo_book = QComboBox()
             combo_book.addItems(book_options)
 
-            # Standardwerte für dein aktuelles Team setzen
             def_char, def_book = default_team[i]
             idx_char = combo_char.findText(def_char)
             if idx_char >= 0:
@@ -183,7 +183,6 @@ class TeamGoalsWidget(QFrame):
             if idx_book >= 0:
                 combo_book.setCurrentIndex(idx_book)
 
-            # Signale verbinden
             combo_char.currentTextChanged.connect(
                 lambda text, cb=combo_book: self.on_char_changed(text, cb)
             )
@@ -202,14 +201,14 @@ class TeamGoalsWidget(QFrame):
         v_sum.setContentsMargins(12, 12, 12, 12)
         v_sum.setSpacing(8)
 
-        lbl_sum_title = QLabel("WEEKLY DOMAIN FARMING SCHEDULE")
-        lbl_sum_title.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
-        v_sum.addWidget(lbl_sum_title)
+        self.lbl_sum_title = QLabel()
+        self.lbl_sum_title.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
+        v_sum.addWidget(self.lbl_sum_title)
 
-        self.lbl_mon_thu = QLabel("📅 Mon / Thu: --")
-        self.lbl_tue_fri = QLabel("📅 Tue / Fri: --")
-        self.lbl_wed_sat = QLabel("📅 Wed / Sat: --")
-        self.lbl_sun = QLabel("📅 Sunday: All Talent Domains Open!")
+        self.lbl_mon_thu = QLabel()
+        self.lbl_tue_fri = QLabel()
+        self.lbl_wed_sat = QLabel()
+        self.lbl_sun = QLabel()
 
         v_sum.addWidget(self.lbl_mon_thu)
         v_sum.addWidget(self.lbl_tue_fri)
@@ -219,11 +218,20 @@ class TeamGoalsWidget(QFrame):
         main_layout.addWidget(self.summary_card)
         main_layout.addStretch()
 
+        self.retranslate_ui()
         self.apply_theme_style()
         self.update_summary()
 
+    def retranslate_ui(self):
+        """Aktualisiert alle UI-Texte dynamisch bei Sprachwechsel"""
+        self.title_label.setText(tr("team_title"))
+        self.lbl_slot_header.setText(tr("team_char_header"))
+        self.lbl_mat_header.setText(tr("team_mat_header"))
+        self.lbl_sum_title.setText(tr("team_sum_title"))
+        self.lbl_sun.setText(tr("team_sun"))
+        self.update_summary()
+
     def on_char_changed(self, char_name, combo_book):
-        """Passives Talentbuch automatisch wählen, wenn ein Charakter gewählt wird."""
         if char_name in self.CHARACTER_BOOKS:
             target_book = self.CHARACTER_BOOKS[char_name]
             idx = combo_book.findText(target_book)
@@ -257,13 +265,14 @@ class TeamGoalsWidget(QFrame):
             elif "Wed/Sat" in book:
                 schedule["Wed/Sat"].append(f"<b>{name}</b> ({book_name})")
 
-        mon_txt = ", ".join(schedule["Mon/Thu"]) if schedule["Mon/Thu"] else "None"
-        tue_txt = ", ".join(schedule["Tue/Fri"]) if schedule["Tue/Fri"] else "None"
-        wed_txt = ", ".join(schedule["Wed/Sat"]) if schedule["Wed/Sat"] else "None"
+        none_str = tr("team_none")
+        mon_txt = ", ".join(schedule["Mon/Thu"]) if schedule["Mon/Thu"] else none_str
+        tue_txt = ", ".join(schedule["Tue/Fri"]) if schedule["Tue/Fri"] else none_str
+        wed_txt = ", ".join(schedule["Wed/Sat"]) if schedule["Wed/Sat"] else none_str
 
-        self.lbl_mon_thu.setText(f"📅 <b>Mon / Thu:</b> {mon_txt}")
-        self.lbl_tue_fri.setText(f"📅 <b>Tue / Fri:</b> {tue_txt}")
-        self.lbl_wed_sat.setText(f"📅 <b>Wed / Sat:</b> {wed_txt}")
+        self.lbl_mon_thu.setText(tr("team_mon_thu", txt=mon_txt))
+        self.lbl_tue_fri.setText(tr("team_tue_fri", txt=tue_txt))
+        self.lbl_wed_sat.setText(tr("team_wed_sat", txt=wed_txt))
 
     def get_state_dict(self):
         return [
@@ -281,12 +290,10 @@ class TeamGoalsWidget(QFrame):
             if i < len(self.team_inputs):
                 combo_char, combo_book = self.team_inputs[i]
 
-                # Charakter setzen
                 idx_c = combo_char.findText(item.get("character", ""))
                 if idx_c >= 0:
                     combo_char.setCurrentIndex(idx_c)
 
-                # Buch setzen
                 idx_b = combo_book.findText(item.get("book", ""))
                 if idx_b >= 0:
                     combo_book.setCurrentIndex(idx_b)

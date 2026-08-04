@@ -16,28 +16,14 @@ from PyQt6.QtWidgets import (
 from config import (
     CHARACTERS,
     REGIONS,
-    RESOURCES,
     TIME_REDUCTION_BONUS,
     get_theme,
     is_autostart_enabled,
 )
+from translations import get_resources_list, tr
 
 
 class InlineAddDialog(QFrame):
-    DURATIONS_STANDARD = [
-        ("4 Hours", 4),
-        ("8 Hours", 8),
-        ("12 Hours", 12),
-        ("20 Hours (Standard)", 20),
-    ]
-
-    DURATIONS_BONUS = [
-        ("3 Hours (Bonus 4h)", 3),
-        ("6 Hours (Bonus 8h)", 6),
-        ("9 Hours (Bonus 12h)", 9),
-        ("15 Hours (Bonus 20h)", 15),
-    ]
-
     def __init__(self, parent=None, on_submit=None, on_cancel=None):
         super().__init__(parent)
         self.on_submit_callback = on_submit
@@ -87,27 +73,31 @@ class InlineAddDialog(QFrame):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 15, 20, 15)
 
-        lbl_title = QLabel("New Expedition")
-        lbl_title.setStyleSheet(f"font-size: 14px; color: {theme['cyan']}; margin-bottom: 5px;")
-        layout.addWidget(lbl_title)
+        self.lbl_title = QLabel(tr("dlg_add_title"))
+        self.lbl_title.setStyleSheet(f"font-size: 14px; color: {theme['cyan']}; margin-bottom: 5px;")
+        layout.addWidget(self.lbl_title)
 
         form_layout = QFormLayout()
         form_layout.setSpacing(8)
 
         self.combo_char = QComboBox()
         self.combo_char.addItems(sorted(CHARACTERS))
-        form_layout.addRow("Character:", self.combo_char)
+        self.lbl_char = QLabel(tr("dlg_char"))
+        form_layout.addRow(self.lbl_char, self.combo_char)
 
         self.combo_region = QComboBox()
         self.combo_region.addItems(REGIONS)
-        form_layout.addRow("Region:", self.combo_region)
+        self.lbl_region = QLabel(tr("dlg_region"))
+        form_layout.addRow(self.lbl_region, self.combo_region)
 
         self.combo_resource = QComboBox()
-        self.combo_resource.addItems(RESOURCES)
-        form_layout.addRow("Resource:", self.combo_resource)
+        self.combo_resource.addItems(get_resources_list())
+        self.lbl_resource = QLabel(tr("dlg_resource"))
+        form_layout.addRow(self.lbl_resource, self.combo_resource)
 
         self.combo_duration = QComboBox()
-        form_layout.addRow("Duration:", self.combo_duration)
+        self.lbl_duration = QLabel(tr("dlg_duration"))
+        form_layout.addRow(self.lbl_duration, self.combo_duration)
 
         self.combo_char.currentTextChanged.connect(self.update_bonus_state)
         self.combo_region.currentTextChanged.connect(self.update_bonus_state)
@@ -118,17 +108,17 @@ class InlineAddDialog(QFrame):
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
 
-        btn_cancel = QPushButton("Cancel")
-        btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_cancel.clicked.connect(self.cancel_click)
+        self.btn_cancel = QPushButton(tr("cancel"))
+        self.btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_cancel.clicked.connect(self.cancel_click)
 
-        btn_start = QPushButton("Start")
-        btn_start.setProperty("primary", "true")
-        btn_start.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_start.clicked.connect(self.submit_click)
+        self.btn_start = QPushButton(tr("dlg_start"))
+        self.btn_start.setProperty("primary", "true")
+        self.btn_start.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_start.clicked.connect(self.submit_click)
 
-        btn_layout.addWidget(btn_cancel)
-        btn_layout.addWidget(btn_start)
+        btn_layout.addWidget(self.btn_cancel)
+        btn_layout.addWidget(self.btn_start)
 
         layout.addLayout(btn_layout)
 
@@ -144,7 +134,21 @@ class InlineAddDialog(QFrame):
         self.combo_duration.blockSignals(True)
         self.combo_duration.clear()
 
-        options = self.DURATIONS_BONUS if has_bonus else self.DURATIONS_STANDARD
+        if has_bonus:
+            options = [
+                (tr("dlg_dur_3h_bonus"), 3),
+                (tr("dlg_dur_6h_bonus"), 6),
+                (tr("dlg_dur_9h_bonus"), 9),
+                (tr("dlg_dur_15h_bonus"), 15),
+            ]
+        else:
+            options = [
+                (tr("dlg_dur_4h"), 4),
+                (tr("dlg_dur_8h"), 8),
+                (tr("dlg_dur_12h"), 12),
+                (tr("dlg_dur_20h"), 20),
+            ]
+
         for label, hours in options:
             self.combo_duration.addItem(label, userData=hours)
 
@@ -220,9 +224,9 @@ class InlineResinDialog(QFrame):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 15, 20, 15)
 
-        lbl_title = QLabel("Adjust Original Resin")
-        lbl_title.setStyleSheet(f"font-size: 14px; color: {theme['cyan']}; margin-bottom: 5px;")
-        layout.addWidget(lbl_title)
+        self.lbl_title = QLabel(tr("dlg_resin_title"))
+        self.lbl_title.setStyleSheet(f"font-size: 14px; color: {theme['cyan']}; margin-bottom: 5px;")
+        layout.addWidget(self.lbl_title)
 
         form_layout = QFormLayout()
         form_layout.setSpacing(8)
@@ -230,7 +234,8 @@ class InlineResinDialog(QFrame):
         self.spin_resin = QSpinBox()
         self.spin_resin.setRange(0, self.max_resin)
         self.spin_resin.setValue(current_resin)
-        form_layout.addRow("Current Resin:", self.spin_resin)
+        self.lbl_current_resin = QLabel(tr("dlg_current_resin"))
+        form_layout.addRow(self.lbl_current_resin, self.spin_resin)
 
         layout.addLayout(form_layout)
         layout.addStretch()
@@ -238,17 +243,17 @@ class InlineResinDialog(QFrame):
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
 
-        btn_cancel = QPushButton("Cancel")
-        btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_cancel.clicked.connect(self.cancel_click)
+        self.btn_cancel = QPushButton(tr("cancel"))
+        self.btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_cancel.clicked.connect(self.cancel_click)
 
-        btn_save = QPushButton("Save")
-        btn_save.setProperty("primary", "true")
-        btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_save.clicked.connect(self.submit_click)
+        self.btn_save = QPushButton(tr("dlg_save"))
+        self.btn_save.setProperty("primary", "true")
+        self.btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_save.clicked.connect(self.submit_click)
 
-        btn_layout.addWidget(btn_cancel)
-        btn_layout.addWidget(btn_save)
+        btn_layout.addWidget(self.btn_cancel)
+        btn_layout.addWidget(self.btn_save)
 
         layout.addLayout(btn_layout)
 
@@ -326,22 +331,22 @@ class InlineSettingsDialog(QFrame):
         layout.setContentsMargins(20, 18, 20, 18)
         layout.setSpacing(12)
 
-        lbl_title = QLabel("⚙️ Settings")
-        lbl_title.setStyleSheet(f"font-size: 14px; color: {theme['cyan']}; margin-bottom: 4px;")
-        layout.addWidget(lbl_title)
+        self.lbl_title = QLabel(tr("dlg_settings_title"))
+        self.lbl_title.setStyleSheet(f"font-size: 14px; color: {theme['cyan']}; margin-bottom: 4px;")
+        layout.addWidget(self.lbl_title)
 
         # Autostart Option
-        self.chk_autostart = QCheckBox("Start with System (Autostart)")
+        self.chk_autostart = QCheckBox(tr("autostart"))
         self.chk_autostart.setChecked(is_autostart_enabled())
         layout.addWidget(self.chk_autostart)
 
         # Close Action Option
-        lbl_close_action = QLabel("On Window Close (✕):")
-        layout.addWidget(lbl_close_action)
+        self.lbl_close_action = QLabel(tr("close_behavior"))
+        layout.addWidget(self.lbl_close_action)
 
         self.combo_close_action = QComboBox()
-        self.combo_close_action.addItem("Minimize to System Tray", userData=True)
-        self.combo_close_action.addItem("Exit Application", userData=False)
+        self.combo_close_action.addItem(tr("close_tray"), userData=True)
+        self.combo_close_action.addItem(tr("close_exit"), userData=False)
 
         idx = 0 if close_to_tray else 1
         self.combo_close_action.setCurrentIndex(idx)
@@ -352,17 +357,17 @@ class InlineSettingsDialog(QFrame):
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
 
-        btn_cancel = QPushButton("Cancel")
-        btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_cancel.clicked.connect(self.cancel_click)
+        self.btn_cancel = QPushButton(tr("cancel"))
+        self.btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_cancel.clicked.connect(self.cancel_click)
 
-        btn_save = QPushButton("Save")
-        btn_save.setProperty("primary", "true")
-        btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_save.clicked.connect(self.submit_click)
+        self.btn_save = QPushButton(tr("dlg_save"))
+        self.btn_save.setProperty("primary", "true")
+        self.btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_save.clicked.connect(self.submit_click)
 
-        btn_layout.addWidget(btn_cancel)
-        btn_layout.addWidget(btn_save)
+        btn_layout.addWidget(self.btn_cancel)
+        btn_layout.addWidget(self.btn_save)
 
         layout.addLayout(btn_layout)
 
