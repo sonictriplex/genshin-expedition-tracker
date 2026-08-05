@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 // 1. Teyvat Journal Screen
 // =========================================================
 @Composable
-fun TeyvatJournalScreen(theme: RegionTheme) {
+fun TeyvatJournalScreen(theme: RegionTheme, language: String) {
     var arLevel by remember { mutableIntStateOf(60) }
 
     var daily1 by remember { mutableStateOf(false) }
@@ -56,7 +56,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "📖 Teyvat Journal & Checklists",
+                text = AppTranslations.tr("journal_title", language),
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
@@ -83,7 +83,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
                 .border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
         ) {
             Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("DAILY COMMISSIONS", color = theme.cyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(AppTranslations.tr("daily_comm", language), color = theme.cyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -102,7 +102,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = katheryne, onCheckedChange = { katheryne = it }, colors = checkboxColors)
-                    Text("🎁 Katheryne Bonus Reward", color = theme.amber, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(AppTranslations.tr("katheryne_bonus", language), color = theme.amber, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
             }
         }
@@ -116,7 +116,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
                 .border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
         ) {
             Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("WEEKLY BOSSES & ROTATION", color = theme.cyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(AppTranslations.tr("weekly_bosses", language), color = theme.cyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = boss1, onCheckedChange = { boss1 = it }, colors = checkboxColors)
                     Text("Boss #1", color = Color.White, fontSize = 12.sp)
@@ -127,7 +127,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
                     Checkbox(checked = boss3, onCheckedChange = { boss3 = it }, colors = checkboxColors)
                     Text("Boss #3", color = Color.White, fontSize = 12.sp)
                 }
-                Text("🌟 Sunday: All Talent Domains Open!", color = theme.amber, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(AppTranslations.tr("sunday_talent", language), color = theme.amber, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             }
         }
 
@@ -141,17 +141,17 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
                     .border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
             ) {
                 Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("SERENITEA POT (UNLOCKED AT AR 28)", color = theme.cyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(AppTranslations.tr("teapot", language), color = theme.cyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(checked = resinClaimed, onCheckedChange = { resinClaimed = it }, colors = checkboxColors)
-                        Text("Transient Resin", color = Color.White, fontSize = 12.sp)
+                        Text(AppTranslations.tr("transient_resin", language), color = Color.White, fontSize = 12.sp)
                         Spacer(modifier = Modifier.width(6.dp))
                         Checkbox(checked = xpClaimed, onCheckedChange = { xpClaimed = it }, colors = checkboxColors)
-                        Text("Hero's Wit/Books", color = Color.White, fontSize = 12.sp)
+                        Text(AppTranslations.tr("heros_wit", language), color = Color.White, fontSize = 12.sp)
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(checked = coinsClaimed, onCheckedChange = { coinsClaimed = it }, colors = checkboxColors)
-                        Text("Artifact Unction/Exp", color = Color.White, fontSize = 12.sp)
+                        Text(AppTranslations.tr("artifact_exp", language), color = Color.White, fontSize = 12.sp)
                     }
                 }
             }
@@ -174,8 +174,8 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("PARAMETRIC TRANSFORMER (AR 31)", color = theme.cyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                        Text("Ready!", color = Color(0xFF4ADE80), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text(AppTranslations.tr("parametric", language), color = theme.cyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Text(AppTranslations.tr("ready_claim", language), color = Color(0xFF4ADE80), fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     }
                     Button(
                         onClick = { },
@@ -183,7 +183,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
                         shape = RoundedCornerShape(6.dp),
                         border = androidx.compose.foundation.BorderStroke(1.dp, theme.cyan)
                     ) {
-                        Text("Use Now (7d)", color = theme.cyan, fontSize = 11.sp)
+                        Text(AppTranslations.tr("use_now", language), color = theme.cyan, fontSize = 11.sp)
                     }
                 }
             }
@@ -206,8 +206,8 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("ARTIFACT ROUTE (AR 45)", color = theme.cyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                        Text("Ready to Farm!", color = Color(0xFF4ADE80), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text(AppTranslations.tr("artifact_route", language), color = theme.cyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Text(AppTranslations.tr("ready_farm", language), color = Color(0xFF4ADE80), fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     }
                     Button(
                         onClick = { },
@@ -215,7 +215,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
                         shape = RoundedCornerShape(6.dp),
                         border = androidx.compose.foundation.BorderStroke(1.dp, theme.cyan)
                     ) {
-                        Text("Route Finished", color = theme.cyan, fontSize = 11.sp)
+                        Text(AppTranslations.tr("route_finished", language), color = theme.cyan, fontSize = 11.sp)
                     }
                 }
             }
@@ -231,14 +231,14 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
                     .border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
             ) {
                 Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("ENDGAME STARS (AR 45)", color = theme.cyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(AppTranslations.tr("endgame_stars", language), color = theme.cyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Abyss: ", color = Color.White, fontSize = 12.sp)
+                            Text("${AppTranslations.tr("abyss", language)} ", color = Color.White, fontSize = 12.sp)
                             IconButton(onClick = { if (abyssStars > 0) abyssStars-- }, modifier = Modifier.size(24.dp)) {
                                 Text("-", color = theme.cyan, fontSize = 14.sp)
                             }
@@ -249,7 +249,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Theater: ", color = Color.White, fontSize = 12.sp)
+                            Text("${AppTranslations.tr("theater", language)} ", color = Color.White, fontSize = 12.sp)
                             IconButton(onClick = { if (theaterStars > 0) theaterStars-- }, modifier = Modifier.size(24.dp)) {
                                 Text("-", color = theme.cyan, fontSize = 14.sp)
                             }
@@ -269,7 +269,7 @@ fun TeyvatJournalScreen(theme: RegionTheme) {
 // 2. Crafting Calculator Screen
 // =========================================================
 @Composable
-fun CraftingCalculatorScreen(theme: RegionTheme) {
+fun CraftingCalculatorScreen(theme: RegionTheme, language: String) {
     var tier1 by remember { mutableStateOf("0") }
     var tier2 by remember { mutableStateOf("0") }
     var tier3 by remember { mutableStateOf("0") }
@@ -309,7 +309,7 @@ fun CraftingCalculatorScreen(theme: RegionTheme) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "🧪 Alchemy & Crafting Calculator",
+            text = AppTranslations.tr("crafting_title", language),
             color = Color.White,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp
@@ -327,7 +327,7 @@ fun CraftingCalculatorScreen(theme: RegionTheme) {
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
-                    text = "Crafting Passive:",
+                    text = AppTranslations.tr("crafting_passive", language),
                     color = Color(0xFFE2E8F0),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
@@ -340,7 +340,7 @@ fun CraftingCalculatorScreen(theme: RegionTheme) {
                             containerColor = if (passiveMode == 0) theme.cyan else Color(0xFF2E323F)
                         )
                     ) {
-                        Text("None", fontSize = 11.sp, color = if (passiveMode == 0) Color.Black else Color.White, fontWeight = FontWeight.Bold)
+                        Text(AppTranslations.tr("none", language), fontSize = 11.sp, color = if (passiveMode == 0) Color.Black else Color.White, fontWeight = FontWeight.Bold)
                     }
                     Button(
                         onClick = { passiveMode = 1 },
@@ -348,7 +348,7 @@ fun CraftingCalculatorScreen(theme: RegionTheme) {
                             containerColor = if (passiveMode == 1) theme.cyan else Color(0xFF2E323F)
                         )
                     ) {
-                        Text("Sucrose (2x)", fontSize = 11.sp, color = if (passiveMode == 1) Color.Black else Color.White, fontWeight = FontWeight.Bold)
+                        Text(AppTranslations.tr("sucrose_passive", language), fontSize = 11.sp, color = if (passiveMode == 1) Color.Black else Color.White, fontWeight = FontWeight.Bold)
                     }
                     Button(
                         onClick = { passiveMode = 2 },
@@ -356,7 +356,7 @@ fun CraftingCalculatorScreen(theme: RegionTheme) {
                             containerColor = if (passiveMode == 2) theme.cyan else Color(0xFF2E323F)
                         )
                     ) {
-                        Text("Mona (Refund)", fontSize = 11.sp, color = if (passiveMode == 2) Color.Black else Color.White, fontWeight = FontWeight.Bold)
+                        Text(AppTranslations.tr("mona_passive", language), fontSize = 11.sp, color = if (passiveMode == 2) Color.Black else Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -365,7 +365,7 @@ fun CraftingCalculatorScreen(theme: RegionTheme) {
                 OutlinedTextField(
                     value = tier1,
                     onValueChange = { tier1 = it },
-                    label = { Text("🟢 Tier 1 (Green / 2★)") },
+                    label = { Text(AppTranslations.tr("tier1", language)) },
                     colors = customFieldColors,
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
@@ -373,7 +373,7 @@ fun CraftingCalculatorScreen(theme: RegionTheme) {
                 OutlinedTextField(
                     value = tier2,
                     onValueChange = { tier2 = it },
-                    label = { Text("🔵 Tier 2 (Blue / 3★)") },
+                    label = { Text(AppTranslations.tr("tier2", language)) },
                     colors = customFieldColors,
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
@@ -381,7 +381,7 @@ fun CraftingCalculatorScreen(theme: RegionTheme) {
                 OutlinedTextField(
                     value = tier3,
                     onValueChange = { tier3 = it },
-                    label = { Text("🟣 Tier 3 (Purple / 4★)") },
+                    label = { Text(AppTranslations.tr("tier3", language)) },
                     colors = customFieldColors,
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
@@ -401,23 +401,23 @@ fun CraftingCalculatorScreen(theme: RegionTheme) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "CRAFTING SUMMARY",
+                    text = AppTranslations.tr("crafting_summary", language),
                     color = theme.cyan,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "🔵 Total Blue Materials (3★): $totalT2 (+ $craftedT2 crafted)",
+                    text = "${AppTranslations.tr("total_blue", language)} $totalT2 (+ $craftedT2)",
                     color = Color.White,
                     fontSize = 13.sp
                 )
                 Text(
-                    text = "🟣 Max Purple Materials (4★): $totalT3 (+ $craftedT3 crafted)",
+                    text = "${AppTranslations.tr("max_purple", language)} $totalT3 (+ $craftedT3)",
                     color = Color.White,
                     fontSize = 13.sp
                 )
                 Text(
-                    text = "💰 Estimated Cost: $estimatedMora Mora",
+                    text = "${AppTranslations.tr("est_cost", language)} $estimatedMora Mora",
                     color = theme.amber,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp
@@ -431,7 +431,7 @@ fun CraftingCalculatorScreen(theme: RegionTheme) {
 // 3. Wish & Pity Counter Screen
 // =========================================================
 @Composable
-fun WishCounterScreen(theme: RegionTheme) {
+fun WishCounterScreen(theme: RegionTheme, language: String) {
     var pityStr by remember { mutableStateOf("0") }
     var isGuaranteed by remember { mutableStateOf(false) }
     var primosStr by remember { mutableStateOf("0") }
@@ -463,7 +463,7 @@ fun WishCounterScreen(theme: RegionTheme) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "🌠 Wish & Pity Savings Counter",
+            text = AppTranslations.tr("wish_title", language),
             color = Color.White,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp
@@ -483,7 +483,7 @@ fun WishCounterScreen(theme: RegionTheme) {
                 OutlinedTextField(
                     value = pityStr,
                     onValueChange = { pityStr = it },
-                    label = { Text("Current Pity (0-89)") },
+                    label = { Text(AppTranslations.tr("current_pity", language)) },
                     colors = customFieldColors,
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
@@ -498,12 +498,12 @@ fun WishCounterScreen(theme: RegionTheme) {
                             checkmarkColor = Color.Black
                         )
                     )
-                    Text("Next 5★ is Guaranteed", color = Color.White, fontSize = 13.sp)
+                    Text(AppTranslations.tr("next_guaranteed", language), color = Color.White, fontSize = 13.sp)
                 }
                 OutlinedTextField(
                     value = primosStr,
                     onValueChange = { primosStr = it },
-                    label = { Text("Primogems Owned") },
+                    label = { Text(AppTranslations.tr("primos_owned", language)) },
                     colors = customFieldColors,
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
@@ -511,7 +511,7 @@ fun WishCounterScreen(theme: RegionTheme) {
                 OutlinedTextField(
                     value = fatesStr,
                     onValueChange = { fatesStr = it },
-                    label = { Text("Intertwined Fates Owned") },
+                    label = { Text(AppTranslations.tr("fates_owned", language)) },
                     colors = customFieldColors,
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
@@ -531,16 +531,16 @@ fun WishCounterScreen(theme: RegionTheme) {
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "PITY & SAVINGS SUMMARY",
+                    text = AppTranslations.tr("pity_summary", language),
                     color = theme.cyan,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
-                Text("💫 Total Available Pulls: $totalWishes Wishes", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                Text("🎯 Wishes to Soft Pity (75): $toSoft", color = Color.White, fontSize = 12.sp)
-                Text("🛡️ Wishes to Hard Pity (90): $toHard", color = Color.White, fontSize = 12.sp)
+                Text("💫 ${AppTranslations.tr("total_pulls", language)} $totalWishes", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text("🎯 ${AppTranslations.tr("to_soft", language)} $toSoft", color = Color.White, fontSize = 12.sp)
+                Text("🛡️ ${AppTranslations.tr("to_hard", language)} $toHard", color = Color.White, fontSize = 12.sp)
                 Text(
-                    text = if (isGuaranteed) "✨ Status: GUARANTEED 5★" else "🎲 Status: 50/50 Chance",
+                    text = if (isGuaranteed) AppTranslations.tr("status_guar", language) else AppTranslations.tr("status_5050", language),
                     color = if (isGuaranteed) Color(0xFF4ADE80) else theme.amber,
                     fontWeight = FontWeight.Bold,
                     fontSize = 12.sp
@@ -554,7 +554,7 @@ fun WishCounterScreen(theme: RegionTheme) {
 // 4. Resin Overflow Planner Screen
 // =========================================================
 @Composable
-fun ResinPlannerScreen(theme: RegionTheme) {
+fun ResinPlannerScreen(theme: RegionTheme, language: String) {
     var targetResinStr by remember { mutableStateOf("160") }
     val targetResin = targetResinStr.toIntOrNull() ?: 160
     val minutesNeeded = (targetResin * 8)
@@ -568,7 +568,7 @@ fun ResinPlannerScreen(theme: RegionTheme) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "⚡ Resin Overflow & Cap Planner",
+            text = AppTranslations.tr("resin_planner_title", language),
             color = Color.White,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp
@@ -586,7 +586,7 @@ fun ResinPlannerScreen(theme: RegionTheme) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "CALCULATE REGEN TIME",
+                    text = AppTranslations.tr("calc_regen", language),
                     color = theme.cyan,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
@@ -594,7 +594,7 @@ fun ResinPlannerScreen(theme: RegionTheme) {
                 OutlinedTextField(
                     value = targetResinStr,
                     onValueChange = { targetResinStr = it },
-                    label = { Text("Target Resin Amount") },
+                    label = { Text(AppTranslations.tr("target_resin", language)) },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
@@ -609,7 +609,7 @@ fun ResinPlannerScreen(theme: RegionTheme) {
 
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "⏱️ Time from 0 to $targetResin Resin: ${hoursNeeded}h ${remMinutes}m",
+                    text = "⏱️ ${AppTranslations.tr("time_from_zero", language)} $targetResin: ${hoursNeeded}h ${remMinutes}m",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp
@@ -623,7 +623,7 @@ fun ResinPlannerScreen(theme: RegionTheme) {
 // 5. Weekly Boss Tracker Screen
 // =========================================================
 @Composable
-fun WeeklyBossScreen(theme: RegionTheme) {
+fun WeeklyBossScreen(theme: RegionTheme, language: String) {
     val bossList = listOf(
         "Stormterror Dvalin", "Wolf of the North", "Childe",
         "Azhdaha", "La Signora", "Narukami no Mikoto",
@@ -652,7 +652,7 @@ fun WeeklyBossScreen(theme: RegionTheme) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "🐲 Weekly Boss Discount Tracker",
+            text = AppTranslations.tr("boss_title", language),
             color = Color.White,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp
@@ -670,25 +670,25 @@ fun WeeklyBossScreen(theme: RegionTheme) {
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = "50% RESIN DISCOUNTS ($remaining / 3 AVAILABLE)",
+                    text = "${AppTranslations.tr("discounts_avail", language)} ($remaining / 3)",
                     color = theme.cyan,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = slot1, onCheckedChange = { slot1 = it }, colors = checkboxColors)
-                    Text("Discount Slot 1 (30 Resin)", color = Color.White, fontSize = 13.sp)
+                    Text("${AppTranslations.tr("discount_slot", language)} 1 (30 Resin)", color = Color.White, fontSize = 13.sp)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = slot2, onCheckedChange = { slot2 = it }, colors = checkboxColors)
-                    Text("Discount Slot 2 (30 Resin)", color = Color.White, fontSize = 13.sp)
+                    Text("${AppTranslations.tr("discount_slot", language)} 2 (30 Resin)", color = Color.White, fontSize = 13.sp)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = slot3, onCheckedChange = { slot3 = it }, colors = checkboxColors)
-                    Text("Discount Slot 3 (30 Resin)", color = Color.White, fontSize = 13.sp)
+                    Text("${AppTranslations.tr("discount_slot", language)} 3 (30 Resin)", color = Color.White, fontSize = 13.sp)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
-                Text("💰 Resin Saved: $savedResin Resin", color = theme.amber, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text("💰 ${AppTranslations.tr("resin_saved", language)} $savedResin Resin", color = theme.amber, fontWeight = FontWeight.Bold, fontSize = 13.sp)
             }
         }
 
@@ -704,7 +704,7 @@ fun WeeklyBossScreen(theme: RegionTheme) {
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = "DEFEATED BOSSES THIS WEEK:",
+                    text = AppTranslations.tr("defeated_bosses", language),
                     color = theme.cyan,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
@@ -834,7 +834,7 @@ data class TeamSlotData(
 )
 
 @Composable
-fun TeamGoalsScreen(theme: RegionTheme) {
+fun TeamGoalsScreen(theme: RegionTheme, language: String) {
     val charList = remember { CHARACTER_BOOKS.keys.toList().sorted() }
 
     var slots by remember {
@@ -855,7 +855,7 @@ fun TeamGoalsScreen(theme: RegionTheme) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "🎯 Team Building & Material Farming Goals",
+            text = AppTranslations.tr("goals_title", language),
             color = Color.White,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp
@@ -876,8 +876,8 @@ fun TeamGoalsScreen(theme: RegionTheme) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("TEAM CHARACTER", color = Color.Gray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    Text("TALENT BOOK GOAL", color = Color.Gray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text(AppTranslations.tr("team_char", language), color = Color.Gray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text(AppTranslations.tr("talent_goal", language), color = Color.Gray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
 
                 slots.forEachIndexed { index, slot ->
@@ -909,7 +909,7 @@ fun TeamGoalsScreen(theme: RegionTheme) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "WEEKLY DOMAIN FARMING SCHEDULE",
+                    text = AppTranslations.tr("schedule_title", language),
                     color = theme.cyan,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
@@ -935,10 +935,10 @@ fun TeamGoalsScreen(theme: RegionTheme) {
                 val tueText = if (tueFri.isNotEmpty()) tueFri.joinToString(", ") else "None"
                 val wedText = if (wedSat.isNotEmpty()) wedSat.joinToString(", ") else "None"
 
-                Text("📅 Mon / Thu: $monText", color = Color.White, fontSize = 12.sp)
-                Text("📅 Tue / Fri: $tueText", color = Color.White, fontSize = 12.sp)
-                Text("📅 Wed / Sat: $wedText", color = Color.White, fontSize = 12.sp)
-                Text("📅 Sunday: All Talent Domains Open!", color = theme.amber, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("📅 ${AppTranslations.tr("mon_thu", language)} $monText", color = Color.White, fontSize = 12.sp)
+                Text("📅 ${AppTranslations.tr("tue_fri", language)} $tueText", color = Color.White, fontSize = 12.sp)
+                Text("📅 ${AppTranslations.tr("wed_sat", language)} $wedText", color = Color.White, fontSize = 12.sp)
+                Text("📅 ${AppTranslations.tr("sun_all", language)}", color = theme.amber, fontWeight = FontWeight.Bold, fontSize = 12.sp)
             }
         }
     }

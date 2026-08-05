@@ -65,70 +65,6 @@ val REGION_THEMES = mapOf(
     "Snezhnaya (Cryo)" to RegionTheme("Snezhnaya (Cryo)", Color(0xFF99F6E4), Color(0xFFA5F3FC), Color(0xFF121D24), Color(0xFF1A2933))
 )
 
-// --- MEHRSPRACHIGKEIT / TRANSLATION DICTIONARY ---
-object AppTranslations {
-    private val en = mapOf(
-        "app_name" to "Genshin Tracker",
-        "nav_tracker" to "Tracker",
-        "nav_journal" to "Journal",
-        "nav_crafting" to "Crafting",
-        "nav_wishes" to "Wishes",
-        "nav_resin" to "Resin",
-        "nav_bosses" to "Bosses",
-        "nav_goals" to "Goals",
-        "hq_title" to "OPERATIONS HQ",
-        "next_arrival" to "NEXT ARRIVAL",
-        "ready_claim" to "Ready to claim!",
-        "no_expeditions" to "No active expeditions",
-        "daily_reset" to "DAILY RESET (04:00)",
-        "resin_counter" to "RESIN COUNTER",
-        "claim_all" to "Claim All Ready",
-        "start_new" to "+ Start New Expedition",
-        "limit_reached" to "Limit Reached",
-        "ready" to "READY!",
-        "running" to "Running",
-        "claim_reward" to "Claim Reward",
-        "settings" to "Settings",
-        "language" to "Language / Sprache:",
-        "in" to "in",
-        "full" to "FULL!",
-        "full_in" to "Full in"
-    )
-
-    private val de = mapOf(
-        "app_name" to "Genshin Tracker",
-        "nav_tracker" to "Expeditionen",
-        "nav_journal" to "Tagebuch",
-        "nav_crafting" to "Alchemie",
-        "nav_wishes" to "Gebete",
-        "nav_resin" to "Harz",
-        "nav_bosses" to "Bosse",
-        "nav_goals" to "Ziele",
-        "hq_title" to "HAUPTQUARTIER",
-        "next_arrival" to "NÄCHSTE ANKUNFT",
-        "ready_claim" to "Bereit zum Einsammeln!",
-        "no_expeditions" to "Keine aktiven Expeditionen",
-        "daily_reset" to "TÄGLICHER RESET (04:00)",
-        "resin_counter" to "HARZ-ZÄHLER",
-        "claim_all" to "Alle Bereits Einsammeln",
-        "start_new" to "+ Neue Expedition starten",
-        "limit_reached" to "Limit erreicht",
-        "ready" to "BEREIT!",
-        "running" to "Läuft",
-        "claim_reward" to "Belohnung holen",
-        "settings" to "Einstellungen",
-        "language" to "Sprache / Language:",
-        "in" to "in",
-        "full" to "VOLL!",
-        "full_in" to "Voll in"
-    )
-
-    fun tr(key: String, lang: String): String {
-        val map = if (lang == "Deutsch") de else en
-        return map[key] ?: key
-    }
-}
-
 // --- Bonus-Zuordnung: Charakter zu Heimatregion (-25% Zeitersparnis) ---
 val TIME_REDUCTION_BONUS = mapOf(
     "Bennett" to "Mondstadt",
@@ -205,8 +141,7 @@ fun MainScreen() {
 
     var showAddDialog by remember { mutableStateOf(false) }
     var showResinDialog by remember { mutableStateOf(false) }
-    var showSettingsDialog by remember { mutableStateOf(false) }
-    var themeExpanded by remember { mutableStateOf(false) }
+    var showSettingsMenu by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableIntStateOf(0) }
     val maxResin = 200
 
@@ -250,52 +185,59 @@ fun MainScreen() {
                 .navigationBarsPadding()
                 .padding(16.dp)
         ) {
-            // Header mit App-Titel, Settings-Icon & Theme-Dropdown
+            // Header mit App-Titel & Hamburger-Menü rechts
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
-                        onClick = { showSettingsDialog = true },
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Text("⚙️", fontSize = 16.sp)
-                    }
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = AppTranslations.tr("app_name", currentLanguage),
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Text(
+                    text = AppTranslations.tr("app_name", currentLanguage),
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
 
                 Box {
-                    OutlinedButton(
-                        onClick = { themeExpanded = true },
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, currentTheme.cyan)
+                    IconButton(
+                        onClick = { showSettingsMenu = true },
+                        modifier = Modifier.size(36.dp)
                     ) {
-                        Text(
-                            text = currentThemeName,
-                            color = currentTheme.cyan,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text("☰", color = currentTheme.cyan, fontSize = 22.sp, fontWeight = FontWeight.Bold)
                     }
+
                     DropdownMenu(
-                        expanded = themeExpanded,
-                        onDismissRequest = { themeExpanded = false }
+                        expanded = showSettingsMenu,
+                        onDismissRequest = { showSettingsMenu = false }
                     ) {
+                        // Section 1: Theme Auswahl
+                        DropdownMenuItem(
+                            text = { Text("🎨 Theme: $currentThemeName", fontWeight = FontWeight.Bold, color = currentTheme.cyan) },
+                            onClick = { }
+                        )
                         REGION_THEMES.keys.forEach { tName ->
                             DropdownMenuItem(
-                                text = { Text(tName) },
+                                text = { Text("   $tName", fontSize = 12.sp) },
                                 onClick = {
                                     currentThemeName = tName
-                                    themeExpanded = false
+                                    showSettingsMenu = false
+                                }
+                            )
+                        }
+
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+                        // Section 2: Sprachauswahl
+                        DropdownMenuItem(
+                            text = { Text("🌐 ${AppTranslations.tr("language", currentLanguage)}", fontWeight = FontWeight.Bold, color = currentTheme.cyan) },
+                            onClick = { }
+                        )
+                        listOf("Deutsch", "English").forEach { lang ->
+                            DropdownMenuItem(
+                                text = { Text("   $lang", fontSize = 12.sp) },
+                                onClick = {
+                                    currentLanguage = lang
+                                    showSettingsMenu = false
                                 }
                             )
                         }
@@ -328,12 +270,12 @@ fun MainScreen() {
                         onStartExpedition = { if (activeExpeditions.size < 5) showAddDialog = true },
                         limitReached = activeExpeditions.size >= 5
                     )
-                    1 -> TeyvatJournalScreen(theme = currentTheme)
-                    2 -> CraftingCalculatorScreen(theme = currentTheme)
-                    3 -> WishCounterScreen(theme = currentTheme)
-                    4 -> ResinPlannerScreen(theme = currentTheme)
-                    5 -> WeeklyBossScreen(theme = currentTheme)
-                    6 -> TeamGoalsScreen(theme = currentTheme)
+                    1 -> TeyvatJournalScreen(theme = currentTheme, language = currentLanguage)
+                    2 -> CraftingCalculatorScreen(theme = currentTheme, language = currentLanguage)
+                    3 -> WishCounterScreen(theme = currentTheme, language = currentLanguage)
+                    4 -> ResinPlannerScreen(theme = currentTheme, language = currentLanguage)
+                    5 -> WeeklyBossScreen(theme = currentTheme, language = currentLanguage)
+                    6 -> TeamGoalsScreen(theme = currentTheme, language = currentLanguage)
                 }
             }
 
@@ -395,54 +337,6 @@ fun MainScreen() {
                     }
                 }
             }
-        }
-
-        // Settings-Dialog (Sprachauswahl)
-        if (showSettingsDialog) {
-            AlertDialog(
-                onDismissRequest = { showSettingsDialog = false },
-                title = { Text(AppTranslations.tr("settings", currentLanguage), color = currentTheme.cyan) },
-                text = {
-                    Column {
-                        Text(AppTranslations.tr("language", currentLanguage), color = Color.White, fontSize = 14.sp)
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        var langExpanded by remember { mutableStateOf(false) }
-                        Box {
-                            OutlinedButton(
-                                onClick = { langExpanded = true },
-                                modifier = Modifier.fillMaxWidth(),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, currentTheme.cyan)
-                            ) {
-                                Text(currentLanguage, color = currentTheme.cyan, fontWeight = FontWeight.Bold)
-                            }
-                            DropdownMenu(
-                                expanded = langExpanded,
-                                onDismissRequest = { langExpanded = false }
-                            ) {
-                                listOf("Deutsch", "English").forEach { lang ->
-                                    DropdownMenuItem(
-                                        text = { Text(lang) },
-                                        onClick = {
-                                            currentLanguage = lang
-                                            langExpanded = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    Button(
-                        onClick = { showSettingsDialog = false },
-                        colors = ButtonDefaults.buttonColors(containerColor = currentTheme.cyan)
-                    ) {
-                        Text("OK", color = Color.Black)
-                    }
-                },
-                containerColor = currentTheme.cardBg
-            )
         }
 
         if (showAddDialog) {
