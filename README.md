@@ -25,6 +25,8 @@ A cross‑platform tracker for expeditions in Genshin Impact, available as a **P
 - **Weekly Boss Tracker:** Manage half‑resin discounts and defeated bosses.
 - **Team & Farming Goals:** Plan talent book farming schedule for up to 4 characters.
 
+![Screenshot Linux App](./assets/GenshinTrackerLinux.png)
+
 ### Android (Jetpack Compose)
 
 - **Native UI:** Modern Material 3 design with dark theme.
@@ -38,6 +40,8 @@ A cross‑platform tracker for expeditions in Genshin Impact, available as a **P
 - **Crafting Calculator:** Built‑in calculator for alchemy and crafting materials.
 - **Wish & Pity Counter:** Track pity and savings for wishes.
 - **Weekly Boss Tracker:** Manage half‑resin discounts and defeated bosses.
+
+<img src="./assets/GenshinTrackerAndroid.jpg" alt="Screenshot Android App" width="400">
 
 ---
 
