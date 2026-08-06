@@ -100,7 +100,6 @@ class ExpeditionCard(QFrame):
         header_layout.addWidget(lbl_name)
         header_layout.addStretch()
 
-        # Bearbeiten-Button (neben das X)
         self.btn_edit = QPushButton("✏️")
         self.btn_edit.setFixedSize(24, 24)
         self.btn_edit.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -120,7 +119,6 @@ class ExpeditionCard(QFrame):
         self.btn_edit.clicked.connect(self.open_edit_dialog)
         header_layout.addWidget(self.btn_edit)
 
-        # Schließen-Button (X)
         btn_delete = QPushButton("✕")
         btn_delete.setFixedSize(24, 24)
         btn_delete.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -450,7 +448,7 @@ class OperationsHQCard(QFrame):
                 h = rem // 3600
                 m = (rem % 3600) // 60
                 s = rem % 60
-                self.lbl_next_val.setText(f"{next_card.char_name} in {h:02d}:{m:02d}:{s:02d}")
+                self.lbl_next_val.setText(tr("hq_next_in", char=next_card.char_name, h=h, m=m, s=s))
                 self.lbl_next_val.setStyleSheet(f"font-size: 11px; font-weight: bold; color: {theme['cyan']};")
         else:
             self.lbl_next_val.setText(tr("hq_no_active"))

@@ -9,19 +9,17 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QPushButton,
-    QSpinBox,
     QTimeEdit,
     QVBoxLayout,
 )
 
 from config import (
     CHARACTERS,
-    REGIONS,
     TIME_REDUCTION_BONUS,
     get_theme,
     is_autostart_enabled,
 )
-from translations import get_resources_list, tr
+from translations import get_regions_list, get_resources_list, tr
 
 
 class InlineAddDialog(QFrame):
@@ -87,7 +85,7 @@ class InlineAddDialog(QFrame):
         form_layout.addRow(self.lbl_char, self.combo_char)
 
         self.combo_region = QComboBox()
-        self.combo_region.addItems(REGIONS)
+        self.combo_region.addItems(get_regions_list())
         self.lbl_region = QLabel(tr("dlg_region"))
         form_layout.addRow(self.lbl_region, self.combo_region)
 
@@ -130,7 +128,7 @@ class InlineAddDialog(QFrame):
         selected_region = self.combo_region.currentText()
 
         bonus_region = TIME_REDUCTION_BONUS.get(selected_char)
-        has_bonus = (bonus_region is not None and bonus_region == selected_region)
+        has_bonus = (bonus_region is not None and tr(f"reg_{bonus_region.lower()}") == selected_region)
 
         self.combo_duration.blockSignals(True)
         self.combo_duration.clear()
@@ -438,7 +436,6 @@ class InlineEditTimerDialog(QFrame):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 15, 20, 15)
 
-        # Verwende dynamische Übersetzung für den Titel
         self.lbl_title = QLabel(tr("dlg_edit_time_title", char=char_name))
         self.lbl_title.setStyleSheet(f"font-size: 14px; color: {theme['cyan']}; margin-bottom: 5px;")
         layout.addWidget(self.lbl_title)
@@ -450,7 +447,6 @@ class InlineEditTimerDialog(QFrame):
         self.time_edit.setDisplayFormat("HH:mm:ss")
         self.time_edit.setTime(QTime(hours, minutes, seconds))
 
-        # Verwende dynamische Übersetzung für das Label
         self.lbl_rem_time = QLabel(tr("dlg_remaining_time"))
         form_layout.addRow(self.lbl_rem_time, self.time_edit)
 

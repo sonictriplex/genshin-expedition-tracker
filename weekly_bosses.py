@@ -50,32 +50,34 @@ class WeeklyBossTrackerWidget(QFrame):
         self.lbl_bosses_header.setStyleSheet("font-size: 11px; font-weight: bold; color: #aaa;")
         main_layout.addWidget(self.lbl_bosses_header)
 
-        grid_bosses = QGridLayout()
-        grid_bosses.setSpacing(10)
+        self.grid_bosses = QGridLayout()
+        self.grid_bosses.setSpacing(10)
 
         self.boss_definitions = [
-            ("Stormterror Dvalin", "Mondstadt"),
-            ("Wolf of the North (Andrius)", "Mondstadt"),
-            ("Childe (Enter the Golden House)", "Liyue"),
-            ("Azhdaha (Beneath the Dragon-Queller)", "Liyue"),
-            ("La Signora (Tenshukaku)", "Inazuma"),
-            ("Magatsu Mitake Narukami no Mikoto", "Inazuma"),
-            ("Journeyman / Scaramouche", "Sumeru"),
-            ("Guardian of Apep's Oasis", "Sumeru"),
-            ("All-Devouring Narwhal", "Fontaine"),
-            ("Arlecchino (The Knave)", "Fontaine"),
+            ("Stormterror Dvalin", "reg_mondstadt"),
+            ("Wolf of the North (Andrius)", "reg_mondstadt"),
+            ("Childe (Enter the Golden House)", "reg_liyue"),
+            ("Azhdaha (Beneath the Dragon-Queller)", "reg_liyue"),
+            ("La Signora (Tenshukaku)", "reg_inazuma"),
+            ("Magatsu Mitake Narukami no Mikoto", "reg_inazuma"),
+            ("Journeyman / Scaramouche", "reg_sumeru"),
+            ("Guardian of Apep's Oasis", "reg_sumeru"),
+            ("All-Devouring Narwhal", "reg_fontaine"),
+            ("Arlecchino (The Knave)", "reg_fontaine"),
         ]
 
         self.boss_checkboxes = []
-        for i, (boss_name, region) in enumerate(self.boss_definitions):
-            cb = QCheckBox(f"{boss_name} ({region})")
+        for i, (boss_name, reg_key) in enumerate(self.boss_definitions):
+            cb = QCheckBox(f"{boss_name} ({tr(reg_key)})")
+            cb.setProperty("boss_name", boss_name)
+            cb.setProperty("reg_key", reg_key)
             cb.stateChanged.connect(self.on_changed)
             row = i // 2
             col = i % 2
-            grid_bosses.addWidget(cb, row, col)
+            self.grid_bosses.addWidget(cb, row, col)
             self.boss_checkboxes.append(cb)
 
-        main_layout.addLayout(grid_bosses)
+        main_layout.addLayout(self.grid_bosses)
 
         self.summary_card = QFrame()
         self.summary_card.setObjectName("sub_card")
@@ -104,6 +106,12 @@ class WeeklyBossTrackerWidget(QFrame):
         self.cb_discount2.setText(tr("boss_discount_slot", num=2))
         self.cb_discount3.setText(tr("boss_discount_slot", num=3))
         self.lbl_bosses_header.setText(tr("boss_header"))
+
+        for cb in self.boss_checkboxes:
+            boss_name = cb.property("boss_name")
+            reg_key = cb.property("reg_key")
+            cb.setText(f"{boss_name} ({tr(reg_key)})")
+
         self.update_summary()
 
     def on_changed(self):

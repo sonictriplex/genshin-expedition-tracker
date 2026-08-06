@@ -1,3 +1,4 @@
+from datetime import datetime
 from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtWidgets import (
     QCheckBox,
@@ -8,16 +9,11 @@ from PyQt6.QtWidgets import (
     QSpinBox,
     QVBoxLayout,
 )
-from datetime import datetime
 from config import get_theme
 from translations import tr
 
 
 class BannerCountdownWidget(QFrame):
-    """
-    Ein kompaktes Widget für die Wunsch-Ansicht,
-    das die verbleibende Zeit des aktuellen Genshin-Banners anzeigt.
-    """
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("sub_card")
@@ -35,10 +31,8 @@ class BannerCountdownWidget(QFrame):
         layout.addWidget(self.title_label)
         layout.addWidget(self.timer_label)
 
-        # Enddatum für das aktuelle Banner (auf August/September 2026 angepasst)
         self.banner_end = datetime(2026, 8, 25, 17, 59, 0)
 
-        # QTimer, der jede Sekunde das Display aktualisiert
         self.clock_timer = QTimer(self)
         self.clock_timer.timeout.connect(self.update_countdown)
         self.clock_timer.start(1000)
@@ -62,14 +56,7 @@ class BannerCountdownWidget(QFrame):
         minutes = (remaining.seconds % 3600) // 60
         seconds = remaining.seconds % 60
 
-        # Direkt über tr() formatiert, damit keine rohen Keys stehen bleiben
-        template = tr("banner_countdown_format")
-        if template == "banner_countdown_format":
-            # Fallback falls der Key fehlen sollte
-            text = f"{days} Tage, {hours:02d}:{minutes:02d}:{seconds:02d} Std."
-        else:
-            text = template.format(days=days, hours=hours, minutes=minutes, seconds=seconds)
-
+        text = tr("banner_countdown_format", days=days, hours=hours, minutes=minutes, seconds=seconds)
         self.timer_label.setText(text)
 
 
@@ -86,7 +73,6 @@ class WishPityCounterWidget(QFrame):
         self.title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #ffffff;")
         main_layout.addWidget(self.title_label)
 
-        # Banner Countdown direkt als erste Sektion integriert
         self.banner_countdown = BannerCountdownWidget(self)
         main_layout.addWidget(self.banner_countdown)
 
@@ -189,19 +175,9 @@ class WishPityCounterWidget(QFrame):
 
         theme = get_theme()
 
-        # Sicherer Aufruf der Formatierung
-        pulls_template = tr("wish_total_pulls")
-        if pulls_template == "wish_total_pulls":
-            total_text = f"💫 Total Available Pulls: <b style='color: {theme['cyan']};'>{total_wishes} Wishes</b> <span style='color: #aaa;'>(From {wishes_from_primos} primos + {fates} fates)</span>"
-        else:
-            total_text = pulls_template.format(color=theme["cyan"], total=total_wishes, primos=wishes_from_primos, fates=fates)
-        self.lbl_total_wishes.setText(total_text)
-
-        soft_template = tr("wish_soft_pity")
-        self.lbl_to_soft_pity.setText(soft_template.format(val=wishes_to_soft) if soft_template != "wish_soft_pity" else f"🎯 Wishes to Soft Pity (75): <b>{wishes_to_soft}</b>")
-
-        hard_template = tr("wish_hard_pity")
-        self.lbl_to_hard_pity.setText(hard_template.format(val=wishes_to_hard) if hard_template != "wish_hard_pity" else f"🛡️ Wishes to Hard Pity (90): <b>{wishes_to_hard}</b>")
+        self.lbl_total_wishes.setText(tr("wish_total_pulls", color=theme["cyan"], total=total_wishes, primos=wishes_from_primos, fates=fates))
+        self.lbl_to_soft_pity.setText(tr("wish_soft_pity", val=wishes_to_soft))
+        self.lbl_to_hard_pity.setText(tr("wish_hard_pity", val=wishes_to_hard))
 
         if is_guaranteed:
             self.lbl_guarantee_status.setText(tr("wish_status_guaranteed"))
@@ -258,3 +234,5 @@ class WishPityCounterWidget(QFrame):
                 font-weight: bold;
             }}
         """)
+        if hasattr(self, "banner_countdown"):
+            self.banner_countdown.title_label.setStyleSheet(f"font-size: 11px; font-weight: bold; color: {theme['amber']};")

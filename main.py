@@ -66,9 +66,8 @@ class GenshinTrackerWindow(QMainWindow):
         self.close_to_tray = True
 
         self.setWindowTitle(tr("app_title"))
-        self.init_system_tray()
 
-        # Main Central Widget with HORIZONTAL Layout (Sidebar + Content)
+        # Main Central Widget with HORIZONTAL Layout
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
 
@@ -76,9 +75,7 @@ class GenshinTrackerWindow(QMainWindow):
         self.root_layout.setContentsMargins(0, 0, 0, 0)
         self.root_layout.setSpacing(0)
 
-        # ---------------------------------------------------------------------
-        # 1. VERTICAL SIDEBAR (LEFT)
-        # ---------------------------------------------------------------------
+        # 1. VERTICAL SIDEBAR
         self.sidebar_frame = QFrame()
         self.sidebar_frame.setObjectName("sidebar_frame")
         self.sidebar_frame.setFixedWidth(64)
@@ -86,13 +83,11 @@ class GenshinTrackerWindow(QMainWindow):
         self.sidebar_layout.setContentsMargins(8, 12, 8, 12)
         self.sidebar_layout.setSpacing(12)
 
-        # App Logo Header
         self.lbl_logo = QLabel("⚔️")
         self.lbl_logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lbl_logo.setStyleSheet("font-size: 20px; margin-bottom: 8px;")
         self.sidebar_layout.addWidget(self.lbl_logo)
 
-        # Navigation Buttons (Top to Bottom)
         self.btn_nav_expeditions = self.create_nav_button("⏳", tr("nav_expeditions"))
         self.btn_nav_expeditions.clicked.connect(lambda: self.switch_page(0))
         self.sidebar_layout.addWidget(self.btn_nav_expeditions)
@@ -123,22 +118,18 @@ class GenshinTrackerWindow(QMainWindow):
 
         self.sidebar_layout.addStretch()
 
-        # Settings Button (Fixed at Bottom)
         self.btn_nav_settings = self.create_nav_button("⚙️", tr("nav_settings"))
         self.btn_nav_settings.clicked.connect(lambda: self.switch_page(7))
         self.sidebar_layout.addWidget(self.btn_nav_settings)
 
         self.root_layout.addWidget(self.sidebar_frame)
 
-        # ---------------------------------------------------------------------
-        # 2. MAIN CONTENT AREA WITH STACKED WIDGET (RIGHT)
-        # ---------------------------------------------------------------------
+        # 2. MAIN CONTENT AREA
         self.content_container = QWidget()
         self.content_layout = QVBoxLayout(self.content_container)
         self.content_layout.setContentsMargins(16, 16, 16, 16)
         self.content_layout.setSpacing(10)
 
-        # Header Bar
         header_layout = QHBoxLayout()
         self.lbl_page_title = QLabel(tr("title_expeditions"))
         self.lbl_page_title.setStyleSheet("font-size: 18px; font-weight: bold; color: white;")
@@ -158,7 +149,6 @@ class GenshinTrackerWindow(QMainWindow):
 
         self.content_layout.addLayout(header_layout)
 
-        # STACKED WIDGET FOR PAGE SWITCHING
         self.stacked_widget = QStackedWidget()
 
         # PAGE 0: Expeditions Grid
@@ -210,10 +200,11 @@ class GenshinTrackerWindow(QMainWindow):
         self.content_layout.addWidget(self.stacked_widget, stretch=1)
         self.root_layout.addWidget(self.content_container, stretch=1)
 
-        # State & Timer Initialization
         self.active_cards = []
         self.overlay_dialog = None
         self.hq_card = OperationsHQCard(parent_window=self)
+
+        self.init_system_tray()
 
         self.update_timer = QTimer(self)
         self.update_timer.timeout.connect(self.on_timer_tick)
@@ -221,7 +212,7 @@ class GenshinTrackerWindow(QMainWindow):
 
         self.load_expeditions()
         self.apply_theme(self.current_theme_name)
-        self.switch_page(0)  # Default page: Expeditions
+        self.switch_page(0)
 
         self.setMinimumSize(1280, 850)
         self.resize(1280, 850)
@@ -304,7 +295,6 @@ class GenshinTrackerWindow(QMainWindow):
         self.lbl_sec.setStyleSheet("font-size: 16px; font-weight: bold; color: white;")
         card_layout.addWidget(self.lbl_sec)
 
-        # Sprachauswahl Dropdown
         self.lbl_lang = QLabel(tr("language"))
         self.lbl_lang.setStyleSheet("font-size: 12px; font-weight: bold; color: #aaa;")
         card_layout.addWidget(self.lbl_lang)
@@ -353,13 +343,11 @@ class GenshinTrackerWindow(QMainWindow):
         self.chk_autostart.setText(tr("autostart"))
         self.lbl_close.setText(tr("close_behavior"))
 
-        # Close action ComboBox Texte aktualisieren
         idx = self.combo_close_action.currentIndex()
         self.combo_close_action.setItemText(0, tr("close_tray"))
         self.combo_close_action.setItemText(1, tr("close_exit"))
         self.combo_close_action.setCurrentIndex(idx)
 
-        # Tooltips für Nav Buttons
         tooltips = [
             tr("nav_expeditions"),
             tr("nav_journal"),
@@ -383,14 +371,21 @@ class GenshinTrackerWindow(QMainWindow):
         for btn, tt in zip(buttons, tooltips):
             btn.setToolTip(tt)
 
-        # Sub-Widgets retranslaten, falls vorhanden
+        # Retranslate System Tray Menu
+        if hasattr(self, "action_show"):
+            self.action_show.setText(tr("tray_open"))
+        if hasattr(self, "action_quit"):
+            self.action_quit.setText(tr("tray_quit"))
+
+        # Sub-Widgets retranslaten
         widgets_to_retranslate = [
             getattr(self, "crafting_widget", None),
             getattr(self, "journal_widget", None),
-            getattr(self, "boss_widget", None),
+            getattr(self, "bosses_widget", None),
             getattr(self, "team_widget", None),
-            getattr(self, "wish_widget", None),
+            getattr(self, "wishes_widget", None),
             getattr(self, "resin_widget", None),
+            getattr(self, "hq_card", None),
         ]
 
         for widget in widgets_to_retranslate:
@@ -488,15 +483,15 @@ class GenshinTrackerWindow(QMainWindow):
         self.tray_icon.setIcon(app_icon)
 
         tray_menu = QMenu()
-        action_show = QAction("Open Tracker", self)
-        action_show.triggered.connect(self.show_normal)
-        tray_menu.addAction(action_show)
+        self.action_show = QAction(tr("tray_open"), self)
+        self.action_show.triggered.connect(self.show_normal)
+        tray_menu.addAction(self.action_show)
 
         tray_menu.addSeparator()
 
-        action_quit = QAction("Quit", self)
-        action_quit.triggered.connect(self.quit_application)
-        tray_menu.addAction(action_quit)
+        self.action_quit = QAction(tr("tray_quit"), self)
+        self.action_quit.triggered.connect(self.quit_application)
+        tray_menu.addAction(self.action_quit)
 
         self.tray_icon.setContextMenu(tray_menu)
         self.tray_icon.activated.connect(self.tray_icon_activated)

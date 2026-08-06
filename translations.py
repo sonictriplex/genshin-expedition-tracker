@@ -16,6 +16,8 @@ TRANSLATIONS = {
         "exp_finished": "The expedition of {char} has finished!",
         "exp_complete_title": "Expedition Complete",
         "tray_running": "Running in background.",
+        "tray_open": "Open Tracker",
+        "tray_quit": "Quit",
 
         # Navigation Tooltips & Main Titles
         "nav_expeditions": "Expeditions",
@@ -35,6 +37,14 @@ TRANSLATIONS = {
         "title_bosses": "Weekly Boss Discount & Claim Tracker",
         "title_team": "Team Building & Farming Goals",
         "title_settings": "Settings & Preferences",
+
+        # Regions
+        "reg_mondstadt": "Mondstadt",
+        "reg_liyue": "Liyue",
+        "reg_inazuma": "Inazuma",
+        "reg_sumeru": "Sumeru",
+        "reg_fontaine": "Fontaine",
+        "reg_natlan": "Natlan",
 
         # Common Actions & Buttons
         "start_new": "+ Start New Expedition",
@@ -173,6 +183,7 @@ TRANSLATIONS = {
         "hq_title": "OPERATIONS HQ",
         "hq_next_title": "NEXT ARRIVAL",
         "hq_no_active": "No active expeditions",
+        "hq_next_in": "{char} in {h:02d}:{m:02d}:{s:02d}",
         "hq_reset_title": "DAILY RESET (04:00)",
         "hq_resin_title": "RESIN COUNTER",
         "hq_claim_all": "Claim All Ready",
@@ -211,6 +222,8 @@ TRANSLATIONS = {
         "exp_finished": "Die Expedition von {char} ist abgeschlossen!",
         "exp_complete_title": "Expedition Beendet",
         "tray_running": "Läuft im Hintergrund.",
+        "tray_open": "Tracker öffnen",
+        "tray_quit": "Beenden",
 
         # Navigation Tooltips & Main Titles
         "nav_expeditions": "Expeditionen",
@@ -230,6 +243,14 @@ TRANSLATIONS = {
         "title_bosses": "Wöchentlicher Boss Tracker",
         "title_team": "Team-Aufbau & Farming Ziele",
         "title_settings": "Einstellungen & Optionen",
+
+        # Regionen
+        "reg_mondstadt": "Mondstadt",
+        "reg_liyue": "Liyue",
+        "reg_inazuma": "Inazuma",
+        "reg_sumeru": "Sumeru",
+        "reg_fontaine": "Fontaine",
+        "reg_natlan": "Natlan",
 
         # Common Actions & Buttons
         "start_new": "+ Neue Expedition starten",
@@ -359,7 +380,7 @@ TRANSLATIONS = {
         # Weekly Bosses
         "boss_title": "🐲 Wöchentlicher Boss-Rabatt-Tracker (Halbes Harz)",
         "boss_slots_title": "WÖCHENTLICHE 50% HARZ-RABATTE (3/3 VERFÜGBAR)",
-        "boss_discount_slot": "Rabatt-Slot {num} (30 Harz)",
+        "boss_discount_slot": "Discount Slot {num} (30 Harz)",
         "boss_header": "DIESE WOCHE BESIEGTE WÖCHENTLICHE BOSSE:",
         "boss_rem_disc": "⚡ Verbleibende Halbharz-Rabatte: <b style='color: {color};'>{rem} / 3</b>",
         "boss_saved_resin": "💰 Diese Woche gespartes Harz: <b style='color: {color};'>{saved} Harz</b> <span style='color: #aaa;'>(Entspricht {hours} Stunden Regenerationszeit)</span>",
@@ -368,6 +389,7 @@ TRANSLATIONS = {
         "hq_title": "OPERATIONS-HQ",
         "hq_next_title": "NÄCHSTE ANKUNFT",
         "hq_no_active": "Keine aktiven Expeditionen",
+        "hq_next_in": "{char} in {h:02d}:{m:02d}:{s:02d}",
         "hq_reset_title": "TÄGLICHER RESET (04:00)",
         "hq_resin_title": "HARZ-ZÄHLER",
         "hq_claim_all": "Alle fertigen abholen",
@@ -425,6 +447,18 @@ def get_resources_list():
         tr("res_meat"),
         tr("res_plants"),
         tr("res_fish"),
+    ]
+
+
+def get_regions_list():
+    """Gibt die übersetzten Regionen-Namen zurück"""
+    return [
+        tr("reg_mondstadt"),
+        tr("reg_liyue"),
+        tr("reg_inazuma"),
+        tr("reg_sumeru"),
+        tr("reg_fontaine"),
+        tr("reg_natlan"),
     ]
 
 
