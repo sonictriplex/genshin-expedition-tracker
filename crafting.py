@@ -182,7 +182,7 @@ class CraftingCalculatorWidget(QFrame):
                 color: white;
                 border: 1px solid {theme['cyan']};
                 border-radius: 4px;
-                padding: 4px;
+                padding: 4px 30px 4px 6px;
                 font-size: 11px;
                 font-weight: bold;
             }}
