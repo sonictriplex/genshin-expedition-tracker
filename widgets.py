@@ -327,7 +327,7 @@ class OperationsHQCard(QFrame):
         h_resin_hdr = QHBoxLayout()
         self.lbl_resin_title = QLabel()
         self.lbl_resin_title.setStyleSheet("font-size: 9px; color: #888; font-weight: bold;")
-        self.btn_edit_resin = QPushButton("⚙")
+        self.btn_edit_resin = QPushButton("✏️")
         self.btn_edit_resin.setFixedSize(16, 16)
         self.btn_edit_resin.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_edit_resin.clicked.connect(self.edit_resin)
