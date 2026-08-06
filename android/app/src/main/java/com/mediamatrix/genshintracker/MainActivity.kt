@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -283,7 +284,7 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Untere Navigationsleiste
+            // Untere Navigationsleiste mit visueller Scroll-Indikation
             Surface(
                 color = currentTheme.cardBg,
                 shape = RoundedCornerShape(12.dp),
@@ -292,49 +293,68 @@ fun MainScreen() {
                     .clip(RoundedCornerShape(12.dp))
                     .border(1.dp, Color(0xFF333847), RoundedCornerShape(12.dp))
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val itemColors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.Black,
-                        selectedTextColor = currentTheme.cyan,
-                        indicatorColor = currentTheme.cyan,
-                        unselectedIconColor = Color.White,
-                        unselectedTextColor = Color(0xFFE2E8F0)
-                    )
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    val scrollState = rememberScrollState()
 
-                    val navItems = listOf(
-                        Triple(0, "⏳", AppTranslations.tr("nav_tracker", currentLanguage)),
-                        Triple(1, "📖", AppTranslations.tr("nav_journal", currentLanguage)),
-                        Triple(2, "🧪", AppTranslations.tr("nav_crafting", currentLanguage)),
-                        Triple(3, "🌠", AppTranslations.tr("nav_wishes", currentLanguage)),
-                        Triple(4, "⚡", AppTranslations.tr("nav_resin", currentLanguage)),
-                        Triple(5, "🐲", AppTranslations.tr("nav_bosses", currentLanguage)),
-                        Triple(6, "🎯", AppTranslations.tr("nav_goals", currentLanguage))
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(scrollState)
+                            .padding(vertical = 6.dp, horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val navItems = listOf(
+                            Triple(0, "⏳", AppTranslations.tr("nav_tracker", currentLanguage)),
+                            Triple(1, "📖", AppTranslations.tr("nav_journal", currentLanguage)),
+                            Triple(2, "🧪", AppTranslations.tr("nav_crafting", currentLanguage)),
+                            Triple(3, "🌠", AppTranslations.tr("nav_wishes", currentLanguage)),
+                            Triple(4, "⚡", AppTranslations.tr("nav_resin", currentLanguage)),
+                            Triple(5, "🐲", AppTranslations.tr("nav_bosses", currentLanguage)),
+                            Triple(6, "🎯", AppTranslations.tr("nav_goals", currentLanguage))
+                        )
 
-                    navItems.forEach { item ->
-                        val tabIndex = item.first
-                        val iconStr = item.second
-                        val titleStr = item.third
-                        val isSelected = selectedTab == tabIndex
+                        navItems.forEach { item ->
+                            val tabIndex = item.first
+                            val iconStr = item.second
+                            val titleStr = item.third
+                            val isSelected = selectedTab == tabIndex
 
-                        NavigationBarItem(
-                            selected = isSelected,
-                            onClick = { selectedTab = tabIndex },
-                            icon = { Text(iconStr, fontSize = 16.sp) },
-                            label = {
-                                Text(
-                                    text = titleStr,
-                                    fontSize = 10.sp,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                )
-                            },
-                            colors = itemColors
+                            Surface(
+                                onClick = { selectedTab = tabIndex },
+                                shape = RoundedCornerShape(8.dp),
+                                color = if (isSelected) currentTheme.cyan else Color.Transparent,
+                                modifier = Modifier.width(76.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(vertical = 6.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(iconStr, fontSize = 18.sp)
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = titleStr,
+                                        fontSize = 10.sp,
+                                        color = if (isSelected) Color.Black else currentTheme.cyan,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // Schlanker weißer Pfeil als Scroll-Hinweis
+                    if (scrollState.value < scrollState.maxValue) {
+                        Text(
+                            text = "▶",
+                            color = Color.White.copy(alpha = 0.8f),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .padding(end = 8.dp)
                         )
                     }
                 }
@@ -966,7 +986,6 @@ fun EditExpeditionDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        // HIER: dynamischen Translation-Key verwenden
         title = { Text(AppTranslations.tr("dlg_edit_title", language), color = theme.cyan) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
