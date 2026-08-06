@@ -89,6 +89,8 @@ TRANSLATIONS = {
         "dlg_current_resin": "Current Resin:",
         "dlg_save": "Save",
         "dlg_settings_title": "⚙️ Settings",
+        "dlg_edit_time_title": "Adjust Time ({char})",
+        "dlg_remaining_time": "Remaining Time:",
 
         # Teyvat Journal
         "jnl_title": "📖 Teyvat Travel Journal & Checklists",
@@ -282,6 +284,8 @@ TRANSLATIONS = {
         "dlg_current_resin": "Aktuelles Harz:",
         "dlg_save": "Speichern",
         "dlg_settings_title": "⚙️ Einstellungen",
+        "dlg_edit_time_title": "Zeit anpassen ({char})",
+        "dlg_remaining_time": "Restzeit:",
 
         # Teyvat Journal
         "jnl_title": "📖 Teyvat Tagebuch & Checklisten",

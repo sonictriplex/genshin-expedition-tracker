@@ -438,7 +438,8 @@ class InlineEditTimerDialog(QFrame):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 15, 20, 15)
 
-        self.lbl_title = QLabel(f"Zeit anpassen ({char_name})")
+        # Verwende dynamische Übersetzung für den Titel
+        self.lbl_title = QLabel(tr("dlg_edit_time_title", char=char_name))
         self.lbl_title.setStyleSheet(f"font-size: 14px; color: {theme['cyan']}; margin-bottom: 5px;")
         layout.addWidget(self.lbl_title)
 
@@ -448,7 +449,10 @@ class InlineEditTimerDialog(QFrame):
         self.time_edit = QTimeEdit()
         self.time_edit.setDisplayFormat("HH:mm:ss")
         self.time_edit.setTime(QTime(hours, minutes, seconds))
-        form_layout.addRow(QLabel("Restzeit:"), self.time_edit)
+
+        # Verwende dynamische Übersetzung für das Label
+        self.lbl_rem_time = QLabel(tr("dlg_remaining_time"))
+        form_layout.addRow(self.lbl_rem_time, self.time_edit)
 
         layout.addLayout(form_layout)
         layout.addStretch()
