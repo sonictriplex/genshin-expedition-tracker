@@ -173,7 +173,18 @@ class WeeklyBossTrackerWidget(QFrame):
             }}
             QCheckBox {{
                 color: #e6e6e6;
+                spacing: 6px;
                 font-size: 11px;
                 font-weight: bold;
+            }}
+            QCheckBox::indicator {{
+                width: 14px;
+                height: 14px;
+                border-radius: 3px;
+                border: 1px solid {theme['cyan']};
+                background: {theme['bg_dark']};
+            }}
+            QCheckBox::indicator:checked {{
+                background: {theme['cyan']};
             }}
         """)
