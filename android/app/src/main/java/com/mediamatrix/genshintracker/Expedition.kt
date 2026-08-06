@@ -7,7 +7,7 @@ data class CharacterInfo(
     val name: String
 )
 
-// Die globale Charakter-Liste mit allen Charakteren (ohne Duplikate)
+// Die globale Charakter-Liste mit allen Charakteren
 val CHARACTERS = mapOf(
     "Albedo" to CharacterInfo("Albedo"),
     "Alhaitham" to CharacterInfo("Alhaitham"),
@@ -106,16 +106,6 @@ val CHARACTERS = mapOf(
     "Zhongli" to CharacterInfo("Zhongli")
 )
 
-val REGIONS = listOf("Mondstadt", "Liyue", "Inazuma", "Sumeru", "Fontaine", "Natlan")
-
-val RESOURCES = listOf(
-    "Mora",
-    "Ores (Iron & Crystal)",
-    "Meat & Fowl",
-    "Ingredients & Plants",
-    "Fish"
-)
-
 // Repräsentiert eine laufende Expedition
 data class Expedition(
     val id: String = UUID.randomUUID().toString(),
@@ -124,7 +114,6 @@ data class Expedition(
     val totalSeconds: Long,
     val endTimestampEpochSec: Long
 ) {
-    // Rechnet die verbleibenden Sekunden live aus
     fun remainingSeconds(): Long {
         val nowSec = System.currentTimeMillis() / 1000
         return (endTimestampEpochSec - nowSec).coerceAtLeast(0)

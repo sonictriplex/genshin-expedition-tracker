@@ -3,7 +3,7 @@ package com.mediamatrix.genshintracker
 object AppTranslations {
     private val en = mapOf(
         // Main Activity / Tracker
-        "app_name" to "Genshin Tracker",
+        "app_name" to "Genshin Impact Tracker",
         "nav_tracker" to "Tracker",
         "nav_journal" to "Journal",
         "nav_crafting" to "Crafting",
@@ -27,6 +27,49 @@ object AppTranslations {
         "in" to "in",
         "full" to "FULL!",
         "full_in" to "Full in",
+        "cancel" to "Cancel",
+        "save" to "Save",
+        "ok" to "OK",
+
+        // Dialogs
+        "dlg_add_title" to "New Expedition",
+        "dlg_edit_title" to "Edit Expedition",
+        "dlg_char" to "Character:",
+        "dlg_region" to "Region:",
+        "dlg_resource" to "Resource:",
+        "dlg_duration" to "Duration:",
+        "dlg_start" to "Start",
+        "dlg_adjust_resin" to "Adjust Resin",
+        "dlg_current_resin" to "Current Resin (0-200):",
+
+        // Durations
+        "dur_4h" to "4 Hours",
+        "dur_8h" to "8 Hours",
+        "dur_12h" to "12 Hours",
+        "dur_20h" to "20 Hours (Standard)",
+        "dur_3h_bonus" to "3 Hours (Bonus 4h)",
+        "dur_6h_bonus" to "6 Hours (Bonus 8h)",
+        "dur_9h_bonus" to "9 Hours (Bonus 12h)",
+        "dur_15h_bonus" to "15 Hours (Bonus 20h)",
+
+        // Regions
+        "reg_mondstadt" to "Mondstadt",
+        "reg_liyue" to "Liyue",
+        "reg_inazuma" to "Inazuma",
+        "reg_sumeru" to "Sumeru",
+        "reg_fontaine" to "Fontaine",
+        "reg_natlan" to "Natlan",
+
+        // Resources
+        "res_mora" to "Mora",
+        "res_ores" to "Ores (Iron & Crystal)",
+        "res_meat" to "Meat & Fowl",
+        "res_plants" to "Ingredients & Plants",
+        "res_fish" to "Fish",
+
+        // Notifications
+        "notif_title" to "Expedition Complete! 🎉",
+        "notif_msg" to "%s has returned from the (%s) expedition.",
 
         // Screens: Teyvat Journal
         "journal_title" to "📖 Teyvat Journal & Checklists",
@@ -100,7 +143,7 @@ object AppTranslations {
 
     private val de = mapOf(
         // Main Activity / Tracker
-        "app_name" to "Genshin Tracker",
+        "app_name" to "Genshin Impact Tracker",
         "nav_tracker" to "Expeditionen",
         "nav_journal" to "Tagebuch",
         "nav_crafting" to "Alchemie",
@@ -124,6 +167,49 @@ object AppTranslations {
         "in" to "in",
         "full" to "VOLL!",
         "full_in" to "Voll in",
+        "cancel" to "Abbrechen",
+        "save" to "Speichern",
+        "ok" to "OK",
+
+        // Dialogs
+        "dlg_add_title" to "Neue Expedition",
+        "dlg_edit_title" to "Expedition bearbeiten",
+        "dlg_char" to "Charakter:",
+        "dlg_region" to "Region:",
+        "dlg_resource" to "Ressource:",
+        "dlg_duration" to "Dauer:",
+        "dlg_start" to "Starten",
+        "dlg_adjust_resin" to "Harz anpassen",
+        "dlg_current_resin" to "Aktuelles Harz (0-200):",
+
+        // Durations
+        "dur_4h" to "4 Stunden",
+        "dur_8h" to "8 Stunden",
+        "dur_12h" to "12 Stunden",
+        "dur_20h" to "20 Stunden (Standard)",
+        "dur_3h_bonus" to "3 Stunden (Bonus 4h)",
+        "dur_6h_bonus" to "6 Stunden (Bonus 8h)",
+        "dur_9h_bonus" to "9 Stunden (Bonus 12h)",
+        "dur_15h_bonus" to "15 Stunden (Bonus 20h)",
+
+        // Regionen
+        "reg_mondstadt" to "Mondstadt",
+        "reg_liyue" to "Liyue",
+        "reg_inazuma" to "Inazuma",
+        "reg_sumeru" to "Sumeru",
+        "reg_fontaine" to "Fontaine",
+        "reg_natlan" to "Natlan",
+
+        // Resources
+        "res_mora" to "Mora",
+        "res_ores" to "Erze (Eisen & Kristall)",
+        "res_meat" to "Fleisch & Geflügel",
+        "res_plants" to "Zutaten & Pflanzen",
+        "res_fish" to "Fisch",
+
+        // Notifications
+        "notif_title" to "Expedition beendet! 🎉",
+        "notif_msg" to "%s ist von der Expedition (%s) zurückgekehrt.",
 
         // Screens: Teyvat Journal
         "journal_title" to "📖 Teyvat Tagebuch & Checklisten",
@@ -180,7 +266,7 @@ object AppTranslations {
         // Screens: Boss Tracker
         "boss_title" to "🐲 Wöchentliche Boss-Rabatte",
         "discounts_avail" to "50% HARZ RABATTE",
-        "discount_slot" to "Rabatt-Slot",
+        "discount_slot" to "Discount Slot",
         "resin_saved" to "Gespartes Harz:",
         "defeated_bosses" to "BESIEGTE BOSSE DIESE WOCHE:",
 

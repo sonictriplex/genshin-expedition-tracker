@@ -67,27 +67,27 @@ val REGION_THEMES = mapOf(
 
 // --- Bonus-Zuordnung: Charakter zu Heimatregion (-25% Zeitersparnis) ---
 val TIME_REDUCTION_BONUS = mapOf(
-    "Bennett" to "Mondstadt",
-    "Fischl" to "Mondstadt",
-    "Chongyun" to "Liyue",
-    "Keqing" to "Liyue",
-    "Shenhe" to "Liyue",
-    "Yelan" to "Liyue",
-    "Kujou Sara" to "Inazuma"
+    "Bennett" to "reg_mondstadt",
+    "Fischl" to "reg_mondstadt",
+    "Chongyun" to "reg_liyue",
+    "Keqing" to "reg_liyue",
+    "Shenhe" to "reg_liyue",
+    "Yelan" to "reg_liyue",
+    "Kujou Sara" to "reg_inazuma"
 )
 
-val DURATIONS_STANDARD = listOf(
-    "4 Hours" to 4,
-    "8 Hours" to 8,
-    "12 Hours" to 12,
-    "20 Hours (Standard)" to 20
+fun getDurationsStandard(lang: String) = listOf(
+    AppTranslations.tr("dur_4h", lang) to 4,
+    AppTranslations.tr("dur_8h", lang) to 8,
+    AppTranslations.tr("dur_12h", lang) to 12,
+    AppTranslations.tr("dur_20h", lang) to 20
 )
 
-val DURATIONS_BONUS = listOf(
-    "3 Hours (Bonus 4h)" to 3,
-    "6 Hours (Bonus 8h)" to 6,
-    "9 Hours (Bonus 12h)" to 9,
-    "15 Hours (Bonus 20h)" to 15
+fun getDurationsBonus(lang: String) = listOf(
+    AppTranslations.tr("dur_3h_bonus", lang) to 3,
+    AppTranslations.tr("dur_6h_bonus", lang) to 6,
+    AppTranslations.tr("dur_9h_bonus", lang) to 9,
+    AppTranslations.tr("dur_15h_bonus", lang) to 15
 )
 
 class MainActivity : ComponentActivity() {
@@ -141,6 +141,7 @@ fun MainScreen() {
 
     var showAddDialog by remember { mutableStateOf(false) }
     var showResinDialog by remember { mutableStateOf(false) }
+    var editingExpedition by remember { mutableStateOf<Expedition?>(null) }
     var showSettingsMenu by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableIntStateOf(0) }
     val maxResin = 200
@@ -259,6 +260,7 @@ fun MainScreen() {
                         language = currentLanguage,
                         context = context,
                         onEditResin = { showResinDialog = true },
+                        onEditExpedition = { exp -> editingExpedition = exp },
                         onClaimAll = {
                             val now = System.currentTimeMillis() / 1000
                             activeExpeditions = activeExpeditions.filter { it.endTimestampEpochSec > now }
@@ -342,6 +344,7 @@ fun MainScreen() {
         if (showAddDialog) {
             AddExpeditionDialog(
                 theme = currentTheme,
+                language = currentLanguage,
                 onDismiss = { showAddDialog = false },
                 onSubmit = { charName, location, hours ->
                     val now = System.currentTimeMillis() / 1000
@@ -359,7 +362,8 @@ fun MainScreen() {
                         expeditionId = newExp.id,
                         charName = charName,
                         location = location,
-                        delaySeconds = totalSec
+                        delaySeconds = totalSec,
+                        language = currentLanguage
                     )
 
                     showAddDialog = false
@@ -372,11 +376,37 @@ fun MainScreen() {
                 currentResin = currentResin,
                 maxResin = maxResin,
                 theme = currentTheme,
+                language = currentLanguage,
                 onDismiss = { showResinDialog = false },
                 onConfirm = { newVal ->
                     currentResin = newVal
                     lastResinUpdate = System.currentTimeMillis() / 1000
                     showResinDialog = false
+                }
+            )
+        }
+
+        if (editingExpedition != null) {
+            EditExpeditionDialog(
+                expedition = editingExpedition!!,
+                theme = currentTheme,
+                language = currentLanguage,
+                onDismiss = { editingExpedition = null },
+                onConfirm = { updatedExp ->
+                    WorkManager.getInstance(context).cancelAllWorkByTag(updatedExp.id)
+                    val remSec = updatedExp.remainingSeconds()
+                    if (remSec > 0) {
+                        scheduleExpeditionNotification(
+                            context = context,
+                            expeditionId = updatedExp.id,
+                            charName = updatedExp.charName,
+                            location = updatedExp.location,
+                            delaySeconds = remSec,
+                            language = currentLanguage
+                        )
+                    }
+                    activeExpeditions = activeExpeditions.map { if (it.id == updatedExp.id) updatedExp else it }
+                    editingExpedition = null
                 }
             )
         }
@@ -393,6 +423,7 @@ fun ExpeditionMainContent(
     language: String,
     context: Context,
     onEditResin: () -> Unit,
+    onEditExpedition: (Expedition) -> Unit,
     onClaimAll: () -> Unit,
     onDeleteExpedition: (Expedition) -> Unit,
     onStartExpedition: () -> Unit,
@@ -422,6 +453,7 @@ fun ExpeditionMainContent(
                 expedition = expedition,
                 theme = theme,
                 language = language,
+                onEdit = onEditExpedition,
                 onDelete = onDeleteExpedition
             )
         }
@@ -587,7 +619,13 @@ fun OperationsHQCard(
 }
 
 @Composable
-fun ExpeditionCard(expedition: Expedition, theme: RegionTheme, language: String, onDelete: (Expedition) -> Unit) {
+fun ExpeditionCard(
+    expedition: Expedition,
+    theme: RegionTheme,
+    language: String,
+    onEdit: (Expedition) -> Unit,
+    onDelete: (Expedition) -> Unit
+) {
     var currentTime by remember { mutableLongStateOf(System.currentTimeMillis() / 1000) }
 
     LaunchedEffect(Unit) {
@@ -635,8 +673,14 @@ fun ExpeditionCard(expedition: Expedition, theme: RegionTheme, language: String,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
                     )
-                    IconButton(onClick = { onDelete(expedition) }, modifier = Modifier.size(24.dp)) {
-                        Text("✕", color = Color.Gray, fontSize = 12.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = { onEdit(expedition) }, modifier = Modifier.size(24.dp)) {
+                            Text("✏️", fontSize = 12.sp)
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        IconButton(onClick = { onDelete(expedition) }, modifier = Modifier.size(24.dp)) {
+                            Text("✕", color = Color.Gray, fontSize = 12.sp)
+                        }
                     }
                 }
 
@@ -695,20 +739,25 @@ fun ExpeditionCard(expedition: Expedition, theme: RegionTheme, language: String,
 @Composable
 fun AddExpeditionDialog(
     theme: RegionTheme,
+    language: String,
     onDismiss: () -> Unit,
     onSubmit: (String, String, Int) -> Unit
 ) {
     val charList = CHARACTERS.keys.toList().sorted()
     var selectedChar by remember { mutableStateOf(charList.firstOrNull() ?: "Bennett") }
-    var selectedRegion by remember { mutableStateOf(REGIONS.first()) }
-    var selectedResource by remember { mutableStateOf(RESOURCES.first()) }
 
-    val hasBonus = TIME_REDUCTION_BONUS[selectedChar] == selectedRegion
-    val durationOptions = if (hasBonus) DURATIONS_BONUS else DURATIONS_STANDARD
+    val regionKeys = listOf("reg_mondstadt", "reg_liyue", "reg_inazuma", "reg_sumeru", "reg_fontaine", "reg_natlan")
+    var selectedRegionKey by remember { mutableStateOf(regionKeys.first()) }
+
+    val resourceKeys = listOf("res_mora", "res_ores", "res_meat", "res_plants", "res_fish")
+    var selectedResourceKey by remember { mutableStateOf(resourceKeys.first()) }
+
+    val hasBonus = TIME_REDUCTION_BONUS[selectedChar] == selectedRegionKey
+    val durationOptions = if (hasBonus) getDurationsBonus(language) else getDurationsStandard(language)
 
     var selectedIndex by remember { mutableIntStateOf(3) }
 
-    LaunchedEffect(hasBonus) {
+    LaunchedEffect(hasBonus, language) {
         if (selectedIndex >= durationOptions.size) {
             selectedIndex = durationOptions.size - 1
         }
@@ -723,10 +772,10 @@ fun AddExpeditionDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("New Expedition", color = theme.cyan) },
+        title = { Text(AppTranslations.tr("dlg_add_title", language), color = theme.cyan) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Character:", color = Color.White, fontSize = 12.sp)
+                Text(AppTranslations.tr("dlg_char", language), color = Color.White, fontSize = 12.sp)
                 Box {
                     OutlinedButton(
                         onClick = { charExpanded = true },
@@ -750,23 +799,23 @@ fun AddExpeditionDialog(
                     }
                 }
 
-                Text("Region:", color = Color.White, fontSize = 12.sp)
+                Text(AppTranslations.tr("dlg_region", language), color = Color.White, fontSize = 12.sp)
                 Box {
                     OutlinedButton(
                         onClick = { regionExpanded = true },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(selectedRegion, color = Color.White)
+                        Text(AppTranslations.tr(selectedRegionKey, language), color = Color.White)
                     }
                     DropdownMenu(
                         expanded = regionExpanded,
                         onDismissRequest = { regionExpanded = false }
                     ) {
-                        REGIONS.forEach { region ->
+                        regionKeys.forEach { regKey ->
                             DropdownMenuItem(
-                                text = { Text(region) },
+                                text = { Text(AppTranslations.tr(regKey, language)) },
                                 onClick = {
-                                    selectedRegion = region
+                                    selectedRegionKey = regKey
                                     regionExpanded = false
                                 }
                             )
@@ -774,23 +823,23 @@ fun AddExpeditionDialog(
                     }
                 }
 
-                Text("Resource:", color = Color.White, fontSize = 12.sp)
+                Text(AppTranslations.tr("dlg_resource", language), color = Color.White, fontSize = 12.sp)
                 Box {
                     OutlinedButton(
                         onClick = { resourceExpanded = true },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(selectedResource, color = Color.White)
+                        Text(AppTranslations.tr(selectedResourceKey, language), color = Color.White)
                     }
                     DropdownMenu(
                         expanded = resourceExpanded,
                         onDismissRequest = { resourceExpanded = false }
                     ) {
-                        RESOURCES.forEach { resource ->
+                        resourceKeys.forEach { resKey ->
                             DropdownMenuItem(
-                                text = { Text(resource) },
+                                text = { Text(AppTranslations.tr(resKey, language)) },
                                 onClick = {
-                                    selectedResource = resource
+                                    selectedResourceKey = resKey
                                     resourceExpanded = false
                                 }
                             )
@@ -798,7 +847,7 @@ fun AddExpeditionDialog(
                     }
                 }
 
-                Text("Duration:", color = Color.White, fontSize = 12.sp)
+                Text(AppTranslations.tr("dlg_duration", language), color = Color.White, fontSize = 12.sp)
                 Box {
                     OutlinedButton(
                         onClick = { durationExpanded = true },
@@ -830,16 +879,18 @@ fun AddExpeditionDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val loc = "$selectedRegion ($selectedResource)"
+                    val regName = AppTranslations.tr(selectedRegionKey, language)
+                    val resName = AppTranslations.tr(selectedResourceKey, language)
+                    val loc = "$regName ($resName)"
                     onSubmit(selectedChar, loc, selectedDuration.second)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = theme.cyan)
             ) {
-                Text("Start", color = Color.Black)
+                Text(AppTranslations.tr("dlg_start", language), color = Color.Black)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel", color = Color.Gray) }
+            TextButton(onClick = onDismiss) { Text(AppTranslations.tr("cancel", language), color = Color.Gray) }
         },
         containerColor = theme.cardBg
     )
@@ -850,6 +901,7 @@ fun AdjustResinDialog(
     currentResin: Int,
     maxResin: Int,
     theme: RegionTheme,
+    language: String,
     onDismiss: () -> Unit,
     onConfirm: (Int) -> Unit
 ) {
@@ -857,10 +909,10 @@ fun AdjustResinDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Adjust Resin", color = theme.cyan) },
+        title = { Text(AppTranslations.tr("dlg_adjust_resin", language), color = theme.cyan) },
         text = {
             Column {
-                Text("Current Resin (0-$maxResin):", color = Color.White)
+                Text(AppTranslations.tr("dlg_current_resin", language), color = Color.White)
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = textVal,
@@ -890,11 +942,89 @@ fun AdjustResinDialog(
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = theme.cyan)
             ) {
-                Text("OK", color = Color.Black)
+                Text(AppTranslations.tr("ok", language), color = Color.Black)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel", color = Color.Gray) }
+            TextButton(onClick = onDismiss) { Text(AppTranslations.tr("cancel", language), color = Color.Gray) }
+        },
+        containerColor = theme.cardBg
+    )
+}
+
+@Composable
+fun EditExpeditionDialog(
+    expedition: Expedition,
+    theme: RegionTheme,
+    language: String,
+    onDismiss: () -> Unit,
+    onConfirm: (Expedition) -> Unit
+) {
+    val remMinTotal = (expedition.remainingSeconds() / 60).toInt()
+    var hoursStr by remember { mutableStateOf((remMinTotal / 60).toString()) }
+    var minutesStr by remember { mutableStateOf((remMinTotal % 60).toString()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        // HIER: dynamischen Translation-Key verwenden
+        title = { Text(AppTranslations.tr("dlg_edit_title", language), color = theme.cyan) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("${expedition.charName} (${expedition.location})", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = hoursStr,
+                        onValueChange = { hoursStr = it },
+                        label = { Text(if (language == "Deutsch") "Stunden" else "Hours") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedBorderColor = theme.cyan,
+                            unfocusedBorderColor = Color.Gray
+                        )
+                    )
+                    OutlinedTextField(
+                        value = minutesStr,
+                        onValueChange = { minutesStr = it },
+                        label = { Text("Min") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedBorderColor = theme.cyan,
+                            unfocusedBorderColor = Color.Gray
+                        )
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val h = hoursStr.toLongOrNull() ?: 0L
+                    val m = minutesStr.toLongOrNull() ?: 0L
+                    val newTotalSec = (h * 3600L) + (m * 60L)
+                    val now = System.currentTimeMillis() / 1000
+                    val updated = expedition.copy(
+                        totalSeconds = newTotalSec,
+                        endTimestampEpochSec = now + newTotalSec
+                    )
+                    onConfirm(updated)
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = theme.cyan)
+            ) {
+                Text(AppTranslations.tr("ok", language), color = Color.Black)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(AppTranslations.tr("cancel", language), color = Color.Gray) }
         },
         containerColor = theme.cardBg
     )
@@ -905,11 +1035,13 @@ fun scheduleExpeditionNotification(
     expeditionId: String,
     charName: String,
     location: String,
-    delaySeconds: Long
+    delaySeconds: Long,
+    language: String
 ) {
     val inputData = workDataOf(
         "char_name" to charName,
-        "location" to location
+        "location" to location,
+        "language" to language
     )
 
     val workRequest = OneTimeWorkRequestBuilder<ExpeditionWorker>()

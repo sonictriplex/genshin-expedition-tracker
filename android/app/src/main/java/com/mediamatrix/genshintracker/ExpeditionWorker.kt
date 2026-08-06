@@ -12,11 +12,16 @@ class ExpeditionWorker(
     override fun doWork(): Result {
         val charName = inputData.getString("char_name") ?: "Character"
         val location = inputData.getString("location") ?: "Expedition"
+        val language = inputData.getString("language") ?: "Deutsch"
+
+        val title = AppTranslations.tr("notif_title", language)
+        val msgTemplate = AppTranslations.tr("notif_msg", language)
+        val message = String.format(msgTemplate, charName, location)
 
         NotificationHelper.showNotification(
             context = context,
-            title = "Expedition complete! 🎉",
-            message = "$charName has returned from the ($location) expedition.",
+            title = title,
+            message = message,
             notificationId = System.currentTimeMillis().toInt()
         )
 
