@@ -47,7 +47,7 @@ from config import (
     set_autostart,
 )
 from crafting import CraftingCalculatorWidget
-from dialogs import InlineAddDialog, InlineResinDialog
+from dialogs import InlineAddDialog, InlineEditTimerDialog, InlineResinDialog
 from journal import TeyvatJournalWidget
 from resin_planner import ResinPlannerWidget
 from team_goals import TeamGoalsWidget
@@ -383,7 +383,7 @@ class GenshinTrackerWindow(QMainWindow):
         for btn, tt in zip(buttons, tooltips):
             btn.setToolTip(tt)
 
-       # Sub-Widgets retranslaten, falls vorhanden
+        # Sub-Widgets retranslaten, falls vorhanden
         widgets_to_retranslate = [
             getattr(self, "crafting_widget", None),
             getattr(self, "journal_widget", None),
@@ -605,6 +605,32 @@ class GenshinTrackerWindow(QMainWindow):
             current_resin=self.hq_card.current_resin,
             max_resin=self.hq_card.max_resin,
             on_submit=self.on_resin_submit,
+            on_cancel=self.close_overlay,
+            parent=self.central_widget,
+        )
+        self.overlay_dialog.show()
+        self.overlay_dialog.raise_()
+        self.position_overlay()
+
+    def open_edit_timer_dialog(self, card):
+        if self.overlay_dialog:
+            return
+
+        rem_sec = max(0, card.get_remaining_seconds())
+
+        def on_submit(new_seconds):
+            card.end_timestamp = time.time() + new_seconds
+            card.notified = False
+            card.is_active = new_seconds > 0
+            card.style_card(active=card.is_active)
+            card.update_time()
+            self.save_expeditions()
+            self.close_overlay()
+
+        self.overlay_dialog = InlineEditTimerDialog(
+            char_name=card.char_name,
+            remaining_seconds=rem_sec,
+            on_submit=on_submit,
             on_cancel=self.close_overlay,
             parent=self.central_widget,
         )

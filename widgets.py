@@ -84,6 +84,7 @@ class ExpeditionCard(QFrame):
         self.total_seconds = total_seconds
         self.end_timestamp = end_timestamp if end_timestamp else (time.time() + total_seconds)
         self.on_delete_callback = on_delete
+        self.parent_window = parent
         self.notified = False
         self.is_active = True
 
@@ -99,6 +100,27 @@ class ExpeditionCard(QFrame):
         header_layout.addWidget(lbl_name)
         header_layout.addStretch()
 
+        # Bearbeiten-Button (neben das X)
+        self.btn_edit = QPushButton("✏️")
+        self.btn_edit.setFixedSize(24, 24)
+        self.btn_edit.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_edit.setStyleSheet("""
+            QPushButton {
+                background: transparent;
+                color: #aaa;
+                border: none;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                color: #55aaff;
+                background-color: #263345;
+                border-radius: 12px;
+            }
+        """)
+        self.btn_edit.clicked.connect(self.open_edit_dialog)
+        header_layout.addWidget(self.btn_edit)
+
+        # Schließen-Button (X)
         btn_delete = QPushButton("✕")
         btn_delete.setFixedSize(24, 24)
         btn_delete.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -144,6 +166,10 @@ class ExpeditionCard(QFrame):
 
         self.style_card(active=True)
         self.update_time()
+
+    def open_edit_dialog(self):
+        if self.parent_window and hasattr(self.parent_window, "open_edit_timer_dialog"):
+            self.parent_window.open_edit_timer_dialog(self)
 
     def on_action_click(self):
         if self.get_remaining_seconds() <= 0:

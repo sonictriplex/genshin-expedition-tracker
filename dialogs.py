@@ -1,4 +1,4 @@
-﻿from PyQt6.QtCore import Qt
+﻿from PyQt6.QtCore import QTime, Qt
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
     QCheckBox,
@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QPushButton,
     QSpinBox,
+    QTimeEdit,
     QVBoxLayout,
 )
 
@@ -376,6 +377,104 @@ class InlineSettingsDialog(QFrame):
         close_to_tray = self.combo_close_action.currentData()
         if self.on_submit_callback:
             self.on_submit_callback(autostart, close_to_tray)
+
+    def cancel_click(self):
+        if self.on_cancel_callback:
+            self.on_cancel_callback()
+
+
+class InlineEditTimerDialog(QFrame):
+    def __init__(self, char_name="", remaining_seconds=0, on_submit=None, on_cancel=None, parent=None):
+        super().__init__(parent)
+        self.on_submit_callback = on_submit
+        self.on_cancel_callback = on_cancel
+        theme = get_theme()
+
+        hours = remaining_seconds // 3600
+        minutes = (remaining_seconds % 3600) // 60
+        seconds = remaining_seconds % 60
+
+        self.setFixedSize(340, 200)
+        self.setStyleSheet(f"""
+            InlineEditTimerDialog {{
+                background-color: {theme['card_bg']};
+                border: 2px solid {theme['cyan']};
+                border-radius: 12px;
+            }}
+            QLabel {{ color: #e6e6e6; font-weight: bold; font-size: 12px; }}
+            QTimeEdit {{
+                background-color: #1a1c24;
+                color: white;
+                border: 1px solid #3d4254;
+                border-radius: 5px;
+                padding: 6px;
+                font-size: 14px;
+                font-weight: bold;
+            }}
+            QTimeEdit:focus {{ border: 1px solid {theme['cyan']}; }}
+            QPushButton {{
+                background-color: #2e323f;
+                color: white;
+                border: 1px solid #444;
+                border-radius: 5px;
+                padding: 6px 12px;
+                font-size: 12px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{ background-color: #3b3f54; }}
+            QPushButton[primary="true"] {{
+                background-color: {theme['cyan']};
+                color: #1a1c24;
+                border: none;
+            }}
+            QPushButton[primary="true"]:hover {{ background-color: {theme['cyan']}; }}
+        """)
+
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(25)
+        shadow.setColor(QColor(0, 0, 0, 180))
+        self.setGraphicsEffect(shadow)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(20, 15, 20, 15)
+
+        self.lbl_title = QLabel(f"Zeit anpassen ({char_name})")
+        self.lbl_title.setStyleSheet(f"font-size: 14px; color: {theme['cyan']}; margin-bottom: 5px;")
+        layout.addWidget(self.lbl_title)
+
+        form_layout = QFormLayout()
+        form_layout.setSpacing(8)
+
+        self.time_edit = QTimeEdit()
+        self.time_edit.setDisplayFormat("HH:mm:ss")
+        self.time_edit.setTime(QTime(hours, minutes, seconds))
+        form_layout.addRow(QLabel("Restzeit:"), self.time_edit)
+
+        layout.addLayout(form_layout)
+        layout.addStretch()
+
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+
+        self.btn_cancel = QPushButton(tr("cancel"))
+        self.btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_cancel.clicked.connect(self.cancel_click)
+
+        self.btn_save = QPushButton(tr("dlg_save"))
+        self.btn_save.setProperty("primary", "true")
+        self.btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_save.clicked.connect(self.submit_click)
+
+        btn_layout.addWidget(self.btn_cancel)
+        btn_layout.addWidget(self.btn_save)
+
+        layout.addLayout(btn_layout)
+
+    def submit_click(self):
+        t = self.time_edit.time()
+        total_sec = t.hour() * 3600 + t.minute() * 60 + t.second()
+        if self.on_submit_callback:
+            self.on_submit_callback(total_sec)
 
     def cancel_click(self):
         if self.on_cancel_callback:
