@@ -409,7 +409,7 @@ class GenshinTrackerWindow(QMainWindow):
 
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {theme['bg_dark']}; }}
-            QWidget {{ color: #e6e6e6; font-family: 'Segoe UI', sans-serif; }}
+            QWidget {{ color: #e6e6e6; font-family: 'Segoe UI', sans-serif; font-size: 12px; }}
             QFrame#sidebar_frame {{
                 background-color: #15171e;
                 border-right: 1px solid #2d313e;
@@ -426,6 +426,23 @@ class GenshinTrackerWindow(QMainWindow):
                 border-radius: 5px;
                 padding: 4px 8px;
                 font-size: 12px;
+            }}
+            /* --- Hier den CheckBox-Style hinzufügen --- */
+            QCheckBox {{
+                color: white;
+                font-size: 12px;
+                spacing: 8px;
+            }}
+            QCheckBox::indicator {{
+                width: 16px;
+                height: 16px;
+                border-radius: 4px;
+                border: 1px solid {theme['cyan']};
+                background-color: #1a1c24;
+            }}
+            QCheckBox::indicator:checked {{
+                background-color: {theme['cyan']};
+                border: 1px solid {theme['cyan']};
             }}
         """)
 

@@ -5,7 +5,7 @@ CURRENT_LANGUAGE = "Deutsch"
 TRANSLATIONS = {
     "English": {
         # General & App
-        "app_title": "Genshin Impact Expedition Tracker",
+        "app_title": "Genshin Impact Tracker",
         "theme": "Theme:",
         "language": "Language / Sprache:",
         "sys_settings": "System Settings",
@@ -211,7 +211,7 @@ TRANSLATIONS = {
     },
     "Deutsch": {
         # General & App
-        "app_title": "Genshin Impact Expeditions-Tracker",
+        "app_title": "Genshin Impact Tracker",
         "theme": "Design:",
         "language": "Sprache / Language:",
         "sys_settings": "Systemeinstellungen",
