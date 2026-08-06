@@ -127,7 +127,7 @@ TRANSLATIONS = {
         "resin_warning_time": "🔔 Warning Time (30m Before Cap): <b style='color: {color};'>{time_str}</b>",
         "resin_progress_format": "{current} / 200 Resin",
 
-        # Team Goals
+        # Team Goals & Talent Books
         "team_title": "🎯 Team Building & Material Farming Goals",
         "team_char_header": "TEAM CHARACTER",
         "team_mat_header": "TALENT BOOK GOAL",
@@ -137,6 +137,27 @@ TRANSLATIONS = {
         "team_wed_sat": "📅 <b>Wed / Sat:</b> {txt}",
         "team_sun": "📅 Sunday: All Talent Domains Open!",
         "team_none": "None",
+        "book_freedom": "Freedom",
+        "book_resistance": "Resistance",
+        "book_ballad": "Ballad",
+        "book_prosperity": "Prosperity",
+        "book_diligence": "Diligence",
+        "book_gold": "Gold",
+        "book_transience": "Transience",
+        "book_elegance": "Elegance",
+        "book_light": "Light",
+        "book_admonition": "Admonition",
+        "book_ingenuity": "Ingenuity",
+        "book_praxis": "Praxis",
+        "book_equity": "Equity",
+        "book_justice": "Justice",
+        "book_order": "Order",
+        "book_contention": "Contention",
+        "book_kindling": "Kindling",
+        "book_conflict": "Conflict",
+        "days_mon_thu_sun": "(Mon/Thu/Sun)",
+        "days_tue_fri_sun": "(Tue/Fri/Sun)",
+        "days_wed_sat_sun": "(Wed/Sat/Sun)",
 
         # Weekly Bosses
         "boss_title": "🐲 Weekly Boss Discount Tracker (Half Resin)",
@@ -299,7 +320,7 @@ TRANSLATIONS = {
         "resin_warning_time": "🔔 Warn-Zeit (30 Min. vor Maximum): <b style='color: {color};'>{time_str}</b>",
         "resin_progress_format": "{current} / 200 Harz",
 
-        # Team Goals
+        # Team Goals & Talent Books
         "team_title": "🎯 Team-Ziele & Material-Farming",
         "team_char_header": "TEAM-CHARAKTER",
         "team_mat_header": "TALENTBUCH-ZIEL",
@@ -309,6 +330,27 @@ TRANSLATIONS = {
         "team_wed_sat": "📅 <b>Mi / Sa:</b> {txt}",
         "team_sun": "📅 Sonntag: Alle Talent-Sphären geöffnet!",
         "team_none": "Keine",
+        "book_freedom": "Freiheit",
+        "book_resistance": "Beständigkeit",
+        "book_ballad": "Poesie",
+        "book_prosperity": "Wohlstand",
+        "book_diligence": "Fleiß",
+        "book_gold": "Gold",
+        "book_transience": "Vergänglichkeit",
+        "book_elegance": "Eleganz",
+        "book_light": "Licht",
+        "book_admonition": "Ermahnung",
+        "book_ingenuity": "Einfallsreichtum",
+        "book_praxis": "Praxis",
+        "book_equity": "Gerechtigkeit",
+        "book_justice": "Ordnung",
+        "book_order": "Mahnung",
+        "book_contention": "Anfechtung",
+        "book_kindling": "Entzündung",
+        "book_conflict": "Konflikt",
+        "days_mon_thu_sun": "(Mo/Do/So)",
+        "days_tue_fri_sun": "(Di/Fr/So)",
+        "days_wed_sat_sun": "(Mi/Sa/So)",
 
         # Weekly Bosses
         "boss_title": "🐲 Wöchentlicher Boss-Rabatt-Tracker (Halbes Harz)",
@@ -380,3 +422,8 @@ def get_resources_list():
         tr("res_plants"),
         tr("res_fish"),
     ]
+
+
+def get_translated_book_title(book_key: str, days_key: str) -> str:
+    """Kombiniert Talentbuch-Name und Tage-Suffix dynamisch"""
+    return f"{tr(book_key)} {tr(days_key)}"

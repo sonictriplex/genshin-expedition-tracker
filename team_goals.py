@@ -8,104 +8,120 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 from config import get_theme
-from translations import tr
+from translations import get_translated_book_title, tr
 
 
 class TeamGoalsWidget(QFrame):
-    # Mapping von Charakteren zu ihren jeweiligen Talentbüchern
+    # Neutrale Mapping-Schlüssel für Charakter -> (Talentbuch-Key, Tage-Key)
     CHARACTER_BOOKS = {
         # Mondstadt
-        "Amber": "Freedom (Mon/Thu/Sun)",
-        "Barbara": "Freedom (Mon/Thu/Sun)",
-        "Bennett": "Resistance (Tue/Fri/Sun)",
-        "Diluc": "Resistance (Tue/Fri/Sun)",
-        "Diona": "Freedom (Mon/Thu/Sun)",
-        "Eula": "Resistance (Tue/Fri/Sun)",
-        "Fischl": "Resistance (Tue/Fri/Sun)",
-        "Jean": "Resistance (Tue/Fri/Sun)",
-        "Kaeya": "Ballad (Wed/Sat/Sun)",
-        "Klee": "Freedom (Mon/Thu/Sun)",
-        "Lisa": "Ballad (Wed/Sat/Sun)",
-        "Mona": "Resistance (Tue/Fri/Sun)",
-        "Mika": "Ballad (Wed/Sat/Sun)",
-        "Noelle": "Resistance (Tue/Fri/Sun)",
-        "Razor": "Resistance (Tue/Fri/Sun)",
-        "Rosaria": "Ballad (Wed/Sat/Sun)",
-        "Sucrose": "Freedom (Mon/Thu/Sun)",
-        "Traveler (Anemo)": "Freedom (Mon/Thu/Sun)",
-        "Traveler (Geo)": "Prosperity (Mon/Thu/Sun)",
-        "Venti": "Ballad (Wed/Sat/Sun)",
-
+        "Amber": ("book_freedom", "days_mon_thu_sun"),
+        "Barbara": ("book_freedom", "days_mon_thu_sun"),
+        "Bennett": ("book_resistance", "days_tue_fri_sun"),
+        "Diluc": ("book_resistance", "days_tue_fri_sun"),
+        "Diona": ("book_freedom", "days_mon_thu_sun"),
+        "Eula": ("book_resistance", "days_tue_fri_sun"),
+        "Fischl": ("book_resistance", "days_tue_fri_sun"),
+        "Jean": ("book_resistance", "days_tue_fri_sun"),
+        "Kaeya": ("book_ballad", "days_wed_sat_sun"),
+        "Klee": ("book_freedom", "days_mon_thu_sun"),
+        "Lisa": ("book_ballad", "days_wed_sat_sun"),
+        "Mona": ("book_resistance", "days_tue_fri_sun"),
+        "Mika": ("book_ballad", "days_wed_sat_sun"),
+        "Noelle": ("book_resistance", "days_tue_fri_sun"),
+        "Razor": ("book_resistance", "days_tue_fri_sun"),
+        "Rosaria": ("book_ballad", "days_wed_sat_sun"),
+        "Sucrose": ("book_freedom", "days_mon_thu_sun"),
+        "Traveler (Anemo)": ("book_freedom", "days_mon_thu_sun"),
+        "Traveler (Geo)": ("book_prosperity", "days_mon_thu_sun"),
+        "Venti": ("book_ballad", "days_wed_sat_sun"),
         # Liyue
-        "Beidou": "Gold (Wed/Sat/Sun)",
-        "Chongyun": "Diligence (Tue/Fri/Sun)",
-        "Ganyu": "Diligence (Tue/Fri/Sun)",
-        "Gaming": "Prosperity (Mon/Thu/Sun)",
-        "Hu Tao": "Diligence (Tue/Fri/Sun)",
-        "Keqing": "Prosperity (Mon/Thu/Sun)",
-        "Ningguang": "Prosperity (Mon/Thu/Sun)",
-        "Qiqi": "Prosperity (Mon/Thu/Sun)",
-        "Shenhe": "Prosperity (Mon/Thu/Sun)",
-        "Xiangling": "Gold (Wed/Sat/Sun)",
-        "Xianyun": "Gold (Wed/Sat/Sun)",
-        "Xingqiu": "Gold (Wed/Sat/Sun)",
-        "Xinyan": "Gold (Wed/Sat/Sun)",
-        "Yanfei": "Gold (Wed/Sat/Sun)",
-        "Yelan": "Prosperity (Mon/Thu/Sun)",
-        "Yao Yao": "Diligence (Tue/Fri/Sun)",
-        "Yun Jin": "Diligence (Tue/Fri/Sun)",
-        "Zhongli": "Gold (Wed/Sat/Sun)",
-
+        "Beidou": ("book_gold", "days_wed_sat_sun"),
+        "Chongyun": ("book_diligence", "days_tue_fri_sun"),
+        "Ganyu": ("book_diligence", "days_tue_fri_sun"),
+        "Gaming": ("book_prosperity", "days_mon_thu_sun"),
+        "Hu Tao": ("book_diligence", "days_tue_fri_sun"),
+        "Keqing": ("book_prosperity", "days_mon_thu_sun"),
+        "Ningguang": ("book_prosperity", "days_mon_thu_sun"),
+        "Qiqi": ("book_prosperity", "days_mon_thu_sun"),
+        "Shenhe": ("book_prosperity", "days_mon_thu_sun"),
+        "Xiangling": ("book_gold", "days_wed_sat_sun"),
+        "Xianyun": ("book_gold", "days_wed_sat_sun"),
+        "Xingqiu": ("book_gold", "days_wed_sat_sun"),
+        "Xinyan": ("book_gold", "days_wed_sat_sun"),
+        "Yanfei": ("book_gold", "days_wed_sat_sun"),
+        "Yelan": ("book_prosperity", "days_mon_thu_sun"),
+        "Yao Yao": ("book_diligence", "days_tue_fri_sun"),
+        "Yun Jin": ("book_diligence", "days_tue_fri_sun"),
+        "Zhongli": ("book_gold", "days_wed_sat_sun"),
         # Inazuma
-        "Arataki Itto": "Elegance (Tue/Fri/Sun)",
-        "Gorou": "Light (Wed/Sat/Sun)",
-        "Kaedehara Kazuha": "Diligence (Tue/Fri/Sun)",
-        "Kamisato Ayaka": "Elegance (Tue/Fri/Sun)",
-        "Kamisato Ayato": "Elegance (Tue/Fri/Sun)",
-        "Kirara": "Transience (Mon/Thu/Sun)",
-        "Kujou Sara": "Elegance (Tue/Fri/Sun)",
-        "Kuki Shinobu": "Elegance (Tue/Fri/Sun)",
-        "Raiden Shogun": "Light (Wed/Sat/Sun)",
-        "Sangonomiya Kokomi": "Transience (Mon/Thu/Sun)",
-        "Sayu": "Light (Wed/Sat/Sun)",
-        "Shikanoin Heizou": "Transience (Mon/Thu/Sun)",
-        "Thoma": "Transience (Mon/Thu/Sun)",
-        "Yae Miko": "Light (Wed/Sat/Sun)",
-        "Yoimiya": "Transience (Mon/Thu/Sun)",
-
+        "Arataki Itto": ("book_elegance", "days_tue_fri_sun"),
+        "Gorou": ("book_light", "days_wed_sat_sun"),
+        "Kaedehara Kazuha": ("book_diligence", "days_tue_fri_sun"),
+        "Kamisato Ayaka": ("book_elegance", "days_tue_fri_sun"),
+        "Kamisato Ayato": ("book_elegance", "days_tue_fri_sun"),
+        "Kirara": ("book_transience", "days_mon_thu_sun"),
+        "Kujou Sara": ("book_elegance", "days_tue_fri_sun"),
+        "Kuki Shinobu": ("book_elegance", "days_tue_fri_sun"),
+        "Raiden Shogun": ("book_light", "days_wed_sat_sun"),
+        "Sangonomiya Kokomi": ("book_transience", "days_mon_thu_sun"),
+        "Sayu": ("book_light", "days_wed_sat_sun"),
+        "Shikanoin Heizou": ("book_transience", "days_mon_thu_sun"),
+        "Thoma": ("book_transience", "days_mon_thu_sun"),
+        "Yae Miko": ("book_light", "days_wed_sat_sun"),
+        "Yoimiya": ("book_transience", "days_mon_thu_sun"),
         # Sumeru
-        "Alhaitham": "Ingenuity (Tue/Fri/Sun)",
-        "Candace": "Admonition (Mon/Thu/Sun)",
-        "Collei": "Praxis (Wed/Sat/Sun)",
-        "Cyno": "Admonition (Mon/Thu/Sun)",
-        "Dehya": "Praxis (Wed/Sat/Sun)",
-        "Faruzan": "Admonition (Mon/Thu/Sun)",
-        "Kaveh": "Ingenuity (Tue/Fri/Sun)",
-        "Layla": "Ingenuity (Tue/Fri/Sun)",
-        "Nahida": "Ingenuity (Tue/Fri/Sun)",
-        "Nilou": "Praxis (Wed/Sat/Sun)",
-        "Tighnari": "Admonition (Mon/Thu/Sun)",
-        "Wanderer": "Praxis (Wed/Sat/Sun)",
-
+        "Alhaitham": ("book_ingenuity", "days_tue_fri_sun"),
+        "Candace": ("book_admonition", "days_mon_thu_sun"),
+        "Collei": ("book_praxis", "days_wed_sat_sun"),
+        "Cyno": ("book_admonition", "days_mon_thu_sun"),
+        "Dehya": ("book_praxis", "days_wed_sat_sun"),
+        "Faruzan": ("book_admonition", "days_mon_thu_sun"),
+        "Kaveh": ("book_ingenuity", "days_tue_fri_sun"),
+        "Layla": ("book_ingenuity", "days_tue_fri_sun"),
+        "Nahida": ("book_ingenuity", "days_tue_fri_sun"),
+        "Nilou": ("book_praxis", "days_wed_sat_sun"),
+        "Tighnari": ("book_admonition", "days_mon_thu_sun"),
+        "Wanderer": ("book_praxis", "days_wed_sat_sun"),
         # Fontaine
-        "Arlecchino": "Order (Wed/Sat/Sun)",
-        "Clorinde": "Justice (Tue/Fri/Sun)",
-        "Charlotte": "Justice (Tue/Fri/Sun)",
-        "Chevreuse": "Order (Wed/Sat/Sun)",
-        "Freminet": "Justice (Tue/Fri/Sun)",
-        "Furina": "Justice (Tue/Fri/Sun)",
-        "Lynette": "Freedom (Mon/Thu/Sun)",
-        "Lyney": "Equity (Mon/Thu/Sun)",
-        "Navia": "Equity (Mon/Thu/Sun)",
-        "Neuvillette": "Equity (Mon/Thu/Sun)",
-        "Wriothesley": "Justice (Tue/Fri/Sun)",
-
+        "Arlecchino": ("book_order", "days_wed_sat_sun"),
+        "Clorinde": ("book_justice", "days_tue_fri_sun"),
+        "Charlotte": ("book_justice", "days_tue_fri_sun"),
+        "Chevreuse": ("book_order", "days_wed_sat_sun"),
+        "Freminet": ("book_justice", "days_tue_fri_sun"),
+        "Furina": ("book_justice", "days_tue_fri_sun"),
+        "Lynette": ("book_freedom", "days_mon_thu_sun"),
+        "Lyney": ("book_equity", "days_mon_thu_sun"),
+        "Navia": ("book_equity", "days_mon_thu_sun"),
+        "Neuvillette": ("book_equity", "days_mon_thu_sun"),
+        "Wriothesley": ("book_justice", "days_tue_fri_sun"),
         # Natlan
-        "Kachina": "Conflict (Wed/Sat/Sun)",
-        "Kinich": "Kindling (Tue/Fri/Sun)",
-        "Mualani": "Contention (Mon/Thu/Sun)",
-        "Xilonen": "Kindling (Tue/Fri/Sun)",
+        "Kachina": ("book_conflict", "days_wed_sat_sun"),
+        "Kinich": ("book_kindling", "days_tue_fri_sun"),
+        "Mualani": ("book_contention", "days_mon_thu_sun"),
+        "Xilonen": ("book_kindling", "days_tue_fri_sun"),
     }
+
+    BOOK_KEYS = [
+        ("book_freedom", "days_mon_thu_sun"),
+        ("book_resistance", "days_tue_fri_sun"),
+        ("book_ballad", "days_wed_sat_sun"),
+        ("book_prosperity", "days_mon_thu_sun"),
+        ("book_diligence", "days_tue_fri_sun"),
+        ("book_gold", "days_wed_sat_sun"),
+        ("book_transience", "days_mon_thu_sun"),
+        ("book_elegance", "days_tue_fri_sun"),
+        ("book_light", "days_wed_sat_sun"),
+        ("book_admonition", "days_mon_thu_sun"),
+        ("book_ingenuity", "days_tue_fri_sun"),
+        ("book_praxis", "days_wed_sat_sun"),
+        ("book_equity", "days_mon_thu_sun"),
+        ("book_justice", "days_tue_fri_sun"),
+        ("book_order", "days_wed_sat_sun"),
+        ("book_contention", "days_mon_thu_sun"),
+        ("book_kindling", "days_tue_fri_sun"),
+        ("book_conflict", "days_wed_sat_sun"),
+    ]
 
     def __init__(self, parent_window=None):
         super().__init__(parent_window)
@@ -132,37 +148,10 @@ class TeamGoalsWidget(QFrame):
 
         self.team_inputs = []
         default_team = [
-            ("Kaeya", "Ballad (Wed/Sat/Sun)"),
-            ("Fischl", "Resistance (Tue/Fri/Sun)"),
-            ("Xiangling", "Gold (Wed/Sat/Sun)"),
-            ("Barbara", "Freedom (Mon/Thu/Sun)"),
-        ]
-
-        book_options = [
-            # Mondstadt
-            "Freedom (Mon/Thu/Sun)",
-            "Resistance (Tue/Fri/Sun)",
-            "Ballad (Wed/Sat/Sun)",
-            # Liyue
-            "Prosperity (Mon/Thu/Sun)",
-            "Diligence (Tue/Fri/Sun)",
-            "Gold (Wed/Sat/Sun)",
-            # Inazuma
-            "Transience (Mon/Thu/Sun)",
-            "Elegance (Tue/Fri/Sun)",
-            "Light (Wed/Sat/Sun)",
-            # Sumeru
-            "Admonition (Mon/Thu/Sun)",
-            "Ingenuity (Tue/Fri/Sun)",
-            "Praxis (Wed/Sat/Sun)",
-            # Fontaine
-            "Equity (Mon/Thu/Sun)",
-            "Justice (Tue/Fri/Sun)",
-            "Order (Wed/Sat/Sun)",
-            # Natlan
-            "Contention (Mon/Thu/Sun)",
-            "Kindling (Tue/Fri/Sun)",
-            "Conflict (Wed/Sat/Sun)",
+            ("Kaeya", ("book_ballad", "days_wed_sat_sun")),
+            ("Fischl", ("book_resistance", "days_tue_fri_sun")),
+            ("Xiangling", ("book_gold", "days_wed_sat_sun")),
+            ("Barbara", ("book_freedom", "days_mon_thu_sun")),
         ]
 
         char_list = sorted(list(self.CHARACTER_BOOKS.keys()))
@@ -172,14 +161,15 @@ class TeamGoalsWidget(QFrame):
             combo_char.addItems(char_list)
 
             combo_book = QComboBox()
-            combo_book.addItems(book_options)
+            for b_key, d_key in self.BOOK_KEYS:
+                combo_book.addItem(get_translated_book_title(b_key, d_key), (b_key, d_key))
 
-            def_char, def_book = default_team[i]
+            def_char, (def_b_key, def_d_key) = default_team[i]
             idx_char = combo_char.findText(def_char)
             if idx_char >= 0:
                 combo_char.setCurrentIndex(idx_char)
 
-            idx_book = combo_book.findText(def_book)
+            idx_book = self._find_book_index(combo_book, def_b_key, def_d_key)
             if idx_book >= 0:
                 combo_book.setCurrentIndex(idx_book)
 
@@ -222,6 +212,13 @@ class TeamGoalsWidget(QFrame):
         self.apply_theme_style()
         self.update_summary()
 
+    def _find_book_index(self, combo_book, b_key, d_key):
+        for idx in range(combo_book.count()):
+            data = combo_book.itemData(idx)
+            if data == (b_key, d_key):
+                return idx
+        return -1
+
     def retranslate_ui(self):
         """Aktualisiert alle UI-Texte dynamisch bei Sprachwechsel"""
         self.title_label.setText(tr("team_title"))
@@ -229,12 +226,32 @@ class TeamGoalsWidget(QFrame):
         self.lbl_mat_header.setText(tr("team_mat_header"))
         self.lbl_sum_title.setText(tr("team_sum_title"))
         self.lbl_sun.setText(tr("team_sun"))
+
+        # Aktualisiert die Dropdown-Texte der Talentbücher dynamisch
+        for _, combo_book in self.team_inputs:
+            current_data = combo_book.currentData()  # Aktuelle Auswahl (b_key, d_key) merken
+            combo_book.blockSignals(True)
+            combo_book.clear()
+            
+            # Neu befüllen mit der aktuellen Sprache
+            for b_key, d_key in self.BOOK_KEYS:
+                combo_book.addItem(get_translated_book_title(b_key, d_key), (b_key, d_key))
+            
+            # Vorherige Auswahl wiederherstellen
+            if current_data:
+                b_key, d_key = current_data
+                idx = self._find_book_index(combo_book, b_key, d_key)
+                if idx >= 0:
+                    combo_book.setCurrentIndex(idx)
+                    
+            combo_book.blockSignals(False)
+
         self.update_summary()
 
     def on_char_changed(self, char_name, combo_book):
         if char_name in self.CHARACTER_BOOKS:
-            target_book = self.CHARACTER_BOOKS[char_name]
-            idx = combo_book.findText(target_book)
+            b_key, d_key = self.CHARACTER_BOOKS[char_name]
+            idx = self._find_book_index(combo_book, b_key, d_key)
             if idx >= 0:
                 combo_book.setCurrentIndex(idx)
         self.on_changed()
@@ -246,42 +263,44 @@ class TeamGoalsWidget(QFrame):
 
     def update_summary(self):
         schedule = {
-            "Mon/Thu": [],
-            "Tue/Fri": [],
-            "Wed/Sat": []
+            "days_mon_thu_sun": [],
+            "days_tue_fri_sun": [],
+            "days_wed_sat_sun": []
         }
 
         for combo_char, combo_book in self.team_inputs:
             name = combo_char.currentText().strip()
             if not name:
                 continue
-            book = combo_book.currentText()
-            book_name = book.split(' ')[0]
+            data = combo_book.currentData()
+            if not data:
+                continue
+            b_key, d_key = data
+            book_name = tr(b_key)
 
-            if "Mon/Thu" in book:
-                schedule["Mon/Thu"].append(f"<b>{name}</b> ({book_name})")
-            elif "Tue/Fri" in book:
-                schedule["Tue/Fri"].append(f"<b>{name}</b> ({book_name})")
-            elif "Wed/Sat" in book:
-                schedule["Wed/Sat"].append(f"<b>{name}</b> ({book_name})")
+            if d_key in schedule:
+                schedule[d_key].append(f"<b>{name}</b> ({book_name})")
 
         none_str = tr("team_none")
-        mon_txt = ", ".join(schedule["Mon/Thu"]) if schedule["Mon/Thu"] else none_str
-        tue_txt = ", ".join(schedule["Tue/Fri"]) if schedule["Tue/Fri"] else none_str
-        wed_txt = ", ".join(schedule["Wed/Sat"]) if schedule["Wed/Sat"] else none_str
+        mon_txt = ", ".join(schedule["days_mon_thu_sun"]) if schedule["days_mon_thu_sun"] else none_str
+        tue_txt = ", ".join(schedule["days_tue_fri_sun"]) if schedule["days_tue_fri_sun"] else none_str
+        wed_txt = ", ".join(schedule["days_wed_sat_sun"]) if schedule["days_wed_sat_sun"] else none_str
 
         self.lbl_mon_thu.setText(tr("team_mon_thu", txt=mon_txt))
         self.lbl_tue_fri.setText(tr("team_tue_fri", txt=tue_txt))
         self.lbl_wed_sat.setText(tr("team_wed_sat", txt=wed_txt))
 
     def get_state_dict(self):
-        return [
-            {
+        state = []
+        for combo_char, combo_book in self.team_inputs:
+            data = combo_book.currentData()
+            b_key, d_key = data if data else ("book_freedom", "days_mon_thu_sun")
+            state.append({
                 "character": combo_char.currentText(),
-                "book": combo_book.currentText()
-            }
-            for combo_char, combo_book in self.team_inputs
-        ]
+                "book_key": b_key,
+                "days_key": d_key
+            })
+        return state
 
     def load_state_dict(self, data):
         if not data or not isinstance(data, list):
@@ -294,9 +313,12 @@ class TeamGoalsWidget(QFrame):
                 if idx_c >= 0:
                     combo_char.setCurrentIndex(idx_c)
 
-                idx_b = combo_book.findText(item.get("book", ""))
-                if idx_b >= 0:
-                    combo_book.setCurrentIndex(idx_b)
+                b_key = item.get("book_key")
+                d_key = item.get("days_key")
+                if b_key and d_key:
+                    idx_b = self._find_book_index(combo_book, b_key, d_key)
+                    if idx_b >= 0:
+                        combo_book.setCurrentIndex(idx_b)
 
         self.update_summary()
 

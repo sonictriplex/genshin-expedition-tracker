@@ -383,9 +383,19 @@ class GenshinTrackerWindow(QMainWindow):
         for btn, tt in zip(buttons, tooltips):
             btn.setToolTip(tt)
 
-        # Sub-Widgets retranslaten, falls vorhanden
-        if hasattr(self, "crafting_widget") and hasattr(self.crafting_widget, "retranslate_ui"):
-            self.crafting_widget.retranslate_ui()
+       # Sub-Widgets retranslaten, falls vorhanden
+        widgets_to_retranslate = [
+            getattr(self, "crafting_widget", None),
+            getattr(self, "journal_widget", None),
+            getattr(self, "boss_widget", None),
+            getattr(self, "team_widget", None),
+            getattr(self, "wish_widget", None),
+            getattr(self, "resin_widget", None),
+        ]
+
+        for widget in widgets_to_retranslate:
+            if widget and hasattr(widget, "retranslate_ui"):
+                widget.retranslate_ui()
 
         self.switch_page(self.stacked_widget.currentIndex())
         self.update_add_button_state()
